@@ -10,5 +10,5 @@ export async function loadHistory() {
     stats: r[11] ? { h: { sh: r[11][0], sot: r[11][1], co: r[11][2], fo: r[11][3], po: r[11][4] }, a: { sh: r[11][5], sot: r[11][6], co: r[11][7], fo: r[11][8], po: r[11][9] } } : null,
     venue: r[12], city: r[13],
   }));
-  return { teams: raw.teams, matches, generated: raw.generated };
+  return { teams: raw.teams, matches, generated: raw.generated, extra: (raw.extra || []).map((e) => ({ date: e[0], h: e[1], a: e[2] })) };
 }

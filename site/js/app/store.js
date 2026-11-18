@@ -7,12 +7,13 @@ import { store as ls } from './util.js';
 import * as R from '../engine/ratings.js';
 import { scoreDistribution, nextGoal, summarize, stepOf, compile } from '../engine/match-model.js';
 import { buildTable, sortTable } from '../engine/season.js';
+import { decided } from '../engine/context.js';
 import { probableLineup, scorerProbabilities, genericLineup } from '../engine/players.js';
 
 export const S = {
   model: null, state: null, teams: {}, season: null,
   matches: new Map(), applied: new Set(), lam: new Map(), details: new Map(),
-  odds: new Map(),
+  odds: new Map(), cx: new Map(),
   seasonSim: null, simKey: '', simRunning: false,
   online: null, lastUpdate: null, version: 0, error: null,
 };
@@ -29,6 +30,7 @@ export async function boot() {
   for (const f of model.fixtures) {
     S.matches.set(f.id, { ...f, lg: 'A', season: model.temporada, ev: (f.ev || []).map((e) => ({ m: e[0], x: e[1], t: e[2], s: e[3], n: e[4] })), stats: null, clock: '', period: 0, statusName: '', snapshot: true });
     if (f.lam) S.lam.set(f.id, { lh: f.lam[0], la: f.lam[1] });
+    if (f.cx) S.cx.set(f.id, f.cx);
     if (f.mkt) S.odds.set(f.id, { dec: f.mkt, src: 'média de fechamento do mercado', kind: 'fechamento' });
   }
   // odds vistas neste navegador antes de o jogo começar (ficam guardadas para a comparação depois)
@@ -63,7 +65,7 @@ function merge(json) {
   // aplica aos ratings os jogos encerrados que ainda não entraram (em ordem cronológica)
   const pending = [...S.matches.values()].filter((m) => m.status === 'post' && !S.applied.has(m.id) && !m.snapshot).sort((a, b) => (a.date < b.date ? -1 : 1));
   for (const m of pending) {
-    const e = R.expectedMatch(S.model, S.state, m.h, m.a, 'A', m.season);
+    const e = R.expectedMatch(S.model, S.state, m.h, m.a, 'A', m.season, false, contextOf(m, false));
     S.lam.set(m.id, { lh: e.lh, la: e.la });
     let hg = 0, ag = 0; for (const x of m.ev) if ('GPO'.includes(x.t)) (x.s === 'h' ? hg++ : ag++);
     m.evOk = hg === m.hg && ag === m.ag;
@@ -125,10 +127,36 @@ export function liveState(m) {
 const cache = new Map();
 const memo = (key, fn) => { if (!cache.has(key)) cache.set(key, fn()); return cache.get(key); };
 
+/**
+ * Contexto do jogo (ver engine/context.js): situação já definida na tabela
+ * antes do pontapé inicial (calculada aqui, com os resultados mais recentes) e
+ * o que o reajuste semanal já sabia (jogo continental em seguida, mando fora da sede).
+ */
+function decidedBefore(date) {
+  const ids = teamIds(); if (ids.length < 6) return new Map();
+  const cut = Date.parse(date) - 2 * 3600000;
+  const T = buildTable(ids, [...S.matches.values()].filter((x) => x.status === 'post' && Date.parse(x.date) <= cut));
+  return decided(Object.values(T).map((r) => ({ id: r.id, pts: r.pts, played: r.j })), 2 * (ids.length - 1));
+}
+export function contextOf(m, cached = true) {
+  const d = cached ? memo(`dec${m.date}`, () => decidedBefore(m.date)) : decidedBefore(m.date);
+  const c = S.cx.get(m.id) || [0, 0, 0];
+  return { dec: [d.has(m.h) ? 1 : 0, d.has(m.a) ? 1 : 0], nc: [c[0], c[1]], disp: c[2], why: [d.get(m.h), d.get(m.a)] };
+}
+/** Frases curtas sobre o contexto que entrou na conta de um jogo (vazio se não há nada). */
+export function contextNotes(m) {
+  if (!S.model.ctx || String(m.id).startsWith('sim-')) return [];
+  const f = contextOf(m), out = [], nm = [team(m.h).name, team(m.a).name];
+  f.why.forEach((w, i) => { if (w) out.push(`${nm[i]}: ${w === 'campeao' ? 'título' : 'rebaixamento'} já confirmado`); });
+  f.nc.forEach((v, i) => { if (v) out.push(`${nm[i]}: jogo continental logo em seguida`); });
+  if (f.disp) out.push(`${nm[0]}: mando fora da sede`);
+  return out;
+}
+
 /** Gols esperados pré-jogo (e demais canais) de uma partida. */
 export function expected(m) {
   return memo(`e${m.id}`, () => {
-    const e = R.expectedMatch(S.model, S.state, m.h, m.a, 'A', m.season);
+    const e = R.expectedMatch(S.model, S.state, m.h, m.a, 'A', m.season, false, contextOf(m));
     const lam = S.lam.get(m.id);
     return lam ? { ...e, lh: lam.lh, la: lam.la } : e;
   });

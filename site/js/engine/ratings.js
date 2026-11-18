@@ -14,6 +14,8 @@
 // simulações dinâmicas entre um reajuste e outro.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { applyContext } from './context.js';
+
 export const CHANNELS = ['g', 'sh', 'sot', 'co', 'yc', 'fo'];
 
 /** Hiperparâmetros padrão por canal (os de `g` são reotimizados no reajuste). */
@@ -194,10 +196,14 @@ export function stackLambda(pr, L, stack, neutral = false) {
   return { lh: f('lh', 1), la: f('la', -1) };
 }
 
-/** Gols esperados finais (ratings + combinação) e demais canais de um jogo. */
-export function expectedMatch(model, state, hId, aId, lg, season, neutral = false) {
+/**
+ * Gols esperados finais (ratings + combinação + contexto do jogo) e demais canais.
+ * `cx` = contexto conhecido do jogo ({dec, nc, disp, closed} — ver context.js); sem ele, só as constantes.
+ */
+export function expectedMatch(model, state, hId, aId, lg, season, neutral = false, cx = null) {
   const pr = predictMatch(state, model.params, hId, aId, lg, season, neutral);
-  const { lh, la } = stackLambda(pr, state.lg[lg], model.stack, neutral);
+  const base = stackLambda(pr, state.lg[lg], model.stack, neutral);
+  const { lh, la } = lg === 'A' ? applyContext(model.ctx, base.lh, base.la, cx, neutral) : base;
   return { lh, la, pr };
 }
 

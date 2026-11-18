@@ -8,6 +8,7 @@ import { simulateMatch } from '../site/js/engine/sim-match.js';
 import { probableLineup, scorerProbabilities, genericLineup } from '../site/js/engine/players.js';
 import { makeRng } from '../site/js/engine/rng.js';
 import { parseClock } from '../site/js/data/espn-parse.js';
+import { applyContext, decided } from '../site/js/engine/context.js';
 
 const model = JSON.parse(readFileSync(new URL('../site/data/model.json', import.meta.url), 'utf8'));
 const hz = model.hazard;
@@ -118,4 +119,25 @@ test('caminho inverso: probabilidades-alvo viram gols esperados coerentes', () =
   // alvo "estranho" (empate alto demais) ainda devolve algo utilizável
   const w = lambdasFromProbs(hz, 0.30, 0.25);
   assert.ok(w.lh > 0.05 && w.la > 0.05 && Number.isFinite(w.lh + w.la));
+});
+
+test('contexto: situação definida na tabela e ajuste dos gols esperados', () => {
+  // 20 times, 38 jogos: lanterna com 10 pts e 2 jogos por fazer não alcança o 16º (20 pts)
+  const rows = Array.from({ length: 20 }, (_, i) => ({ id: String(i), pts: 80 - 3 * i, played: 36 }));
+  rows[19].pts = 10; rows[0].pts = 90;
+  const d = decided(rows, 38);
+  assert.equal(d.get('19'), 'rebaixado');
+  assert.equal(d.get('0'), 'campeao');
+  assert.equal(d.has('10'), false);
+  // no meio do campeonato ninguém está definido
+  assert.equal(decided(rows.map((r) => ({ ...r, played: 20 })), 38).size, 0);
+  const ctx = { tot: 0, hfa: 0, dec: -0.2, nc: -0.08, closed: -0.07, disp: -0.12 };
+  const base = applyContext(ctx, 1.4, 1.0, null);
+  assert.ok(Math.abs(base.lh - 1.4) < 1e-12 && Math.abs(base.la - 1.0) < 1e-12);
+  const rel = applyContext(ctx, 1.4, 1.0, { dec: [1, 0] });
+  assert.ok(rel.lh < 1.4 && rel.la > 1.0, 'mandante já rebaixado rende menos');
+  const rot = applyContext(ctx, 1.4, 1.0, { nc: [0, 1] });
+  assert.ok(rot.lh > 1.4 && rot.la < 1.0, 'visitante que vai poupar rende menos');
+  assert.deepEqual(applyContext(null, 1.4, 1.0, { dec: [1, 0] }), { lh: 1.4, la: 1.0 });
+  if (model.ctx) for (const k of ['dec', 'nc', 'disp']) assert.ok(model.ctx[k] < 0 && model.ctx[k] > -0.6, `coeficiente ${k} plausível`);
 });

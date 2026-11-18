@@ -2,7 +2,8 @@
 // do cache bruto da ESPN. Um registro por partida, Série A e Série B.
 import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
-import { parseScoreboard } from '../site/js/data/espn-parse.js';
+import { parseScoreboard, statusOf } from '../site/js/data/espn-parse.js';
+import { canon } from './lib/context.mjs';
 
 const CACHE = new URL('../model/cache/', import.meta.url);
 const OUT = new URL('../model/data/', import.meta.url);
@@ -16,6 +17,8 @@ for (const f of files) {
   const json = JSON.parse(await readFile(new URL(f, CACHE), 'utf8'));
   const { matches, teams: ts } = parseScoreboard(json, lg);
   for (const m of matches) {
+    // a ESPN trocou o id de alguns clubes ao longo dos anos: unifica
+    for (const k of ['h', 'a']) { const c = canon(m[k], lg); if (c !== m[k]) { ts[c] ||= ts[m[k]]; m[k] = c; } }
     const prev = byId.get(m.id);
     // remarcações aparecem duplicadas: fica a versão mais "avançada"
     const rank = { off: 0, pre: 1, in: 2, post: 3 };
@@ -44,9 +47,25 @@ for (const m of matches) {
   if (!m.evOk) bad++;
 }
 
+// Calendário das taças continentais (só data e times): serve para saber quando um
+// time tem jogo internacional logo depois de uma rodada e tende a poupar.
+const extra = [];
+const seenX = new Set();
+for (const f of (await readdir(CACHE)).filter((f) => /^(conmebol\.|fifa\.|bra\.supercopa).*_\d{4}\.json$/.test(f)).sort()) {
+  const json = JSON.parse(await readFile(new URL(f, CACHE), 'utf8'));
+  for (const e of json.events || []) {
+    const c = e.competitions?.[0]; if (!c || seenX.has(e.id)) continue;
+    const h = c.competitors?.find((x) => x.homeAway === 'home')?.team?.id, a = c.competitors?.find((x) => x.homeAway === 'away')?.team?.id;
+    if (!h || !a || statusOf(c.status || e.status) === 'off') continue;
+    seenX.add(e.id); extra.push([e.date, canon(String(h)), canon(String(a))]);
+  }
+}
+extra.sort((x, y) => (x[0] < y[0] ? -1 : 1));
+
 const compact = {
   generated: new Date().toISOString(),
   teams,
+  extra,
   // colunas: id, liga, temporada, data, status, mandante, visitante, gm, gv, evOk, eventos, stats
   matches: matches.map((m) => [
     m.id, m.lg, m.season, m.date, m.status, m.h, m.a, m.hg, m.ag, (m.evOk ? 1 : 0) + (m.statsOk ? 2 : 0),
@@ -61,5 +80,5 @@ await writeFile(new URL('history.json.gz', OUT), buf);
 
 const per = {};
 for (const m of matches) { const k = `${m.lg}${m.season}`; (per[k] ||= { n: 0, post: 0, pre: 0, off: 0, in: 0 })[m.status]++; per[k].n++; }
-console.log(`partidas: ${matches.length} (encerradas ${played}, eventos inconsistentes ${bad})  times: ${Object.keys(teams).length}  gz: ${(buf.length / 1e6).toFixed(2)} MB`);
+console.log(`partidas: ${matches.length} (encerradas ${played}, eventos inconsistentes ${bad})  times: ${Object.keys(teams).length}  jogos de taças continentais: ${extra.length}  gz: ${(buf.length / 1e6).toFixed(2)} MB`);
 console.log(Object.entries(per).map(([k, v]) => `${k}:${v.post}${v.pre ? '+' + v.pre + 'p' : ''}${v.off ? '+' + v.off + 'x' : ''}`).join('  '));

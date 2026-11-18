@@ -4,22 +4,24 @@
 //   node tools/refit.mjs --quick    reaproveita os hiperparâmetros do modelo atual
 //
 // Etapas: (1) proxy de xG  (2) hiperparâmetros dos ratings  (3) passada
-// "walk-forward" por toda a história  (4) camada de combinação  (5) modelo de
-// intensidades minuto a minuto  (6) backtest  (7) jogadores  (8) exporta
-// site/data/model.json
+// "walk-forward" por toda a história  (4) camada de combinação e contexto do
+// jogo  (5) modelo de intensidades minuto a minuto  (6) backtest  (7) jogadores
+// (8) exporta site/data/model.json
 // ─────────────────────────────────────────────────────────────────────────────
 import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { loadHistory } from './lib/history.mjs';
 import { nelderMead, ols, poissonGLM } from './lib/optim.mjs';
 import * as R from '../site/js/engine/ratings.js';
 import { scoreDistribution, timeline, stepOf, diffIdx, menIdx } from '../site/js/engine/match-model.js';
+import { applyContext } from '../site/js/engine/context.js';
+import { buildContext, loadCities } from './lib/context.mjs';
 
 const QUICK = process.argv.includes('--quick');
 const OUT = new URL('../site/data/model.json', import.meta.url);
 const t0 = Date.now();
 const log = (...a) => console.log(`[${((Date.now() - t0) / 1000).toFixed(1)}s]`, ...a);
 
-const { matches, teams } = await loadHistory();
+const { matches, teams, extra } = await loadHistory();
 const done = matches.filter((m) => m.status === 'post');
 const seasonNow = Math.max(...matches.filter((m) => m.lg === 'A').map((m) => m.season));
 let prev = null;
@@ -126,6 +128,33 @@ for (const r of rows) {
   r.lh = f('h'); r.la = f('a');
 }
 log('combinação', stack);
+
+// ── (4b) contexto do jogo (ver site/js/engine/context.js) ────────────────────
+// Regressão de Poisson sobre os gols, com log λ da etapa anterior como offset.
+// Para prever a temporada Y só entram jogos da Série A de 2009 até Y−1.
+const cx = buildContext(matches, extra, await loadCities());
+const CTX_KEYS = ['tot', 'hfa', 'dec', 'nc', 'closed', 'disp'];
+const ctxX = (r, s) => { const f = cx.get(r.m.id); return [1, s, s * (f.dec[0] - f.dec[1]), s * (f.nc[0] - f.nc[1]), s * f.closed, s * f.disp]; };
+function fitCtx(sub) {
+  if (sub.length < 300) return null;
+  const X = [], y = [], off = [];
+  for (const r of sub) { X.push(ctxX(r, 1)); y.push(r.m.hg); off.push(Math.log(r.lh)); X.push(ctxX(r, -1)); y.push(r.m.ag); off.push(Math.log(r.la)); }
+  // encolhimento: atributos padronizados com desvio a priori de 0,05; constantes quase livres
+  const k = CTX_KEYS.length, scale = new Array(k).fill(1);
+  for (let j = 2; j < k; j++) { let s1 = 0, s2 = 0; for (const x of X) { s1 += x[j]; s2 += x[j] * x[j]; } const sd = Math.sqrt(Math.max(0, s2 / X.length - (s1 / X.length) ** 2)); scale[j] = sd > 1e-12 ? 0.05 / sd : 0; }
+  const b = poissonGLM(X.map((x) => x.map((v, j) => v * scale[j])), y, off, { ridge: 1 });
+  return Object.fromEntries(CTX_KEYS.map((key, j) => [key, b[j] * scale[j]]));
+}
+const ctxTrain = (to) => rows.filter((r) => r.m.lg === 'A' && r.m.season >= 2009 && r.m.season < to);
+const ctxBySeason = {};
+for (const s of seasons) ctxBySeason[s] = fitCtx(ctxTrain(s));
+const ctx = fitCtx(ctxTrain(Infinity));
+for (const r of rows) {
+  if (r.m.lg !== 'A') continue;
+  const adj = applyContext(ctxBySeason[r.m.season], r.lh, r.la, cx.get(r.m.id));
+  r.lh0 = r.lh; r.la0 = r.la; r.lh = adj.lh; r.la = adj.la;
+}
+log('contexto', ctx);
 
 // ── (5) intensidades minuto a minuto ─────────────────────────────────────────
 const S1 = 3, S2 = 7;
@@ -304,13 +333,15 @@ const keep = Object.fromEntries(Object.entries(state.teams).filter(([, t]) => t.
 const lgOut = {}; for (const L of ['A', 'B']) { lgOut[L] = {}; for (const c of R.CHANNELS) lgOut[L][c] = { mu: +state.lg[L][c].mu.toFixed(5), hfa: +state.lg[L][c].hfa.toFixed(5), n: state.lg[L][c].n }; }
 const teamMeta = Object.fromEntries(Object.keys(keep).map((id) => [id, teams[id]]));
 const preLam = new Map(rows.filter((r) => r.m.lg === 'A' && r.m.season === seasonNow).map((r) => [r.m.id, [+r.lh.toFixed(4), +r.la.toFixed(4)]]));
-// calendário da temporada; jogos já aplicados levam o λ pré-jogo (para gráficos de jogos passados)
-const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).map((m) => ({ id: m.id, date: m.date, status: m.status, h: m.h, a: m.a, hg: m.hg, ag: m.ag, venue: m.venue, city: m.city, ...(oddsDec.has(`${m.season}|${m.h}|${m.a}`) && m.status === 'post' ? { mkt: oddsDec.get(`${m.season}|${m.h}|${m.a}`) } : {}), ...(preLam.has(m.id) ? { lam: preLam.get(m.id), ev: m.ev.filter((e) => e.t !== 'Y').map((e) => [e.m, e.x, e.t, e.s, e.n]) } : {}) }));
+// calendário da temporada; jogos já aplicados levam o λ pré-jogo (para gráficos de jogos passados);
+// jogos por vir levam o contexto conhecido de antemão: [continental em seguida (m, v), mando fora da sede]
+const cxOut = (id) => { const f = cx.get(id); return f && (f.nc[0] || f.nc[1] || f.disp) ? [f.nc[0], f.nc[1], f.disp] : null; };
+const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).map((m) => ({ id: m.id, date: m.date, status: m.status, h: m.h, a: m.a, hg: m.hg, ag: m.ag, venue: m.venue, city: m.city, ...(oddsDec.has(`${m.season}|${m.h}|${m.a}`) && m.status === 'post' ? { mkt: oddsDec.get(`${m.season}|${m.h}|${m.a}`) } : {}), ...(m.status !== 'post' && cxOut(m.id) ? { cx: cxOut(m.id) } : {}), ...(preLam.has(m.id) ? { lam: preLam.get(m.id), ev: m.ev.filter((e) => e.t !== 'Y').map((e) => [e.m, e.x, e.t, e.s, e.n]) } : {}) }));
 const lastA = done.filter((m) => m.lg === 'A').at(-1);
 const round5 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'number' ? +v.toPrecision(5) : v]));
 const model = {
-  version: 1,
-  nome: 'Vitrôncio v1',
+  version: 2,
+  nome: 'Vitrôncio v2',
   geradoEm: new Date().toISOString(),
   dadosAte: lastA?.date,
   temporada: seasonNow,
@@ -318,6 +349,7 @@ const model = {
   params: Object.fromEntries(Object.entries(params).map(([c, p]) => [c, round5(p)])),
   xg: round5(xg),
   stack: stack && round5(stack),
+  ctx: ctx && round5(ctx),
   hazard,
   dispersion,
   state: { lg: lgOut, teams: keep, applied: state.applied, lastDate: state.lastDate },

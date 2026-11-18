@@ -44,9 +44,17 @@ export function modelView() {
         <tr><td class="l">Perdendo por 1</td><td class="pts">${e(hz.goal.diff[1])}</td></tr><tr><td class="l">Perdendo por 2 ou mais</td><td class="pts">${e(hz.goal.diff[0])}</td></tr>
         <tr><td class="l">Ganhando por 1</td><td class="pts">${e(hz.goal.diff[3])}</td></tr><tr><td class="l">Ganhando por 2 ou mais</td><td class="pts">${e(hz.goal.diff[4])}</td></tr>
         <tr><td class="l">Com um jogador a mais</td><td class="pts">${e(hz.goal.men[2])}</td></tr><tr><td class="l">Com um jogador a menos</td><td class="pts">${e(hz.goal.men[0])}</td></tr></table></div></div>
-      <h3>3. O campeonato</h3>
+      ${M.ctx ? `<h3>3. Contexto do jogo</h3>
+      <p>Quatro situações mudam os gols esperados além da força dos times. Os efeitos foram estimados nos jogos da Série A desde 2009 e só ficaram os que melhoraram a previsão em temporadas não usadas na escolha.</p>
+      <table style="max-width:560px">
+        <tr><td class="l">Time já rebaixado ou já campeão (matematicamente)</td><td class="pts">${e(M.ctx.dec)}</td></tr>
+        <tr><td class="l">Jogo de taça continental em até 4 dias depois</td><td class="pts">${e(M.ctx.nc)}</td></tr>
+        <tr><td class="l">Mando a mais de 100 km da sede (vantagem de casa)</td><td class="pts">${e(M.ctx.disp)}</td></tr>
+        <tr><td class="l">Portões fechados, 2020–21 (vantagem de casa)</td><td class="pts">${e(M.ctx.closed)}</td></tr></table>
+      <p class="small muted">Efeito nos gols esperados do próprio time; o adversário ganha o equivalente.</p>` : ''}
+      <h3>${M.ctx ? 4 : 3}. O campeonato</h3>
       <p>Título, Libertadores e rebaixamento saem de milhares de simulações dos jogos restantes, com um desvio de força sorteado por time em cada simulação e os critérios de desempate da CBF. Com jogos em andamento, a simulação parte do placar e do minuto atuais.</p>
-      <h3>4. Atualização</h3>
+      <h3>${M.ctx ? 5 : 4}. Atualização</h3>
       <p>O modelo é reajustado por completo uma vez por semana. Entre reajustes, o navegador busca os resultados novos e aplica a mesma atualização de forças.</p>
     </section>
     <section><div class="sec-h"><h2>Validação</h2><span class="sub">cada jogo da Série A desde ${bt.desde}, previsto apenas com informação anterior a ele</span></div>
@@ -66,7 +74,7 @@ export function modelView() {
     </section>
     <section><div class="sec-h"><h2>Limitações</h2></div><ul>
       <li>Não considera lesões, suspensões nem jogadores poupados; só o que aconteceu em campo.</li>
-      <li>Usa apenas jogos das Séries A e B.</li>
+      <li>Aprende só com jogos das Séries A e B; das taças continentais usa apenas o calendário.</li>
       <li>Marcadores prováveis e dados de jogadores são atualizados só no reajuste semanal.</li>
       <li>Os dados ao vivo vêm de um serviço público da ESPN e podem atrasar ou mudar sem aviso.</li></ul></section>
   </div>`;

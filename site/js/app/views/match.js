@@ -1,6 +1,6 @@
 // Página/bloco de jogo: monta o "view model" do player para jogo real
 // (pré, ao vivo, encerrado) e controla o jogo simulado.
-import { S, team, forecast, forecastPair, wpTimeline, liveState, loadDetails, lineup, scorers, form, expected, expectedPair, reds } from '../store.js';
+import { S, team, forecast, forecastPair, wpTimeline, liveState, loadDetails, lineup, scorers, form, expected, expectedPair, reds, contextNotes } from '../store.js';
 import { esc, pct, num, fmtFull, fmtTime, relDay, countdown } from '../util.js';
 import { renderPlayer } from '../player.js';
 import { colors, scoreMatrix, scorerList, formDots, logo } from '../components.js';
@@ -16,7 +16,8 @@ export function preBody(m, f) {
   const disp = S.model.dispersion || {};
   const sH = scorers(m.h, e.lh), sA = scorers(m.a, e.la);
   const isReal = !String(m.id).startsWith('sim-');
-  return `<div class="kv" style="margin-bottom:12px">
+  const notes = contextNotes(m);
+  return `${notes.length ? `<p class="small muted" style="margin:0 0 10px">Contexto considerado: ${notes.map(esc).join('; ')}.</p>` : ''}<div class="kv" style="margin-bottom:12px">
       <div><div class="k">Gols esperados</div><div class="v">${num(e.lh, 2)} <small>×</small> ${num(e.la, 2)}</div></div>
       <div><div class="k">Placar mais provável</div><div class="v">${s.top[0].h}–${s.top[0].a} <small>${pct(s.top[0].p)}</small></div></div>
       <div><div class="k">Mais de 2,5 gols</div><div class="v">${pct(s.over25)}</div></div>
