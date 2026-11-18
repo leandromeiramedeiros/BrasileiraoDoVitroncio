@@ -28,3 +28,22 @@ O xG por chute de `model/data/xg.json` entrou como um segundo rating de gols (ca
 | trocar o proxy pelo xG num rating só (descartado) | 0,2036 | 0,2031 | 0,2045 |
 
 A troca direta rende mais no geral, mas nada em 2022–2026; a versão com dois ratings é a que não piora em nenhum período. O ganho em 2022–2026 é pequeno demais para ser distinguido de ruído. Empilhar pi-ratings/Elo/árvores (`zoo/`) não ajudou em 2022–2026.
+
+## Testes de aprendizado de máquina (parciais, nenhum em produção)
+
+dRPS contra o v1. "–" = a trilha foi interrompida antes de consultar 2022–2026.
+
+| teste | DEV 2013–2021 | HOLDOUT 2022–2026 |
+|---|---|---|
+| `zoo` árvores sobre todos os ratings (Elo, pi, GAP…) | −0,00010 | +0,00017 |
+| `zoo` só ratings de gols / só Elo | +0,00115 / +0,00135 | +0,00182 / +0,00234 |
+| `zoo` v1 + rating de "domínio" (`co_dom`) | −0,00104 | −0,00027 |
+| `zoo` mistura recalibrada (`pool_recal_zoo`) | −0,00114 | −0,00032 |
+| `zoo` só recalibração | −0,00073 | −0,00030 |
+| `neural` DeepSets ajustando o v1 (média de sementes) | −0,00108 | – |
+| `neural` GRU ajustando o v1 | −0,00112 | – |
+| `neural` MLP / embeddings com Poisson | +0,02 / +0,018 | – |
+| `players` atributos de elenco em logit ordenado | −0,0001 a −0,0004 (IC cruza zero) | – |
+| `players` atributos de elenco em árvores (3–4 folhas) | −0,00138 a −0,00145 (IC abaixo de zero) | – |
+
+Leitura: em `zoo`, ganhos de ≈ 0,001 no DEV caíram para ≈ 0,0003 em 2022–2026, e esse resto é quase todo recalibração, que o v2 já tem nas constantes do contexto. `neural` e `players` nunca chegaram ao HOLDOUT nem gravaram previsões; os números acima são dos logs. Vale retomar primeiro as árvores com atributos de elenco. Esses modelos rodam em Python: para entrar no site teriam de gerar, no reajuste semanal, o ajuste de cada jogo futuro.
