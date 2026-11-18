@@ -38,6 +38,8 @@ Virada de temporada: `tools/fetch.mjs` já busca o ano seguinte em dezembro; `re
 
 ## Ideias para evoluir o algoritmo (ainda não feitas)
 
+- **Pesquisa interrompida em novembro de 2026:** código e placar parcial em `research/2026-11/` (leia o README de lá antes de recomeçar). A trilha de xG por finalização já mostrava ganho em DEV e HOLDOUT e é a próxima a integrar.
+
 - Outras competições como evidência de força (Copa do Brasil, Libertadores): testado em novembro de 2026, ganho ≈ 0,0001 de RPS — não compensou. Estaduais, descanso, viagem, clima, clássicos e "briga contra o rebaixamento" também foram testados e não ajudaram; o que ajudou virou `context.js`.
 - Distância de viagem e dias de descanso como covariáveis.
 - Atualização ao vivo dos gols esperados com as finalizações do próprio jogo.
