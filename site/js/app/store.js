@@ -2,7 +2,8 @@
 // Os ratings são atualizados aqui mesmo, no navegador, a cada jogo encerrado
 // depois da foto — por isso as previsões nunca ficam "paradas" na semana.
 import * as api from './api.js';
-import { parseScoreboard, parseClock } from '../data/espn-parse.js';
+import { parseScoreboard, parseClock, parseOdds, impliedProbs } from '../data/espn-parse.js';
+import { store as ls } from './util.js';
 import * as R from '../engine/ratings.js';
 import { scoreDistribution, nextGoal, summarize, stepOf, compile } from '../engine/match-model.js';
 import { buildTable, sortTable } from '../engine/season.js';
@@ -11,6 +12,7 @@ import { probableLineup, scorerProbabilities, genericLineup } from '../engine/pl
 export const S = {
   model: null, state: null, teams: {}, season: null,
   matches: new Map(), applied: new Set(), lam: new Map(), details: new Map(),
+  odds: new Map(),
   seasonSim: null, simKey: '', simRunning: false,
   online: null, lastUpdate: null, version: 0, error: null,
 };
@@ -27,12 +29,16 @@ export async function boot() {
   for (const f of model.fixtures) {
     S.matches.set(f.id, { ...f, lg: 'A', season: model.temporada, ev: (f.ev || []).map((e) => ({ m: e[0], x: e[1], t: e[2], s: e[3], n: e[4] })), stats: null, clock: '', period: 0, statusName: '', snapshot: true });
     if (f.lam) S.lam.set(f.id, { lh: f.lam[0], la: f.lam[1] });
+    if (f.mkt) S.odds.set(f.id, { dec: f.mkt, src: 'média de fechamento do mercado', kind: 'fechamento' });
   }
+  // odds vistas neste navegador antes de o jogo começar (ficam guardadas para a comparação depois)
+  for (const [id, o] of Object.entries(ls.get('odds', {}))) if (!S.odds.has(id) && S.matches.has(id)) S.odds.set(id, o);
   S.version++; emit();
   refreshSeason().then(() => poll());
   document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(true); });
 }
 
+let oddsDirty = false;
 function merge(json) {
   const { matches, teams, seasonYear } = parseScoreboard(json, 'A');
   let changed = false;
@@ -48,6 +54,8 @@ function merge(json) {
     const prev = S.matches.get(m.id);
     const sig = (x) => x && `${x.status}|${x.hg}|${x.ag}|${x.clock}|${x.date}|${x.ev.length}|${x.statsOk}`;
     if (sig(prev) !== sig(m) || prev?.snapshot) { S.matches.set(m.id, m); changed = true; }
+    // odds: só as vistas ANTES do jogo valem como palpite pré-jogo do mercado
+    if (m.odds && m.status === 'pre') { const cur = S.odds.get(m.id); if (!cur || cur.kind !== 'fechamento') { if (!cur || cur.dec.join() !== m.odds.dec.join()) { changed = true; oddsDirty = true; } S.odds.set(m.id, { ...m.odds, kind: 'pre', at: Date.now() }); } }
   }
   // remarcações: remove "adiado" se o mesmo confronto já existe com outro id
   const live = new Set([...S.matches.values()].filter((m) => m.status !== 'off').map((m) => `${m.h}|${m.a}`));
@@ -63,6 +71,7 @@ function merge(json) {
     S.applied.add(m.id);
     changed = true;
   }
+  if (oddsDirty) { oddsDirty = false; const keep = {}; for (const [id, o] of S.odds) if (o.kind !== 'fechamento') keep[id] = o; ls.set('odds', keep); }
   if (changed) { S.version++; cache.clear(); }
   return changed;
 }
@@ -249,3 +258,29 @@ export function loadDetails(m, maxAge = 20000) {
   if (inflight.has(m.id)) return;
   inflight.set(m.id, api.summary(m.id).then((j) => { S.details.set(m.id, parseSummary(j, m)); emit(); }).catch(() => { if (!cur) S.details.set(m.id, { commentary: [], key: [], stats: null, lineups: null, at: Date.now(), failed: true }); }).finally(() => inflight.delete(m.id)));
 }
+
+// ── mercado (odds) — só para comparação; nunca entra no modelo ───────────────
+/** O que o mercado dizia/diz sobre o jogo: probabilidades implícitas e odds decimais. */
+export function market(m) {
+  const o = S.odds.get(m.id);
+  if (!o) return null;
+  return { ...impliedProbs(o.dec), dec: o.dec, src: o.src, kind: o.kind };
+}
+const oddsTried = new Set();
+let oddsQueue = Promise.resolve();
+/** Busca as odds de fechamento de jogos já iniciados que ainda não têm (um por vez, sem pressa). */
+export function loadOdds(list) {
+  for (const m of list) {
+    if (S.odds.has(m.id) || oddsTried.has(m.id) || m.status === 'pre' || m.status === 'off') continue;
+    oddsTried.add(m.id);
+    oddsQueue = oddsQueue.then(() => api.coreOdds(m.id)).then((j) => {
+      for (const it of j?.items || []) { const o = parseOdds(it); if (o) { S.odds.set(m.id, { ...o, kind: 'fechamento' }); S.version++; emit(); break; } }
+    }).catch(() => {});
+  }
+}
+/** RPS de uma previsão 1X2 para um jogo encerrado (quanto menor, melhor). */
+export function rpsOf(p, m) {
+  const y = m.hg > m.ag ? [1, 0, 0] : m.hg === m.ag ? [0, 1, 0] : [0, 0, 1];
+  return ((p.pH - y[0]) ** 2 + (p.pH + p.pD - y[0] - y[1]) ** 2) / 2;
+}
+export const outcomeProb = (p, m) => (m.hg > m.ag ? p.pH : m.hg === m.ag ? p.pD : p.pA);

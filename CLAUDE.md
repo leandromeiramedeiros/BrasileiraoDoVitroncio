@@ -4,7 +4,7 @@ Site estático (GitHub Pages) da Série A com simulador próprio. Interface e co
 
 ## Regras do projeto
 
-- Não é ferramenta de aposta. Odds de casas de aposta só entram como régua no backtest (`model/cache/BRA.csv`) e **nunca** aparecem no site nem viram entrada do modelo.
+- Não é ferramenta de aposta. As odds aparecem no site **apenas como comparação** (página "Vitrôncio × Mercado" e bloco na página do jogo: simulação × odds × resultado) e como régua no backtest. **Nunca** viram entrada, alvo ou critério de seleção do modelo — a comparação só faz sentido se o modelo for independente do mercado. Nada de linguagem de "aposta de valor".
 - `site/js/engine/` é JS puro compartilhado entre navegador e `tools/`. Qualquer mudança no motor precisa manter os dois lados funcionando; rode `npm test`.
 - O dono autorizou push direto em `main` (cada push publica o site).
 - Teste de interface: sirva `site/` e use Playwright com respostas gravadas da ESPN (a CDN deles recusa navegador headless). Não tente contornar esse bloqueio.

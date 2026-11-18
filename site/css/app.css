@@ -191,3 +191,11 @@ td.pts { font-family: var(--display); font-size: 17px; font-weight: 600; }
 .skeleton { height: 180px; border-radius: var(--radius); background: linear-gradient(90deg, var(--panel), var(--panel2), var(--panel)); background-size: 200% 100%; animation: sk 1.4s infinite; } @keyframes sk { to { background-position: -200% 0; } }
 
 @media (max-width: 640px) { .chart text { font-size: 20px; } .chart.big text { font-size: 15px; } .sec-h { flex-wrap: wrap; gap: 4px 12px; } .sec-h h2 { font-size: 20px; } .board { padding: 6px 12px 4px; } .scorers { padding: 0 14px 12px; } .oracle, .simctl { padding-left: 14px; padding-right: 14px; } .race .r { grid-template-columns: 22px 96px 1fr 46px; } }
+.mk { display: grid; grid-template-columns: 1fr 44px 44px 44px; gap: 4px; font-size: 11.5px; color: var(--muted); margin-top: 5px; font-variant-numeric: tabular-nums; }
+.mk span:not(:first-child) { text-align: right; } .mk + .mk { margin-top: 1px; color: var(--dim); }
+.vs-row { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: start; margin: 10px 0; }
+.vs-lab { font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; font-size: 14px; color: var(--gold); padding-top: 5px; }
+.vs-row + .vs-row .vs-lab { color: var(--text); }
+.tri { display: inline-flex; gap: 4px; } .tri span { display: inline-flex; flex-direction: column; align-items: center; min-width: 44px; padding: 2px 5px; border-radius: 6px; background: var(--panel2); font-size: 13px; line-height: 1.2; }
+.tri span i { font-style: normal; font-size: 9.5px; color: var(--dim); letter-spacing: .05em; } .tri span.hit { background: rgba(255, 210, 31, .22); outline: 1px solid rgba(255, 210, 31, .6); }
+@media (max-width: 640px) { .vs-row { grid-template-columns: 1fr; gap: 2px; } }

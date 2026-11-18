@@ -1,5 +1,5 @@
 // Componentes de interface (funções que devolvem HTML).
-import { S, team, forecast, table, liveState } from './store.js';
+import { S, team, forecast, table, liveState, market } from './store.js';
 import { esc, pct, num, fmtTime, fmtShort, relDay, teamColor, store } from './util.js';
 
 export const fav = () => store.get('fav', null);
@@ -37,6 +37,8 @@ export function matchCard(m, { selected = false, act = null, day = false } = {})
   const H = team(m.h), A = team(m.a), f = forecast(m), p = m.status === 'pre' || m.status === 'off' ? f.pre : f.now;
   const played = m.status === 'in' || m.status === 'post';
   const top = f.pre.sum.top[0];
+  const k = market(m);
+  const mk = k ? `<div class="mk" title="probabilidades implícitas nas odds, sem a margem da casa"><span>mercado</span><span>${pct(k.pH)}</span><span>${pct(k.pD)}</span><span>${pct(k.pA)}</span></div>` : '';
   const isFav = fav() && (m.h === fav() || m.a === fav());
   const attrs = act ? `href="#/" data-act="${act}" data-id="${m.id}"` : `href="#/jogo/${m.id}"`;
   const cls = (side) => (m.status !== 'post' ? '' : (side === 'h' ? m.hg > m.ag : m.ag > m.hg) ? 'win' : m.hg === m.ag ? '' : 'lose');
@@ -45,7 +47,8 @@ export function matchCard(m, { selected = false, act = null, day = false } = {})
     <div class="row ${cls('h')}">${logo(H)}<span>${esc(H.name)}</span>${played ? `<span class="sc">${m.hg}</span>` : `<span class="pp">${pct(p.pH)}</span>`}</div>
     <div class="row ${cls('a')}">${logo(A)}<span>${esc(A.name)}</span>${played ? `<span class="sc">${m.ag}</span>` : `<span class="pp">${pct(p.pA)}</span>`}</div>
     ${m.status === 'post' ? '' : `<div style="margin-top:8px">${probBar(p, { sm: true })}</div>`}
-    <div class="foot">${m.status === 'post' ? `<span>Vitrôncio dava ${pct(m.hg > m.ag ? f.pre.pH : m.hg === m.ag ? f.pre.pD : f.pre.pA)} para esse resultado</span>` : m.status === 'in' ? `<span>empate ${pct(p.pD)}</span><span>gols esperados até o fim: ${num(p.xgH + p.xgA)}</span>` : `<span>empate ${pct(p.pD)}</span><span>placar mais provável <b style="color:var(--text)">${top.h}–${top.a}</b></span>`}</div>
+    ${m.status === 'pre' && k ? `<div class="mk"><span>Vitrôncio</span><span>${pct(f.pre.pH)}</span><span>${pct(f.pre.pD)}</span><span>${pct(f.pre.pA)}</span></div>${mk}` : ''}
+    <div class="foot">${m.status === 'post' ? `<span>Vitrôncio dava ${pct(m.hg > m.ag ? f.pre.pH : m.hg === m.ag ? f.pre.pD : f.pre.pA)} para esse resultado${k ? ` · mercado ${pct(m.hg > m.ag ? k.pH : m.hg === m.ag ? k.pD : k.pA)}` : ''}</span>` : m.status === 'in' ? `<span>empate ${pct(p.pD)}</span><span>gols esperados até o fim: ${num(p.xgH + p.xgA)}</span>` : `<span>empate ${pct(p.pD)}</span><span>placar mais provável <b style="color:var(--text)">${top.h}–${top.a}</b></span>`}</div>
   </a>`;
 }
 

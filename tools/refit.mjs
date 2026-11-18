@@ -195,6 +195,7 @@ log('intensidades', JSON.stringify(hazard));
 
 // ── (6) backtest (Série A) ───────────────────────────────────────────────────
 let odds = new Map();
+const oddsDec = new Map();
 try {
   const map = { 'Flamengo RJ': 'Flamengo', 'Sport Recife': 'Sport', 'Sao Paulo': 'São Paulo', Gremio: 'Grêmio', 'Botafogo RJ': 'Botafogo', Ceara: 'Ceará', Goias: 'Goiás', 'Atletico GO': 'Atlético-GO', 'America MG': 'América-MG', Avai: 'Avaí', Cuiaba: 'Cuiabá', Vitoria: 'Vitória', 'Chapecoense-SC': 'Chapecoense', Nautico: 'Náutico', Parana: 'Paraná', Criciuma: 'Criciúma', 'Atletico-MG': 'Atlético-MG' };
   const nameToId = {}; for (const [id, t] of Object.entries(teams)) { nameToId[t.name] = id; nameToId[t.full] = id; }
@@ -204,6 +205,7 @@ try {
     const o = [parseFloat(r[10]) || parseFloat(r[16]), parseFloat(r[11]) || parseFloat(r[17]), parseFloat(r[12]) || parseFloat(r[18])]; if (!(o[0] && o[1] && o[2])) continue;
     const inv = o.map((v) => 1 / v), s = inv[0] + inv[1] + inv[2];
     odds.set(`${r[2]}|${hi}|${ai}`, inv.map((v) => v / s));
+    oddsDec.set(`${r[2]}|${hi}|${ai}`, o);
   }
 } catch { log('sem arquivo de referência de mercado (model/cache/BRA.csv) — benchmark ignorado'); }
 
@@ -303,7 +305,7 @@ const lgOut = {}; for (const L of ['A', 'B']) { lgOut[L] = {}; for (const c of R
 const teamMeta = Object.fromEntries(Object.keys(keep).map((id) => [id, teams[id]]));
 const preLam = new Map(rows.filter((r) => r.m.lg === 'A' && r.m.season === seasonNow).map((r) => [r.m.id, [+r.lh.toFixed(4), +r.la.toFixed(4)]]));
 // calendário da temporada; jogos já aplicados levam o λ pré-jogo (para gráficos de jogos passados)
-const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).map((m) => ({ id: m.id, date: m.date, status: m.status, h: m.h, a: m.a, hg: m.hg, ag: m.ag, venue: m.venue, city: m.city, ...(preLam.has(m.id) ? { lam: preLam.get(m.id), ev: m.ev.filter((e) => e.t !== 'Y').map((e) => [e.m, e.x, e.t, e.s, e.n]) } : {}) }));
+const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).map((m) => ({ id: m.id, date: m.date, status: m.status, h: m.h, a: m.a, hg: m.hg, ag: m.ag, venue: m.venue, city: m.city, ...(oddsDec.has(`${m.season}|${m.h}|${m.a}`) && m.status === 'post' ? { mkt: oddsDec.get(`${m.season}|${m.h}|${m.a}`) } : {}), ...(preLam.has(m.id) ? { lam: preLam.get(m.id), ev: m.ev.filter((e) => e.t !== 'Y').map((e) => [e.m, e.x, e.t, e.s, e.n]) } : {}) }));
 const lastA = done.filter((m) => m.lg === 'A').at(-1);
 const round5 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'number' ? +v.toPrecision(5) : v]));
 const model = {

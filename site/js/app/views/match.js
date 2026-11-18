@@ -7,6 +7,7 @@ import { colors, scoreMatrix, scorerList, formDots, logo } from '../components.j
 import { simulateMatch } from '../../engine/sim-match.js';
 import { scoreDistribution, nextGoal, summarize, compile, timeline } from '../../engine/match-model.js';
 import { makeRng } from '../../engine/rng.js';
+import { versusBlock } from './compare.js';
 
 // ── previsão pré-jogo (corpo da aba "Previsão") ──────────────────────────────
 export function preBody(m, f) {
@@ -155,6 +156,7 @@ export function matchView(id) {
   if (!m) return `<div class="wrap"><p class="muted">Jogo não encontrado. <a class="gold" href="#/">Voltar ao início</a></p></div>`;
   const simOn = sim.res && sim.key === `s${m.id}`;
   return `<div class="wrap"><section>${matchBlock(m)}</section>
+    ${simOn ? '' : versusBlock(m)}
     ${m.status === 'pre' && !simOn ? `<section class="btnrow"><button class="btn gold" data-act="simstart" data-id="${m.id}">▶ Assistir uma simulação deste jogo</button><span class="muted small">Cada simulação é diferente — o placar segue as probabilidades acima.</span></section>` : ''}
   </div>`;
 }

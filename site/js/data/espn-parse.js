@@ -13,6 +13,28 @@ export function parseClock(displayValue, valueSeconds) {
   return { min: Math.min(min, 90), add: 0 };
 }
 
+/** Odd americana ("+245", "-150", "EVEN") -> decimal. */
+export function americanToDecimal(a) {
+  if (a == null) return null;
+  if (typeof a === 'string') { if (/even/i.test(a)) return 2; a = parseFloat(a.replace('+', '')); }
+  if (!Number.isFinite(a) || a === 0) return null;
+  return a > 0 ? 1 + a / 100 : 1 + 100 / -a;
+}
+/** Odds 1X2 de um item de odds da ESPN (scoreboard ou core API) -> {dec:[casa,empate,fora], src}. */
+export function parseOdds(o) {
+  if (!o) return null;
+  const ml = o.moneyline || {};
+  const pick = (side, legacy) => americanToDecimal(ml[side]?.close?.odds ?? ml[side]?.open?.odds ?? legacy?.moneyLine);
+  const h = pick('home', o.homeTeamOdds), d = pick('draw', o.drawOdds), a = pick('away', o.awayTeamOdds);
+  if (!(h > 1 && d > 1 && a > 1)) return null;
+  return { dec: [+h.toFixed(3), +d.toFixed(3), +a.toFixed(3)], src: o.provider?.name || 'ESPN' };
+}
+/** Probabilidades implícitas (sem a margem da casa), a partir das odds decimais. */
+export function impliedProbs(dec) {
+  const inv = dec.map((v) => 1 / v), s = inv[0] + inv[1] + inv[2];
+  return { pH: inv[0] / s, pD: inv[1] / s, pA: inv[2] / s, margem: s - 1 };
+}
+
 export function statusOf(st) {
   const name = st?.type?.name || '';
   const state = st?.type?.state || 'pre';
@@ -76,6 +98,7 @@ export function parseEvent(e, league = 'A') {
     att: c.attendance || null,
     ev,
     stats,
+    odds: parseOdds(c.odds?.[0]),
     // estatísticas confiáveis: posse somando ~100 e volume plausível de finalizações
     statsOk: !!stats && stats.h.po != null && stats.a.po != null && Math.abs(stats.h.po + stats.a.po - 100) <= 1.5 && stats.h.sh + stats.a.sh >= 6 && stats.h.sh >= stats.h.sot && stats.a.sh >= stats.a.sot,
   };
