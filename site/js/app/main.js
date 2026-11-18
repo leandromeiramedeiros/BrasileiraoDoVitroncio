@@ -12,7 +12,7 @@ import { teamsView, teamView } from './views/teams.js';
 import { modelView } from './views/model.js';
 import { calendarView, playersView, calState } from './views/extra.js';
 import { compareView, cmpState } from './views/compare.js';
-import { againstView, multiView, multToggle, multSet } from './views/against.js';
+import { againstView, multiView, multToggle, multSet, multOdd, multOpen } from './views/against.js';
 import { initVitroncio, reactFav, reactSelf } from './vitroncio.js';
 
 const view = document.getElementById('view');
@@ -75,9 +75,10 @@ document.addEventListener('click', (ev) => {
   else if (act === 'whatifall') simState.all = !simState.all;
   else if (act === 'calmonth') calState.month = id;
   else if (act === 'cmpmore') cmpState.n += 60;
-  else if (act === 'mleg') multToggle(id, +el.dataset.j);
-  else if (act === 'mclear') multSet({});
-  else if (act === 'mload') multSet(Object.fromEntries(el.dataset.legs.split(',').map((x) => { const [i, j] = x.split(':'); return [i, +j]; })));
+  else if (act === 'mleg') multToggle(id, el.dataset.sel);
+  else if (act === 'mclear') multSet([]);
+  else if (act === 'mload') multSet(el.dataset.legs.split(','));
+  else if (act === 'mopen') multOpen(id);
   else if (act === 'runwhatif') { if (!simState.running) runWhatIf(render); return; }
   last = ''; render();
 });
@@ -86,6 +87,7 @@ document.addEventListener('change', (ev) => {
   if (el.dataset.change === 'pair') { simState[el.dataset.side] = el.value; closeSim(); last = ''; render(); }
   else if (el.dataset.change === 'calteam') { calState.team = el.value; last = ''; render(); }
   else if (el.dataset.change === 'cmpteam') { cmpState.team = el.value; last = ''; render(); }
+  else if (el.dataset.change === 'modd') { multOdd(el.dataset.key, el.value); last = ''; render(); }
 });
 
 window.bdvLogoFail = (img) => { failedLogos.add(img.getAttribute('src')); last = ''; render(); };

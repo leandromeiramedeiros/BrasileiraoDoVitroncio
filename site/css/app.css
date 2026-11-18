@@ -266,3 +266,9 @@ table.ba td.hist { white-space: normal; min-width: 150px; }
 .mgame .seg button.on { background: var(--gold); color: #14110a; }
 @media (max-width: 760px) { .mgames { grid-template-columns: 1fr; } }
 .mkv { grid-template-columns: repeat(4, minmax(0, 1fr)); } @media (max-width: 760px) { .mkv { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.mmore { align-self: flex-start; background: none; border: 0; padding: 0; color: var(--muted); font-size: 12.5px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.mmk { display: flex; flex-direction: column; gap: 8px; } .mgrp { display: flex; flex-direction: column; gap: 4px; }
+.mgrp .seg { flex-wrap: wrap; } .mgrp .seg button { flex: 1 1 30%; font-size: 12.5px; } .mgrp .seg button small { color: var(--dim); margin-left: 3px; } .mgrp .seg button.on small { color: inherit; }
+.mticket { margin-bottom: 12px; } .modd { width: 70px; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--line2); background: var(--panel2); color: var(--text); font: inherit; font-size: 13.5px; text-align: center; }
+@media (max-width: 640px) { .mticket td.msel { white-space: normal; min-width: 120px; } .modd { width: 58px; } }

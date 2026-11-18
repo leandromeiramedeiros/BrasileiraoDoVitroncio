@@ -27,7 +27,11 @@ export function parseOdds(o) {
   const pick = (side, legacy) => americanToDecimal(ml[side]?.close?.odds ?? ml[side]?.open?.odds ?? legacy?.moneyLine);
   const h = pick('home', o.homeTeamOdds), d = pick('draw', o.drawOdds), a = pick('away', o.awayTeamOdds);
   if (!(h > 1 && d > 1 && a > 1)) return null;
-  return { dec: [+h.toFixed(3), +d.toFixed(3), +a.toFixed(3)], src: o.provider?.name || 'ESPN' };
+  // total de gols (mais/menos), quando a casa publica
+  const ov = americanToDecimal(o.total?.over?.close?.odds ?? o.total?.over?.open?.odds), un = americanToDecimal(o.total?.under?.close?.odds ?? o.total?.under?.open?.odds);
+  const line = parseFloat(o.overUnder ?? String(o.total?.over?.close?.line || '').replace(/^o/, ''));
+  const tot = ov > 1 && un > 1 && Number.isFinite(line) ? { line, o: +ov.toFixed(3), u: +un.toFixed(3) } : null;
+  return { dec: [+h.toFixed(3), +d.toFixed(3), +a.toFixed(3)], src: o.provider?.name || 'ESPN', ...(tot ? { tot } : {}) };
 }
 /** Probabilidades implícitas (sem a margem da casa), a partir das odds decimais. */
 export function impliedProbs(dec) {

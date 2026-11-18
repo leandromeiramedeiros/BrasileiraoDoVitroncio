@@ -197,3 +197,17 @@ test('desfalques: suspensão por cartões', async () => {
   assert.equal(suspendedFor(c, 'T', 'A', 2026).length, 0, 'cumpriu no jogo seguinte');
   if (model.ctx?.absent) assert.ok(model.ctx.absent.susp_w < 0 && model.ctx.absent.absP_w < 0, 'desfalque reduz os gols esperados');
 });
+
+test('mercados: pernas do mesmo jogo e contagens', async () => {
+  const { jointProb, selProb } = await import('../site/js/engine/markets.js');
+  const d = scoreDistribution(hz, 1.5, 1.0);
+  const ctx = { matrix: d.matrix, pRed: 0.22, yc: 4.6, co: 9.8, disp: model.dispersion, cal: model.against?.calMercados };
+  near(selProb(ctx, 'r:H') + selProb(ctx, 'r:D') + selProb(ctx, 'r:A'), 1, 1e-9, '1X2 soma 1');
+  near(selProb(ctx, 'g:o2.5') + selProb(ctx, 'g:u2.5'), 1, 1e-9, 'mais + menos = 1');
+  near(jointProb(ctx, ['r:H', 'g:u1.5']), d.matrix[1][0], 1e-12, 'vitória com menos de 1,5 gol = só 1 a 0');
+  assert.ok(jointProb(ctx, ['r:H', 'bt:n']) !== selProb(ctx, 'r:H') * selProb(ctx, 'bt:n'), 'mesmo jogo: não é o produto');
+  near(selProb(ctx, 'c:o4.5') + selProb(ctx, 'c:u4.5'), 1, 1e-6, 'cartões: mais + menos = 1');
+  near(jointProb(ctx, ['c:o3.5', 'c:u5.5']), selProb(ctx, 'c:o3.5') - selProb(ctx, 'c:o5.5'), 1e-9, 'faixa de cartões');
+  assert.equal(jointProb(ctx, ['v:s', 'v:n']), 0);
+  near(jointProb(ctx, ['r:H', 'k:o9.5']), selProb(ctx, 'r:H') * selProb(ctx, 'k:o9.5'), 1e-12, 'escanteios independentes do placar');
+});

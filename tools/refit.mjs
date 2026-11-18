@@ -15,6 +15,7 @@ import * as R from '../site/js/engine/ratings.js';
 import { scoreDistribution, calibrateLambdas, timeline, stepOf, diffIdx, menIdx } from '../site/js/engine/match-model.js';
 import { applyContext } from '../site/js/engine/context.js';
 import { bestAgainst, GAPS } from '../site/js/engine/against.js';
+import { jointProb } from '../site/js/engine/markets.js';
 import { buildContext, loadCities } from './lib/context.mjs';
 import { createLineupState, lineupFeatures, applyLineupMatch, teamSnapshot } from '../site/js/engine/lineup.js';
 import { createCardState, applyCardMatch, serveBans, suspendedFor, absentFeatures } from '../site/js/engine/absent.js';
@@ -410,7 +411,7 @@ for (const r of cmpRows) {
 const agMult = {};
 for (const legs of agWeeks.values()) {
   legs.sort((x, y) => y.e - x.e);
-  for (let k = 1; k <= 5 && k <= legs.length; k++) {
+  for (let k = 1; k <= 6 && k <= legs.length; k++) {
     const top = legs.slice(0, k), win = top.every((l) => l.won), pay = win ? top.reduce((a, l) => a * l.o, 1) : 0;
     const A = (agMult[k] ||= { n: 0, hits: 0, ret: 0, odd: [], temporadas: {} }), S = (A.temporadas[top[0].season] ||= { n: 0, hits: 0, ret: 0 });
     for (const x of [A, S]) { x.n++; x.hits += win ? 1 : 0; x.ret += pay - 1; }
@@ -429,6 +430,7 @@ const against = cmpRows.length ? {
   total: { ...agTot, ret: r2(agTot.ret), rawRet: r2(agTot.rawRet) },
   record: agRecord, jogos: cmpRows.length, fonte: 'odds médias de fechamento (football-data.co.uk)',
   multiplas: agMult, margem: +agMargin.toFixed(4),
+  mercados: null,
 } : null;
 log('best against', against && { total: against.total, porDiferenca: against.porDiferenca });
 
@@ -439,6 +441,62 @@ for (const c of ['sh', 'sot', 'co', 'yc', 'fo']) {
   for (const r of rows) { if (r.m.lg !== 'A' || r.m.season < 2019) continue; const o = R.observe(r.m, params, null)[c]; if (!o) continue; s += (o[0] - r.pr[c].lh) ** 2 / r.pr[c].lh + (o[1] - r.pr[c].la) ** 2 / r.pr[c].la; n += 2; }
   dispersion[c] = +(s / Math.max(1, n)).toFixed(3);
 }
+
+// ── (6c) outros mercados das múltiplas: as probabilidades batem com o que aconteceu? ──
+// Série A desde 2015, previsão de dias antes do jogo (sem escalação). Não há odds
+// históricas desses mercados, então o teste é de calibração: previsto × aconteceu.
+const MK = [['g:o1.5', 'Mais de 1,5 gol'], ['g:o2.5', 'Mais de 2,5 gols'], ['g:o3.5', 'Mais de 3,5 gols'], ['bt:s', 'Ambos marcam'],
+  ['c:o3.5', 'Mais de 3,5 cartões amarelos'], ['c:o4.5', 'Mais de 4,5 cartões amarelos'], ['c:o5.5', 'Mais de 5,5 cartões amarelos'],
+  ['k:o8.5', 'Mais de 8,5 escanteios'], ['k:o9.5', 'Mais de 9,5 escanteios'], ['k:o10.5', 'Mais de 10,5 escanteios'], ['v:s', 'Alguma expulsão']];
+const mkObs = (id, m) => {
+  const [v, s] = id.split(':'), L = parseFloat(s.slice(1));
+  if (v === 'g') return m.hg + m.ag > L ? 1 : 0;
+  if (v === 'bt') return m.hg > 0 && m.ag > 0 ? 1 : 0;
+  if (v === 'c') return m.evOk ? (m.ev.filter((e) => e.t === 'Y').length > L ? 1 : 0) : null;
+  if (v === 'k') return m.statsOk && m.stats.h.co != null && m.stats.a.co != null ? (m.stats.h.co + m.stats.a.co > L ? 1 : 0) : null;
+  return m.evOk ? (m.ev.some((e) => e.t === 'R') ? 1 : 0) : null;
+};
+// recalibração de cartões, escanteios e expulsão (ver markets.js), por temporada só com o passado
+const lgam = (x) => { const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - lgam(1 - x); x -= 1; let s = c[0]; const t = x + 7.5; for (let i = 1; i < 9; i++) s += c[i] / (x + i); return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(s); };
+const nbll = (y, mu, phi) => { const r = mu / (phi - 1); return lgam(y + r) - lgam(r) - lgam(y + 1) - r * Math.log(phi) + y * Math.log(1 - 1 / phi); };
+const calRows = [];
+for (const r of rows) {
+  const m = r.m; if (m.lg !== 'A' || m.season < 2015) continue;
+  const c0 = calibrateLambdas(hazard, r.lhNoLu, r.laNoLu, CALIB), d = scoreDistribution(hazard, c0.lh, c0.la);
+  calRows.push({ r, d, season: m.season, yc: r.pr.yc.lh + r.pr.yc.la, co: r.pr.co.lh + r.pr.co.la, pr: 1 - (1 - d.pRedH) * (1 - d.pRedA),
+    yY: m.evOk ? m.ev.filter((e) => e.t === 'Y').length : null, yK: m.statsOk && m.stats.h.co != null && m.stats.a.co != null ? m.stats.h.co + m.stats.a.co : null, yR: m.evOk ? (m.ev.some((e) => e.t === 'R') ? 1 : 0) : null });
+}
+function fitCal(sub) {
+  if (sub.length < 300) return null;
+  const cnt = (mk, yk) => { const D = sub.filter((x) => x[yk] != null).map((x) => [Math.log(x[mk]), x[yk]]);
+    const f = (v) => { const phi = 1 + Math.exp(v[2]); let s = 0; for (const [lm, y] of D) s -= nbll(y, Math.exp(v[0] + v[1] * lm), phi); return s / D.length; };
+    const x = nelderMead(f, [0, 1, Math.log(0.3)], { maxIter: 600, steps: [0.1, 0.1, 0.3] }).x; return { a: x[0], b: x[1], phi: 1 + Math.exp(x[2]) }; };
+  const R = sub.filter((x) => x.yR != null).map((x) => [Math.log(x.pr / (1 - x.pr)), x.yR]);
+  // expulsão: o modelo quase não diferencia os jogos, então só um deslocamento (b = 1); inclinação livre explode fora da faixa
+  const fr = (v) => { let s = 0; for (const [l, y] of R) { const p = 1 / (1 + Math.exp(-(v[0] + l))); s -= y ? Math.log(p) : Math.log(1 - p); } return s / R.length; };
+  const xr = nelderMead(fr, [0], { maxIter: 200, steps: [0.1] }).x;
+  return { c: cnt('yc', 'yY'), k: cnt('co', 'yK'), v: { a: xr[0], b: 1 } };
+}
+const calBy = {}; for (const s of [...new Set(calRows.map((x) => x.season))]) calBy[s] = fitCal(calRows.filter((x) => x.season < s));
+const calMercados = fitCal(calRows);
+const mkAcc = Object.fromEntries(MK.map(([id]) => [id, []]));
+const mkRaw = Object.fromEntries(MK.map(([id]) => [id, []]));
+for (const x of calRows) {
+  if (!calBy[x.season]) continue; // a primeira temporada não tem passado para calibrar
+  const base = { matrix: x.d.matrix, pRed: x.pr, yc: x.yc, co: x.co, disp: dispersion };
+  for (const [id] of MK) { const y = mkObs(id, x.r.m); if (y == null) continue; mkAcc[id].push([jointProb({ ...base, cal: calBy[x.season] }, [id]), y]); mkRaw[id].push([jointProb(base, [id]), y]); }
+}
+const mercados = MK.map(([id, label]) => {
+  const a = mkAcc[id].sort((x, y) => x[0] - y[0]), n = a.length; if (!n) return null;
+  const mean = (f, xs = a) => xs.reduce((s, x) => s + f(x), 0) / xs.length, base = mean((x) => x[1]);
+  const t = [0, 1, 2].map((k) => a.slice(Math.floor((k * n) / 3), Math.floor(((k + 1) * n) / 3)));
+  return { id, label, n, previsto: +mean((x) => x[0]).toFixed(4), aconteceu: +base.toFixed(4),
+    brier: +mean((x) => (x[0] - x[1]) ** 2).toFixed(4), brierBase: +mean((x) => (base - x[1]) ** 2).toFixed(4),
+    brierCru: +(mkRaw[id].reduce((s, x) => s + (x[0] - x[1]) ** 2, 0) / mkRaw[id].length).toFixed(4),
+    tercos: t.map((xs) => [+mean((x) => x[0], xs).toFixed(3), +mean((x) => x[1], xs).toFixed(3), xs.length]) };
+}).filter(Boolean);
+log('mercados', mercados.map((x) => `${x.id} n=${x.n} prev=${x.previsto} obs=${x.aconteceu} brier=${x.brier}/${x.brierBase}`).join(' | '));
 
 // ── (7) jogadores (temporada atual, a partir dos summaries) ──────────────────
 const players = {};
@@ -517,7 +575,7 @@ const model = {
   ratingHistory,
   players,
   backtest,
-  against,
+  against: against && { ...against, mercados, calMercados: calMercados && { c: round5(calMercados.c), k: round5(calMercados.k), v: round5(calMercados.v) } },
 };
 await writeFile(OUT, JSON.stringify(model));
 log(`model.json gravado (${((await readFile(OUT)).length / 1024).toFixed(0)} KB)`);

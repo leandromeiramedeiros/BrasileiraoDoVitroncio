@@ -312,7 +312,7 @@ export function loadDetails(m, maxAge = 20000) {
 export function market(m) {
   const o = S.odds.get(m.id);
   if (!o) return null;
-  return { ...impliedProbs(o.dec), dec: o.dec, src: o.src, kind: o.kind };
+  return { ...impliedProbs(o.dec), dec: o.dec, src: o.src, kind: o.kind, tot: o.tot || null };
 }
 const oddsTried = new Set();
 let oddsQueue = Promise.resolve();
