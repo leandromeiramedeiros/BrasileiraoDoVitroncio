@@ -239,3 +239,5 @@ body.vitmode img.logo { content: url("../img/vitroncio-cara.webp"); border-radiu
   .vit-pop[data-pose="olho"] .vit-say { margin-bottom: min(25vh, 200px); }
 }
 @media (prefers-reduced-motion: reduce) { .vit-pop, .vit-peek { transition: none; } }
+
+.refs { padding-left: 18px; } .refs li { font-size: 13.5px; line-height: 1.5; margin: 6px 0; } .refs a { color: inherit; } .refs a:hover i { text-decoration: underline; } .refs i { color: var(--text); font-style: normal; font-weight: 500; }

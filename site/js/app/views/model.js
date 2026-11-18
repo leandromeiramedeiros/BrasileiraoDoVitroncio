@@ -1,6 +1,7 @@
 // "Como o Vitrôncio pensa": explicação do modelo + números de validação.
 import { S } from '../store.js';
 import { esc, pct, num, fmtFull } from '../util.js';
+import { RESEARCH, REFS, DATA } from './refs.js';
 
 function calibChart(cal) {
   const W = 360, H = 300, pad = 36;
@@ -78,6 +79,13 @@ export function modelView() {
       <li>Não considera lesões, suspensões nem jogadores poupados; só o que aconteceu em campo.</li>
       <li>Aprende só com jogos das Séries A e B; das taças continentais usa apenas o calendário.</li>
       <li>Marcadores prováveis e dados de jogadores são atualizados só no reajuste semanal.</li>
-      <li>Os dados ao vivo vêm de um serviço público da ESPN e podem atrasar ou mudar sem aviso.</li></ul></section>
+      <li>Os dados ao vivo vêm de um serviço público da ESPN e podem atrasar ou mudar sem aviso.</li>
+      <li>Não serve para apostar. As odds de fechamento erram menos que o modelo${g.rpsRef ? ` (RPS ${g.rpsRef.toFixed(4)} contra ${g.rps.toFixed(4)})` : ''}, e a casa ainda cobra margem. Entre 2013 e 2026, apostar nos resultados em que o modelo via preço bom teria perdido cerca de 6% do valor apostado.</li></ul></section>
+    <section><div class="sec-h"><h2>Pesquisa</h2><span class="sub">novembro de 2026: o que foi testado para reduzir o erro</span></div>
+      <p class="small muted">Cada ideia foi escolhida olhando só as temporadas de 2013 a 2021 e conferida depois em 2022–2026. Efeito: mudança no RPS de 2022–2026 (negativo é melhor).</p>
+      <div class="tw"><table><tr><th class="l">Ideia</th><th class="l">Situação</th><th>Efeito</th></tr>${RESEARCH.map(([a, b, c]) => `<tr><td class="l">${esc(a)}</td><td class="l small">${esc(b)}</td><td class="pts">${esc(c)}</td></tr>`).join('')}</table></div></section>
+    <section><div class="sec-h"><h2>Referências</h2><span class="sub">livros, artigos e dados por trás do modelo e dos testes</span></div>
+      ${REFS.map(([grp, list]) => `<h3>${esc(grp)}</h3><ul class="refs">${list.map((r) => `<li><a href="https://scholar.google.com/scholar?q=${encodeURIComponent(`"${r.title}"`)}" target="_blank" rel="noopener">${esc(r.authors)} (${r.year}). <i>${esc(r.title)}</i>.</a> ${esc(r.venue)}. <span class="dim">${esc(r.use)}.</span></li>`).join('')}</ul>`).join('')}
+      <h3>Dados</h3><ul class="refs">${DATA.map(([a, b]) => `<li><b>${esc(a)}</b>: ${esc(b)}.</li>`).join('')}</ul></section>
   </div>`;
 }

@@ -17,6 +17,7 @@ Site estático (GitHub Pages) da Série A com simulador próprio. Interface e co
   - Presença fixa: marca no cabeçalho, rodapé, ao lado de toda barra de probabilidade, página "Odds" e topo da página do modelo.
   - Aparições e easter eggs ficam em `site/js/app/vitroncio.js` (a lista está no cabeçalho do arquivo). São escondidos de propósito: não anuncie na interface nem no README. Falas curtas e secas, na voz dele; nada que zombe de um time específico.
 - Página inicial curta; o detalhe fica nas páginas de jogo.
+- Página do modelo: a tabela "Pesquisa" e as referências vêm de `site/js/app/views/refs.js`. Ao testar algo novo, acrescente a linha com o efeito em 2022–2026; só cite livro ou artigo que foi de fato usado, sem inventar páginas ou DOI.
 
 ## Reajuste semanal (o pedido mais comum)
 
