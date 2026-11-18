@@ -14,11 +14,11 @@ import { reactSim } from '../vitroncio.js';
 export function preBody(m, f) {
   const H = team(m.h), A = team(m.a), s = f.pre.sum, e = f.e, pr = e.pr;
   const disp = S.model.dispersion || {};
-  const sH = scorers(m.h, e.lh), sA = scorers(m.a, e.la);
+  const sH = scorers(m.h, f.pre.xgH), sA = scorers(m.a, f.pre.xgA);
   const isReal = !String(m.id).startsWith('sim-');
   const notes = contextNotes(m);
   return `${notes.length ? `<p class="small muted" style="margin:0 0 10px">Contexto considerado: ${notes.map(esc).join('; ')}.</p>` : ''}<div class="kv" style="margin-bottom:12px">
-      <div><div class="k">Gols esperados</div><div class="v">${num(e.lh, 2)} <small>×</small> ${num(e.la, 2)}</div></div>
+      <div><div class="k">Gols esperados</div><div class="v">${num(f.pre.xgH, 2)} <small>×</small> ${num(f.pre.xgA, 2)}</div></div>
       <div><div class="k">Placar mais provável</div><div class="v">${s.top[0].h}–${s.top[0].a} <small>${pct(s.top[0].p)}</small></div></div>
       <div><div class="k">Mais de 2,5 gols</div><div class="v">${pct(s.over25)}</div></div>
       <div><div class="k">Ambos marcam</div><div class="v">${pct(s.btts)}</div></div>
@@ -66,7 +66,7 @@ export function realVM(m, { compact = false } = {}) {
   if (mode === 'pre') {
     return { ...base, score: null, clock: m.status === 'off' ? 'Adiado' : `${relDay(m.date)} · ${fmtTime(m.date)}`, oracleRight: m.status === 'off' ? '' : `começa ${countdown(m.date)}`, preBody: compact ? '' : preBody(m, f), lineups: det?.lineups || probableLineups(m), events: [],
       controls: m.status === 'off' ? '' : `<div class="simctl"><button class="btn sm gold" data-act="simstart" data-id="${m.id}"${compact ? ' data-home="1"' : ''}>Simular este jogo</button>${compact ? `<a class="btn sm" href="#/jogo/${m.id}">Previsão completa</a>` : ''}<span class="muted small">a simulação sorteia um resultado possível e mostra minuto a minuto</span></div>`,
-      strip: compact ? `<div class="strip-kv"><span>gols esperados <b>${num(f.e.lh, 2)} × ${num(f.e.la, 2)}</b></span><span>placar mais provável <b>${f.pre.sum.top[0].h}–${f.pre.sum.top[0].a}</b></span><span>mais de 2,5 gols <b>${pct(f.pre.sum.over25)}</b></span><span>ambos marcam <b>${pct(f.pre.sum.btts)}</b></span></div>` : '' };
+      strip: compact ? `<div class="strip-kv"><span>gols esperados <b>${num(f.pre.xgH, 2)} × ${num(f.pre.xgA, 2)}</b></span><span>placar mais provável <b>${f.pre.sum.top[0].h}–${f.pre.sum.top[0].a}</b></span><span>mais de 2,5 gols <b>${pct(f.pre.sum.over25)}</b></span><span>ambos marcam <b>${pct(f.pre.sum.btts)}</b></span></div>` : '' };
   }
   const derived = m.ev.filter((e) => e.t !== 'Y' || mode === 'live').map((e) => ({ label: `${e.m}'${e.x ? '+' + e.x : ''}`, type: e.t === 'R' ? 'red' : e.t === 'Y' ? 'yellow' : e.t === 'O' ? 'own' : 'goal', side: e.s, text: evText(m, e) })).reverse();
   const events = det?.commentary?.length ? det.commentary : det?.key?.length ? det.key : derived;

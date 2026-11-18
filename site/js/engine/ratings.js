@@ -15,6 +15,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { applyContext } from './context.js';
+import { calibrateLambdas } from './match-model.js';
 
 // 'x' é um segundo rating de gols: mesmo filtro do 'g', mas observando o xG medido
 // chute a chute quando o jogo tem esse dado (m.xg); sem ele, vê o mesmo que o 'g'.
@@ -209,8 +210,10 @@ export function stackLambda(pr, L, stack, neutral = false) {
 export function expectedMatch(model, state, hId, aId, lg, season, neutral = false, cx = null) {
   const pr = predictMatch(state, model.params, hId, aId, lg, season, neutral);
   const base = stackLambda(pr, state.lg[lg], model.stack, neutral);
-  const { lh, la } = lg === 'A' ? applyContext(model.ctx, base.lh, base.la, cx, neutral) : base;
-  return { lh, la, pr };
+  const tgt = lg === 'A' ? applyContext(model.ctx, base.lh, base.la, cx, neutral) : base;
+  // lh/la são as taxas que alimentam a cadeia de Markov; xh/xa, os gols esperados de fato
+  const { lh, la } = model.calib && model.hazard ? calibrateLambdas(model.hazard, tgt.lh, tgt.la, model.calib) : tgt;
+  return { lh, la, xh: tgt.lh, xa: tgt.la, pr };
 }
 
 /** Força "geral" em gols por jogo contra um time médio, em campo neutro. */

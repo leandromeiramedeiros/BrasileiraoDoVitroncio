@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import * as R from '../site/js/engine/ratings.js';
-import { scoreDistribution, nextGoal, summarize, timeline, stepOf, liveState, lambdasFromProbs } from '../site/js/engine/match-model.js';
+import { scoreDistribution, nextGoal, summarize, timeline, stepOf, liveState, lambdasFromProbs, calibrateLambdas } from '../site/js/engine/match-model.js';
 import { simulateSeason, buildTable } from '../site/js/engine/season.js';
 import { simulateMatch } from '../site/js/engine/sim-match.js';
 import { probableLineup, scorerProbabilities, genericLineup } from '../site/js/engine/players.js';
@@ -142,4 +142,14 @@ test('contexto: situação definida na tabela e ajuste dos gols esperados', () =
   assert.ok(rot.lh > 1.4 && rot.la < 1.0, 'visitante que vai poupar rende menos');
   assert.deepEqual(applyContext(null, 1.4, 1.0, { dec: [1, 0] }), { lh: 1.4, la: 1.0 });
   if (model.ctx) for (const k of ['dec', 'nc', 'disp']) assert.ok(model.ctx[k] < 0 && model.ctx[k] > -0.6, `coeficiente ${k} plausível`);
+});
+
+test('calibração: a cadeia reproduz os gols esperados de cada lado', () => {
+  for (const [lh, la] of [[1.5, 1.0], [2.4, 0.6], [0.7, 2.6], [1.2, 1.2]]) {
+    const c = calibrateLambdas(hz, lh, la);
+    const d = scoreDistribution(hz, c.lh, c.la);
+    near(d.xgH, lh, lh * 0.002, 'gols mandante'); near(d.xgA, la, la * 0.002, 'gols visitante');
+  }
+  const [f] = model.fixtures.filter((x) => x.status === 'pre');
+  if (f && model.calib) { const e = R.expectedMatch(model, model.state, f.h, f.a, 'A', model.temporada); const d = scoreDistribution(hz, e.lh, e.la); near(d.xgH, e.xh, e.xh * 0.002, 'jogo real'); }
 });

@@ -12,7 +12,7 @@ import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { loadHistory } from './lib/history.mjs';
 import { nelderMead, ols, poissonGLM } from './lib/optim.mjs';
 import * as R from '../site/js/engine/ratings.js';
-import { scoreDistribution, timeline, stepOf, diffIdx, menIdx } from '../site/js/engine/match-model.js';
+import { scoreDistribution, calibrateLambdas, timeline, stepOf, diffIdx, menIdx } from '../site/js/engine/match-model.js';
 import { applyContext } from '../site/js/engine/context.js';
 import { buildContext, loadCities } from './lib/context.mjs';
 
@@ -242,6 +242,7 @@ try {
   }
 } catch { log('sem arquivo de referência de mercado (model/cache/BRA.csv) — benchmark ignorado'); }
 
+const CALIB = 2; // iterações da calibração da cadeia (ver calibrateLambdas)
 const bt = { from: 2013, seasons: {}, calib: Array.from({ length: 10 }, () => ({ n: 0, p: 0, y: 0 })), totals: { pred: new Array(9).fill(0), obs: new Array(9).fill(0) }, scoreHit: { n: 0, top1: 0, top3: 0 } };
 const agg = () => ({ n: 0, ll: 0, rps: 0, brier: 0, hit: 0, nM: 0, llMk: 0, rpsMk: 0, llM2: 0, rpsM2: 0, llBase: 0, rpsBase: 0 });
 const all = agg();
@@ -251,7 +252,8 @@ for (const r of rows) {
   if (m.lg !== 'A') continue;
   const k = m.hg > m.ag ? 0 : m.hg === m.ag ? 1 : 2;
   if (m.season >= bt.from) {
-    const d = scoreDistribution(hazard, r.lh, r.la);
+    const c = calibrateLambdas(hazard, r.lh, r.la, CALIB);
+    const d = scoreDistribution(hazard, c.lh, c.la);
     const p = [d.pH, d.pD, d.pA];
     const y = [0, 0, 0]; y[k] = 1;
     const rps = (q) => ((q[0] - y[0]) ** 2 + (q[0] + q[1] - y[0] - y[1]) ** 2) / 2;
@@ -336,7 +338,7 @@ try {
 const keep = Object.fromEntries(Object.entries(state.teams).filter(([, t]) => t.season >= seasonNow - 1).map(([id, t]) => [id, { lg: t.lg, season: t.season, n: t.n, ch: Object.fromEntries(Object.entries(t.ch).map(([c, s]) => [c, Object.fromEntries(Object.entries(s).map(([k, v]) => [k, +v.toFixed(5)]))])) }]));
 const lgOut = {}; for (const L of ['A', 'B']) { lgOut[L] = {}; for (const c of R.CHANNELS) lgOut[L][c] = { mu: +state.lg[L][c].mu.toFixed(5), hfa: +state.lg[L][c].hfa.toFixed(5), n: state.lg[L][c].n }; }
 const teamMeta = Object.fromEntries(Object.keys(keep).map((id) => [id, teams[id]]));
-const preLam = new Map(rows.filter((r) => r.m.lg === 'A' && r.m.season === seasonNow).map((r) => [r.m.id, [+r.lh.toFixed(4), +r.la.toFixed(4)]]));
+const preLam = new Map(rows.filter((r) => r.m.lg === 'A' && r.m.season === seasonNow).map((r) => { const c = calibrateLambdas(hazard, r.lh, r.la, CALIB); return [r.m.id, [+c.lh.toFixed(4), +c.la.toFixed(4)]]; }));
 // calendário da temporada; jogos já aplicados levam o λ pré-jogo (para gráficos de jogos passados);
 // jogos por vir levam o contexto conhecido de antemão: [continental em seguida (m, v), mando fora da sede]
 const cxOut = (id) => { const f = cx.get(id); return f && (f.nc[0] || f.nc[1] || f.disp) ? [f.nc[0], f.nc[1], f.disp] : null; };
@@ -345,7 +347,7 @@ const lastA = done.filter((m) => m.lg === 'A').at(-1);
 const round5 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'number' ? +v.toPrecision(5) : v]));
 const model = {
   version: 3,
-  nome: 'Vitrôncio v3',
+  nome: 'Vitrôncio v3.1',
   geradoEm: new Date().toISOString(),
   dadosAte: lastA?.date,
   temporada: seasonNow,
@@ -354,6 +356,7 @@ const model = {
   xg: round5(xg),
   stack: stack && round5(stack),
   ctx: ctx && round5(ctx),
+  calib: CALIB,
   hazard,
   dispersion,
   state: { lg: lgOut, teams: keep, applied: state.applied, lastDate: state.lastDate },

@@ -76,7 +76,7 @@ export function renderPlayer(vm) {
       <div class="duo"><div class="panel"><div class="sec-h"><h3>${vm.mode === 'post' ? 'Placar final' : 'Placar final provável'}</h3></div>${scoreMatrix(d, m, { now: vm.score })}</div>
       <div><div class="kv">
         <div><div class="k">Antes do jogo</div><div class="v s">${pct(vm.pre.pH)} · ${pct(vm.pre.pD)} · ${pct(vm.pre.pA)}</div></div>
-        <div><div class="k">Gols esperados (pré-jogo)</div><div class="v s">${num(vm.e.lh, 2)} × ${num(vm.e.la, 2)}</div></div>
+        <div><div class="k">Gols esperados (pré-jogo)</div><div class="v s">${num(vm.pre.xgH, 2)} × ${num(vm.pre.xgA, 2)}</div></div>
         ${vm.next && vm.mode !== 'post' ? `<div><div class="k">Próximo gol</div><div class="v s">${esc(H.abbr)} ${pct(vm.next.pH)} · ${esc(A.abbr)} ${pct(vm.next.pA)}</div></div><div><div class="k">Sem mais gols</div><div class="v">${pct(vm.next.pNone)}</div></div><div><div class="k">Gols até o fim</div><div class="v">${num(d.xgH + d.xgA - (vm.score[0] + vm.score[1]))}</div></div>` : ''}
       </div></div></div>`;
   }

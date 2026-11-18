@@ -21,7 +21,7 @@ Site estático (GitHub Pages) da Série A com simulador próprio. Interface e co
 ## Reajuste semanal (o pedido mais comum)
 
 1. `npm run weekly` (≈1–2 min). Sem rede para a ESPN, pare e avise.
-2. Compare o bloco `backtest geral` do log com o `site/data/model.json` anterior (`git show HEAD:site/data/model.json`). RPS deve ficar perto de 0,2042 (referência de mercado ≈ 0,2003, ingênuo ≈ 0,2179). Piora acima de ~0,001 merece investigação antes de publicar.
+2. Compare o bloco `backtest geral` do log com o `site/data/model.json` anterior (`git show HEAD:site/data/model.json`). RPS deve ficar perto de 0,2040 (referência de mercado ≈ 0,2003, ingênuo ≈ 0,2179). Piora acima de ~0,001 merece investigação antes de publicar.
 3. Olhe os hiperparâmetros (`params.g`) e as intensidades (`hazard`): mudanças bruscas de uma semana para outra são sinal de problema nos dados.
 4. `npm test`, commit ("Reajuste semanal AAAA-MM-DD" + resumo dos números) e push.
 5. Relate ao dono: números do backtest, o que mudou no ranking de força, e qualquer anomalia.
@@ -33,13 +33,14 @@ Virada de temporada: `tools/fetch.mjs` já busca o ano seguinte em dezembro; `re
 - `ratings.js` — EKF Poisson por canal (`g` gols, `sh`, `sot`, `co`, `yc`, `fo`). `applyMatch` atualiza, `expectedMatch` prevê (inclui a camada `stack`).
 - `context.js` — contexto do jogo aplicado sobre os gols esperados: time já rebaixado/campeão (calculado da tabela, também no navegador), jogo continental em seguida, mando fora da sede, portões fechados. Coeficientes em `model.ctx`; os dados vêm de `tools/lib/context.mjs` (calendário das taças em `history.json.gz`, cidades em `model/data/cities.json`). Clube promovido de cidade nova: acrescente a cidade em `cities.json`.
 - Canal `x` (v3): segundo rating de gols, mesmo filtro do `g`, observando o xG por finalização de `model/data/xg.json` (id do jogo -> xG de cada lado, escala de gols; Séries A e B 2014–nov/2026). Entra na previsão pelo termo `a4` do `stack`. Jogo sem xG por chute cai na mesma observação do `g`. O arquivo veio da pesquisa (`research/2026-11/xg/`) e **ainda não é atualizado pelo `npm run weekly`** — portar essa etapa para `tools/` é a pendência mais importante.
+- `match-model.js` — `calibrateLambdas` acerta as taxas-base para a cadeia reproduzir os gols esperados de cada lado; `expectedMatch` devolve `lh/la` (taxas da cadeia) e `xh/xa` (gols esperados). Na interface, mostre `pre.xgH/xgA`, não `e.lh/e.la`.
 - `match-model.js` — cadeia de Markov exata: `scoreDistribution(hz, lh, la, estado)`.
 - `season.js` — Monte Carlo da temporada. `sim-match.js` — jogo simulado narrado. `players.js` — escalação provável e artilheiros.
 - `tools/refit.mjs` — tudo que é estimado: xG proxy, hiperparâmetros (Nelder–Mead), stacking, GLMs de intensidade, backtest, jogadores, exportação.
 
 ## Ideias para evoluir o algoritmo (ainda não feitas)
 
-- **Pesquisa interrompida em novembro de 2026:** código e placar parcial em `research/2026-11/` (leia o README de lá antes de recomeçar). O xG por finalização entrou no v3 como segundo rating (ganho pequeno: 0,2047 → 0,2042). Ideia ainda não testada: a cadeia de Markov entrega ~6% a mais de gols ao azarão e ~5% a menos ao favorito do que o λ pede em jogos desiguais; calibrar a cadeia para reproduzir o λ de cada lado pode render mais.
+- **Pesquisa interrompida em novembro de 2026:** código e placar parcial em `research/2026-11/` (leia o README de lá antes de recomeçar). O xG por finalização entrou no v3 como segundo rating (ganho pequeno: 0,2047 → 0,2042). A calibração da cadeia para reproduzir o λ de cada lado entrou no v3.1 (0,2042 → 0,2040, ganho nos dois períodos, sem parâmetro ajustado).
 
 - Outras competições como evidência de força (Copa do Brasil, Libertadores): testado em novembro de 2026, ganho ≈ 0,0001 de RPS — não compensou. Estaduais, descanso, viagem, clima, clássicos e "briga contra o rebaixamento" também foram testados e não ajudaram; o que ajudou virou `context.js`.
 - Distância de viagem e dias de descanso como covariáveis.

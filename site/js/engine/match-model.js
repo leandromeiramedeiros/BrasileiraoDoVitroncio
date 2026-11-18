@@ -130,6 +130,18 @@ export function scoreDistribution(hz, lh, la, start = null) {
  * com o ao vivo. `total` (opcional) fixa a soma lh+la e ajusta só o equilíbrio
  * entre os lados (nesse caso casa pH/(pH+pA) em vez dos dois alvos).
  */
+/**
+ * Taxas-base para a cadeia reproduzir os gols esperados de cada lado.
+ * A cadeia dá mais gols a quem está atrás no placar; sem esta correção, num jogo
+ * desigual o azarão fica ~6% acima e o favorito ~5% abaixo do que os ratings pedem.
+ * Duas iterações de ponto fixo deixam o erro abaixo de 0,1%.
+ */
+export function calibrateLambdas(hz, lh, la, iters = 2) {
+  let bh = lh, ba = la;
+  for (let i = 0; i < iters; i++) { const d = scoreDistribution(hz, bh, ba); bh *= lh / d.xgH; ba *= la / d.xgA; }
+  return { lh: bh, la: ba };
+}
+
 export function lambdasFromProbs(hz, pH, pA, { total = null, init = null } = {}) {
   const f = (x) => { const d = scoreDistribution(hz, Math.exp(x[0]), Math.exp(x[1])); return [d.pH, d.pA]; };
   if (total) {
