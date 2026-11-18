@@ -15,6 +15,8 @@ import * as R from '../site/js/engine/ratings.js';
 import { scoreDistribution, calibrateLambdas, timeline, stepOf, diffIdx, menIdx } from '../site/js/engine/match-model.js';
 import { applyContext } from '../site/js/engine/context.js';
 import { buildContext, loadCities } from './lib/context.mjs';
+import { createLineupState, lineupFeatures, applyLineupMatch, teamSnapshot } from '../site/js/engine/lineup.js';
+import { gunzipSync } from 'node:zlib';
 
 const QUICK = process.argv.includes('--quick');
 const OUT = new URL('../site/data/model.json', import.meta.url);
@@ -160,6 +162,43 @@ for (const r of rows) {
 }
 log('contexto', ctx);
 
+// ── (4c) escalação anunciada (ver site/js/engine/lineup.js) ──────────────────
+// Atributos da escalação de cada jogo, calculados só com jogos anteriores; o
+// coeficiente da temporada Y sai de uma regressão de Poisson nos jogos da Série A
+// de 2009 a Y−1, com os gols esperados até aqui como offset. O backtest com
+// escalação supõe a escalação conhecida (no site, cerca de 1 h antes do jogo).
+const LU_KEYS = ['usage', 'ga', 'bench'];
+const lineupRows = JSON.parse(gunzipSync(await readFile(new URL('../model/data/rosters.json.gz', import.meta.url))).toString('utf8'));
+const luState = createLineupState();
+const luFeat = new Map();
+for (const m of lineupRows) {
+  luFeat.set(m.id, [lineupFeatures(luState, m.h, m.home.xi, m.home.bench, m.date), lineupFeatures(luState, m.a, m.away.xi, m.away.bench, m.date)]);
+  applyLineupMatch(luState, m);
+}
+const luDiff = (id) => { const f = luFeat.get(id); return LU_KEYS.map((k) => (f && f[0][k] != null && f[1][k] != null ? f[0][k] - f[1][k] : 0)); };
+function fitLineup(sub) {
+  if (sub.length < 300) return null;
+  const X = [], y = [], off = [];
+  for (const r of sub) { const d = luDiff(r.m.id); X.push(d); y.push(r.m.hg); off.push(Math.log(r.lh)); X.push(d.map((v) => -v)); y.push(r.m.ag); off.push(Math.log(r.la)); }
+  const b = poissonGLM(X, y, off, { ridge: 1e-6 });
+  return Object.fromEntries(LU_KEYS.map((k, j) => [k, b[j]]));
+}
+const luTrain = (to) => rows.filter((r) => r.m.lg === 'A' && r.m.season >= 2009 && r.m.season < to && luFeat.has(r.m.id));
+const luBySeason = {};
+for (const s of seasons) luBySeason[s] = fitLineup(luTrain(s));
+const lineupCoef = fitLineup(luTrain(Infinity));
+for (const r of rows) {
+  r.lhNoLu = r.lh; r.laNoLu = r.la;
+  const b = luBySeason[r.m.season]; if (r.m.lg !== 'A' || !b || !luFeat.has(r.m.id)) continue;
+  const e = luDiff(r.m.id).reduce((a, x, j) => a + b[LU_KEYS[j]] * x, 0);
+  r.lh *= Math.exp(e); r.la *= Math.exp(-e);
+}
+// foto de cada time para o navegador calcular a escalação quando a ESPN publicar
+const luSnaps = {};
+const nowIso = new Date().toISOString();
+for (const id of new Set(matches.filter((m) => m.lg === 'A' && m.season === seasonNow).flatMap((m) => [m.h, m.a]))) { const sn = teamSnapshot(luState, id, nowIso); if (sn.n) luSnaps[id] = sn; }
+log('escalação', lineupCoef, `${luFeat.size} jogos com escalação`);
+
 // ── (5) intensidades minuto a minuto ─────────────────────────────────────────
 const S1 = 3, S2 = 7;
 const hzShape = { S1, S2 };
@@ -244,7 +283,7 @@ try {
 
 const CALIB = 2; // iterações da calibração da cadeia (ver calibrateLambdas)
 const bt = { from: 2013, seasons: {}, calib: Array.from({ length: 10 }, () => ({ n: 0, p: 0, y: 0 })), totals: { pred: new Array(9).fill(0), obs: new Array(9).fill(0) }, scoreHit: { n: 0, top1: 0, top3: 0 } };
-const agg = () => ({ n: 0, ll: 0, rps: 0, brier: 0, hit: 0, nM: 0, llMk: 0, rpsMk: 0, llM2: 0, rpsM2: 0, llBase: 0, rpsBase: 0 });
+const agg = () => ({ n: 0, ll: 0, rps: 0, brier: 0, hit: 0, nM: 0, llMk: 0, rpsMk: 0, llM2: 0, rpsM2: 0, llBase: 0, rpsBase: 0, rpsNoLu: 0 });
 const all = agg();
 let baseCnt = [4.8, 2.6, 2.6]; // priori de frequências (mandante/empate/visitante), atualizada ao longo do tempo
 for (const r of rows) {
@@ -257,10 +296,12 @@ for (const r of rows) {
     const p = [d.pH, d.pD, d.pA];
     const y = [0, 0, 0]; y[k] = 1;
     const rps = (q) => ((q[0] - y[0]) ** 2 + (q[0] + q[1] - y[0] - y[1]) ** 2) / 2;
+    const c0 = r.lhNoLu !== r.lh ? calibrateLambdas(hazard, r.lhNoLu, r.laNoLu, CALIB) : null, d0 = c0 ? scoreDistribution(hazard, c0.lh, c0.la) : d;
+    const rpsNoLu = rps([d0.pH, d0.pD, d0.pA]);
     const bs = baseCnt.map((v) => v / (baseCnt[0] + baseCnt[1] + baseCnt[2]));
     const mk = odds.get(`${m.season}|${m.h}|${m.a}`);
     for (const a of [all, (bt.seasons[m.season] ||= agg())]) {
-      a.n++; a.ll -= Math.log(p[k]); a.rps += rps(p); a.brier += p.reduce((s, v, i) => s + (v - y[i]) ** 2, 0);
+      a.n++; a.ll -= Math.log(p[k]); a.rps += rps(p); a.rpsNoLu += rpsNoLu; a.brier += p.reduce((s, v, i) => s + (v - y[i]) ** 2, 0);
       a.hit += p[k] === Math.max(...p) ? 1 : 0; a.llBase -= Math.log(bs[k]); a.rpsBase += rps(bs);
       if (mk) { a.nM++; a.llMk -= Math.log(mk[k]); a.rpsMk += rps(mk); a.llM2 -= Math.log(p[k]); a.rpsM2 += rps(p); }
     }
@@ -272,7 +313,7 @@ for (const r of rows) {
   }
   baseCnt[k]++;
 }
-const fin = (a) => ({ n: a.n, logloss: +(a.ll / a.n).toFixed(4), rps: +(a.rps / a.n).toFixed(4), brier: +(a.brier / a.n).toFixed(4), acerto: +(a.hit / a.n).toFixed(4), rpsBase: +(a.rpsBase / a.n).toFixed(4), loglossBase: +(a.llBase / a.n).toFixed(4), ...(a.nM ? { nRef: a.nM, rpsRef: +(a.rpsMk / a.nM).toFixed(4), loglossRef: +(a.llMk / a.nM).toFixed(4), rpsModelNoRef: +(a.rpsM2 / a.nM).toFixed(4) } : {}) });
+const fin = (a) => ({ n: a.n, logloss: +(a.ll / a.n).toFixed(4), rps: +(a.rps / a.n).toFixed(4), rpsSemEscalacao: +(a.rpsNoLu / a.n).toFixed(4), brier: +(a.brier / a.n).toFixed(4), acerto: +(a.hit / a.n).toFixed(4), rpsBase: +(a.rpsBase / a.n).toFixed(4), loglossBase: +(a.llBase / a.n).toFixed(4), ...(a.nM ? { nRef: a.nM, rpsRef: +(a.rpsMk / a.nM).toFixed(4), loglossRef: +(a.llMk / a.nM).toFixed(4), rpsModelNoRef: +(a.rpsM2 / a.nM).toFixed(4) } : {}) });
 const backtest = {
   desde: bt.from, geral: fin(all),
   temporadas: Object.fromEntries(Object.entries(bt.seasons).map(([s, a]) => [s, fin(a)])),
@@ -347,7 +388,7 @@ const lastA = done.filter((m) => m.lg === 'A').at(-1);
 const round5 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'number' ? +v.toPrecision(5) : v]));
 const model = {
   version: 3,
-  nome: 'Vitrôncio v3.1',
+  nome: 'Vitrôncio v3.2',
   geradoEm: new Date().toISOString(),
   dadosAte: lastA?.date,
   temporada: seasonNow,
@@ -355,7 +396,8 @@ const model = {
   params: Object.fromEntries(Object.entries(params).map(([c, p]) => [c, round5(p)])),
   xg: round5(xg),
   stack: stack && round5(stack),
-  ctx: ctx && round5(ctx),
+  ctx: ctx && { ...round5(ctx), ...(lineupCoef ? { lineup: round5(lineupCoef) } : {}) },
+  lineupSnaps: luSnaps,
   calib: CALIB,
   hazard,
   dispersion,

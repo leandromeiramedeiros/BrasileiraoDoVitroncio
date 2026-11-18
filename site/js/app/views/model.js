@@ -51,6 +51,7 @@ export function modelView() {
         <tr><td class="l">Jogo de taça continental em até 4 dias depois</td><td class="pts">${e(M.ctx.nc)}</td></tr>
         <tr><td class="l">Mando a mais de 100 km da sede (vantagem de casa)</td><td class="pts">${e(M.ctx.disp)}</td></tr>
         <tr><td class="l">Portões fechados, 2020–21 (vantagem de casa)</td><td class="pts">${e(M.ctx.closed)}</td></tr></table>
+      ${M.ctx.lineup ? `<p>Quando a escalação sai (cerca de uma hora antes do jogo), o modelo mede quanto do time habitual de cada lado começa jogando, quanto dos gols e assistências recentes do time está em campo e quantos titulares habituais estão no banco. Cada 10 pontos percentuais a menos do time habitual em campo valem ${e(-0.1 * M.ctx.lineup.usage)} nos gols esperados do time.</p>` : ''}
       <p class="small muted">Efeito nos gols esperados do próprio time; o adversário ganha o equivalente.</p>` : ''}
       <h3>${M.ctx ? 4 : 3}. O campeonato</h3>
       <p>Título, Libertadores e rebaixamento saem de milhares de simulações dos jogos restantes, com um desvio de força sorteado por time em cada simulação e os critérios de desempate da CBF. Com jogos em andamento, a simulação parte do placar e do minuto atuais.</p>
@@ -64,10 +65,11 @@ export function modelView() {
         <div><div class="k">Placar exato</div><div class="v">${pct(bt.placarExato.top1, 1)}</div></div>
         <div><div class="k">Placar entre os 3 mais prováveis</div><div class="v">${pct(bt.placarExato.top3, 1)}</div></div>
         <div><div class="k">RPS do modelo</div><div class="v">${g.rps.toFixed(4)}</div></div>
+        ${g.rpsSemEscalacao && g.rpsSemEscalacao !== g.rps ? `<div><div class="k">RPS sem a escalação</div><div class="v">${g.rpsSemEscalacao.toFixed(4)}</div></div>` : ''}
         <div><div class="k">RPS de referência simples</div><div class="v">${g.rpsBase.toFixed(4)}</div></div>
         ${g.rpsRef ? `<div><div class="k">RPS do mercado</div><div class="v">${g.rpsRef.toFixed(4)}</div></div>` : ''}
       </div>
-      <p class="small muted">RPS mede o erro das probabilidades: quanto menor, melhor. A referência simples usa sempre as frequências históricas de vitória do mandante, empate e visitante.${g.rpsRef ? ` O modelo cobre ${pct((g.rpsBase - g.rps) / (g.rpsBase - g.rpsRef))} da distância entre essa referência e o mercado.` : ''}</p>
+      <p class="small muted">RPS mede o erro das probabilidades: quanto menor, melhor.${g.rpsSemEscalacao && g.rpsSemEscalacao !== g.rps ? ' O RPS do modelo usa a escalação anunciada de cada jogo; dias antes do jogo, sem ela, o erro esperado é o da coluna "sem a escalação".' : ''} A referência simples usa sempre as frequências históricas de vitória do mandante, empate e visitante.${g.rpsRef ? ` O modelo cobre ${pct((g.rpsBase - g.rps) / (g.rpsBase - g.rpsRef))} da distância entre essa referência e o mercado.` : ''}</p>
       <div class="duo"><div class="panel"><div class="sec-h"><h3>Calibração</h3></div>${calibChart(bt.calibracao)}<p class="small muted">Probabilidade prevista (horizontal) contra frequência observada (vertical). Sobre a diagonal, o modelo está calibrado.</p></div>
       <div class="panel"><div class="sec-h"><h3>Total de gols por jogo</h3></div><table><tr><th class="l">Gols</th>${bt.totalGols.previsto.map((_, k) => `<th>${k}${k === 8 ? '+' : ''}</th>`).join('')}</tr><tr><td class="l">Previsto</td>${bt.totalGols.previsto.map((v) => `<td>${pct(v)}</td>`).join('')}</tr><tr><td class="l">Real</td>${bt.totalGols.observado.map((v) => `<td>${pct(v)}</td>`).join('')}</tr></table>
         <div class="sec-h" style="margin-top:16px"><h3>Por temporada</h3></div><div class="tw" style="max-height:300px;overflow:auto"><table><tr><th>Ano</th><th>Jogos</th><th>Favorito</th><th>RPS</th><th>Referência</th></tr>${seasons.map(([s, a]) => `<tr><td>${s}</td><td>${a.n}</td><td>${pct(a.acerto)}</td><td>${a.rps.toFixed(4)}</td><td>${a.rpsBase.toFixed(4)}</td></tr>`).join('')}</table></div></div></div>

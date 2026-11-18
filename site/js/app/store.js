@@ -3,11 +3,12 @@
 // depois da foto — por isso as previsões nunca ficam "paradas" na semana.
 import * as api from './api.js';
 import { parseScoreboard, parseClock, parseOdds, impliedProbs } from '../data/espn-parse.js';
-import { store as ls } from './util.js';
+import { store as ls, pct } from './util.js';
 import * as R from '../engine/ratings.js';
 import { scoreDistribution, nextGoal, summarize, stepOf, compile } from '../engine/match-model.js';
 import { buildTable, sortTable } from '../engine/season.js';
 import { decided } from '../engine/context.js';
+import { snapshotFeatures } from '../engine/lineup.js';
 import { probableLineup, scorerProbabilities, genericLineup } from '../engine/players.js';
 
 export const S = {
@@ -99,6 +100,8 @@ export async function poll(force = false) {
     if ((y && y > S.season) || Date.now() - lastSeasonRefresh > 30 * 60000) { lastSeasonRefresh = Date.now(); if (y && y > S.season) { S.season = y; } await refreshSeason(); }
   } catch (e) { S.online = false; }
   emit();
+  // escalações: a ESPN publica cerca de 1 h antes; olha os jogos das próximas 2 h
+  for (const m of upcoming()) if (Date.parse(m.date) - Date.now() < 2 * 3600000) loadDetails(m);
   const live = liveMatches().length > 0;
   const soon = [...S.matches.values()].some((m) => m.status === 'pre' && Math.abs(new Date(m.date) - Date.now()) < 20 * 60000);
   pollTimer = setTimeout(poll, live ? 12000 : soon ? 30000 : 120000);
@@ -141,7 +144,14 @@ function decidedBefore(date) {
 export function contextOf(m, cached = true) {
   const d = cached ? memo(`dec${m.date}`, () => decidedBefore(m.date)) : decidedBefore(m.date);
   const c = S.cx.get(m.id) || [0, 0, 0];
-  return { dec: [d.has(m.h) ? 1 : 0, d.has(m.a) ? 1 : 0], nc: [c[0], c[1]], disp: c[2], why: [d.get(m.h), d.get(m.a)] };
+  return { dec: [d.has(m.h) ? 1 : 0, d.has(m.a) ? 1 : 0], nc: [c[0], c[1]], disp: c[2], why: [d.get(m.h), d.get(m.a)], lu: lineupOf(m) };
+}
+/** Atributos da escalação anunciada (ESPN) dos dois times, ou null se ainda não saiu. */
+function lineupOf(m) {
+  const L = S.details.get(m.id)?.lineups, snaps = S.model.lineupSnaps;
+  if (!S.model.ctx?.lineup || !snaps || !L?.h?.xi?.length || !L?.a?.xi?.length) return null;
+  const f = (side, id) => snapshotFeatures(snaps[id], L[side].xi.map((p) => p.id), (L[side].bench || []).map((p) => p.id));
+  return [f('h', m.h), f('a', m.a)];
 }
 /** Frases curtas sobre o contexto que entrou na conta de um jogo (vazio se não há nada). */
 export function contextNotes(m) {
@@ -150,6 +160,7 @@ export function contextNotes(m) {
   f.why.forEach((w, i) => { if (w) out.push(`${nm[i]}: ${w === 'campeao' ? 'título' : 'rebaixamento'} já confirmado`); });
   f.nc.forEach((v, i) => { if (v) out.push(`${nm[i]}: jogo continental logo em seguida`); });
   if (f.disp) out.push(`${nm[0]}: mando fora da sede`);
+  if (f.lu && f.lu[0].usage != null && f.lu[1].usage != null) out.push(`escalações anunciadas (${nm[0]} com ${pct(Math.min(1, Math.round(f.lu[0].usage * 100) / 100))} do time habitual, ${nm[1]} com ${pct(Math.min(1, Math.round(f.lu[1].usage * 100) / 100))})`);
   return out;
 }
 
@@ -285,7 +296,13 @@ export function loadDetails(m, maxAge = 20000) {
   const ttl = m.status === 'in' ? maxAge : m.status === 'post' ? 3600000 : 300000;
   if (cur && Date.now() - cur.at < ttl) return;
   if (inflight.has(m.id)) return;
-  inflight.set(m.id, api.summary(m.id).then((j) => { S.details.set(m.id, parseSummary(j, m)); emit(); }).catch(() => { if (!cur) S.details.set(m.id, { commentary: [], key: [], stats: null, lineups: null, at: Date.now(), failed: true }); }).finally(() => inflight.delete(m.id)));
+  inflight.set(m.id, api.summary(m.id).then((j) => {
+    const d = parseSummary(j, m), had = !!S.details.get(m.id)?.lineups;
+    S.details.set(m.id, d);
+    // escalação acabou de sair: as previsões deste jogo (e da temporada) mudam
+    if (!had && d.lineups && m.status !== 'post') { cache.clear(); S.version++; }
+    emit();
+  }).catch(() => { if (!cur) S.details.set(m.id, { commentary: [], key: [], stats: null, lineups: null, at: Date.now(), failed: true }); }).finally(() => inflight.delete(m.id)));
 }
 
 // ── mercado (odds) — só para comparação; nunca entra no modelo ───────────────

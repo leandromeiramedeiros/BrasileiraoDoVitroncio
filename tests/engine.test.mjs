@@ -153,3 +153,21 @@ test('calibração: a cadeia reproduz os gols esperados de cada lado', () => {
   const [f] = model.fixtures.filter((x) => x.status === 'pre');
   if (f && model.calib) { const e = R.expectedMatch(model, model.state, f.h, f.a, 'A', model.temporada); const d = scoreDistribution(hz, e.lh, e.la); near(d.xgH, e.xh, e.xh * 0.002, 'jogo real'); }
 });
+
+test('escalação: foto do time e efeito nos gols esperados', async () => {
+  const { createLineupState, applyLineupMatch, teamSnapshot, snapshotFeatures, lineupFeatures } = await import('../site/js/engine/lineup.js');
+  const st = createLineupState();
+  const xi = Array.from({ length: 11 }, (_, i) => `p${i}`), alt = [...xi.slice(0, 6), 'q1', 'q2', 'q3', 'q4', 'q5'];
+  const min = Object.fromEntries(xi.map((p) => [p, 90]));
+  for (let k = 0; k < 6; k++) applyLineupMatch(st, { date: `2026-05-${String(10 + k).padStart(2, '0')}T20:00Z`, season: 2026, h: 'T', a: 'U', home: { xi, bench: ['q1'], min, ga: { p9: 1 } }, away: { xi, bench: [], min, ga: {} } });
+  const snap = JSON.parse(JSON.stringify(teamSnapshot(st, 'T', '2026-05-20T20:00Z')));
+  const full = snapshotFeatures(snap, xi, ['q1']), half = snapshotFeatures(snap, alt, []);
+  assert.ok(Math.abs(full.usage - 1) < 1e-3 && half.usage < 0.6, 'time habitual completo = 1');
+  assert.deepEqual(full, lineupFeatures(st, 'T', xi, ['q1'], '2026-05-20T20:00Z'), 'foto no navegador = cálculo direto');
+  if (model.ctx?.lineup) {
+    const a = applyContext(model.ctx, 1.4, 1.0, { lu: [half, full] }), b = applyContext(model.ctx, 1.4, 1.0, { lu: [full, full] });
+    assert.ok(a.lh < b.lh && a.la > b.la, 'mandante desfalcado rende menos');
+    const c = applyContext(model.ctx, 1.4, 1.0, { lu: [{ usage: null }, full] }), z = applyContext(model.ctx, 1.4, 1.0, null);
+    assert.ok(Math.abs(c.lh - z.lh) < 1e-12, 'atributo nulo de um lado não entra');
+  }
+});

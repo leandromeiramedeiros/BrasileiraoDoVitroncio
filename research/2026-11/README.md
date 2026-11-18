@@ -47,3 +47,12 @@ dRPS contra o v1. "–" = a trilha foi interrompida antes de consultar 2022–20
 | `players` atributos de elenco em árvores (3–4 folhas) | −0,00138 a −0,00145 (IC abaixo de zero) | – |
 
 Leitura: em `zoo`, ganhos de ≈ 0,001 no DEV caíram para ≈ 0,0003 em 2022–2026, e esse resto é quase todo recalibração, que o v2 já tem nas constantes do contexto. `neural` e `players` nunca chegaram ao HOLDOUT nem gravaram previsões; os números acima são dos logs. Vale retomar primeiro as árvores com atributos de elenco. Esses modelos rodam em Python: para entrar no site teriam de gerar, no reajuste semanal, o ajuste de cada jogo futuro.
+
+
+## Fechamento (v3.1 e v3.2, publicados)
+
+- **v3.1** — calibração da cadeia de Markov para reproduzir os gols esperados de cada lado: 0,2042 → 0,2040 (2022–2026: 0,2044 → 0,2040). Sem parâmetro ajustado.
+- **v3.2** — escalação anunciada (`players/js/`, portado para `site/js/engine/lineup.js`). No reajuste de produção: 0,2040 → 0,2030 no geral, 0,2041 → 0,2033 em 2022–2026. Na pesquisa, sobre o contexto: DEV −0,00134 [−0,00217; −0,00047], HOLDOUT −0,00095 [−0,00189; +0,00001]. Ressalva: o HOLDOUT desta trilha foi consultado duas vezes (uma versão anterior deu −0,00078); a escolha dos atributos foi só no DEV. Com o "time esperado" no lugar da escalação: zero (+0,00001 no HOLDOUT), por isso o ajuste só entra quando a escalação sai.
+- **Árvores com atributos de elenco** (`players/gbm_final.py`): sobre o contexto, somam ≈ o mesmo que o deslocamento linear; ficou o linear, que roda no navegador.
+- **Redes neurais** (`neural/`): DeepSets e GRU, sobre contexto + escalação: −0,00005 e −0,00012 no HOLDOUT, IC cruzando zero. Não entraram.
+- **Trilha core**: novo canal de gols (EKF com covariância ataque–defesa e surpresa de finalizações) e rating ordinal. Sobre o contexto: +0,00011 no HOLDOUT. Não entraram; detalhes de porte na conversa de 18/11/2026 e em `core/`.

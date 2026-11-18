@@ -13,11 +13,13 @@
 // Os coeficientes são estimados no reajuste semanal (tools/refit.mjs).
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** f = { dec:[m,v], nc:[m,v], disp:0|1, closed:0|1 } (tudo opcional). */
+/** f = { dec:[m,v], nc:[m,v], disp:0|1, closed:0|1, lu:[{…},{…}] } (tudo opcional). */
 export function applyContext(ctx, lh, la, f, neutral = false) {
   if (!ctx) return { lh, la };
   const diff = (v) => (v ? (v[0] || 0) - (v[1] || 0) : 0);
-  const D = (neutral ? 0 : ctx.hfa + (f?.disp ? ctx.disp : 0) + (f?.closed ? ctx.closed : 0)) + ctx.dec * diff(f?.dec) + ctx.nc * diff(f?.nc);
+  let D = (neutral ? 0 : ctx.hfa + (f?.disp ? ctx.disp : 0) + (f?.closed ? ctx.closed : 0)) + ctx.dec * diff(f?.dec) + ctx.nc * diff(f?.nc);
+  // escalação anunciada: f.lu = [atributos do mandante, atributos do visitante] (ver lineup.js)
+  if (ctx.lineup && f?.lu) for (const k in ctx.lineup) { const x = f.lu[0]?.[k], y = f.lu[1]?.[k]; if (x != null && y != null) D += ctx.lineup[k] * (x - y); }
   return { lh: lh * Math.exp(ctx.tot + D), la: la * Math.exp(ctx.tot - D) };
 }
 
