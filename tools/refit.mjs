@@ -396,6 +396,29 @@ for (const r of cmpRows) {
   S.bets++; S.wins += won; S.ret += won * r.o[res.i] - 1;
   if (r.season === seasonNow) agRecord.push({ id: r.id, k: res.i, p: +r.p[res.i].toFixed(4), q: +r.q[res.i].toFixed(4), c: +res.c[res.i].toFixed(4), o: r.o[res.i], won });
 }
+// múltiplas: em cada rodada (semana), a combinação de k pernas com maior ganho esperado
+// corrigido, que são os k palpites com maior (probabilidade corrigida × odd). Mesmas
+// células por temporada (só o passado); sem a primeira temporada, que não tem histórico.
+const agDate = new Map(matches.map((m) => [m.id, m.date]));
+const agWeeks = new Map();
+for (const r of cmpRows) {
+  if (r.season === agSeasons[0]) continue;
+  const res = bestAgainst(agCellsBy[r.season], r.p, r.q, r.early); if (!res) continue;
+  const w = `${r.season}|${Math.floor((Date.parse(agDate.get(r.id)) - Date.parse('2000-01-03T00:00:00Z')) / 6048e5)}`;
+  (agWeeks.get(w) || agWeeks.set(w, []).get(w)).push({ e: res.c[res.i] * r.o[res.i], o: r.o[res.i], won: r.k === res.i, season: r.season });
+}
+const agMult = {};
+for (const legs of agWeeks.values()) {
+  legs.sort((x, y) => y.e - x.e);
+  for (let k = 1; k <= 5 && k <= legs.length; k++) {
+    const top = legs.slice(0, k), win = top.every((l) => l.won), pay = win ? top.reduce((a, l) => a * l.o, 1) : 0;
+    const A = (agMult[k] ||= { n: 0, hits: 0, ret: 0, odd: [], temporadas: {} }), S = (A.temporadas[top[0].season] ||= { n: 0, hits: 0, ret: 0 });
+    for (const x of [A, S]) { x.n++; x.hits += win ? 1 : 0; x.ret += pay - 1; }
+    A.odd.push(top.reduce((a, l) => a * l.o, 1));
+  }
+}
+for (const A of Object.values(agMult)) { A.odd.sort((x, y) => x - y); A.oddMediana = +A.odd[A.odd.length >> 1].toFixed(1); delete A.odd; A.ret = +A.ret.toFixed(2); for (const s of Object.values(A.temporadas)) s.ret = +s.ret.toFixed(2); }
+const agMargin = cmpRows.reduce((a, r) => a + (1 / r.o[0] + 1 / r.o[1] + 1 / r.o[2] - 1), 0) / Math.max(1, cmpRows.length);
 const agFmt = (b) => ({ n: b.n, aconteceu: b.n ? +(b.y / b.n).toFixed(4) : null, modelo: b.n ? +(b.p / b.n).toFixed(4) : null, mercado: b.n ? +(b.q / b.n).toFixed(4) : null, retorno: b.n ? +(b.ret / b.n).toFixed(4) : null });
 const agTot = Object.values(agSeason).reduce((t, x) => { for (const k in x) t[k] = (t[k] || 0) + x[k]; return t; }, {});
 const r2 = (v) => +v.toFixed(2);
@@ -405,6 +428,7 @@ const against = cmpRows.length ? {
   temporadas: Object.fromEntries(Object.entries(agSeason).map(([s, v]) => [s, { ...v, ret: r2(v.ret), rawRet: r2(v.rawRet) }])),
   total: { ...agTot, ret: r2(agTot.ret), rawRet: r2(agTot.rawRet) },
   record: agRecord, jogos: cmpRows.length, fonte: 'odds médias de fechamento (football-data.co.uk)',
+  multiplas: agMult, margem: +agMargin.toFixed(4),
 } : null;
 log('best against', against && { total: against.total, porDiferenca: against.porDiferenca });
 

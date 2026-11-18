@@ -3,7 +3,7 @@
 // (engine/against.js). Pedido do dono; mostra sempre o retrospecto, que na maior
 // parte das temporadas é negativo. Não é recomendação de aposta.
 import { S, team, upcoming, liveMatches, forecast, market, table, loadOdds } from '../store.js';
-import { esc, pct, fmtShort, fmtTime } from '../util.js';
+import { esc, pct, fmtShort, fmtTime, store } from '../util.js';
 import { logo } from '../components.js';
 import { bestAgainst, GAPS } from '../../engine/against.js';
 import { face } from '../vitroncio.js';
@@ -86,5 +86,68 @@ export function againstView() {
       ${seasons.map(([s, v]) => `<tr><td>${s}</td><td>${v.bets}</td><td class="ev ${v.ret > 0 ? 'pos' : 'neg'}">${v.bets ? signed(v.ret / v.bets, 0) : '–'}</td><td>${v.rawBets}</td><td class="ev ${v.rawRet > 0 ? 'pos' : 'neg'}">${v.rawBets ? signed(v.rawRet / v.rawBets, 0) : '–'}</td></tr>`).join('')}
       </tbody></table></div>
       <p class="small muted" style="margin-top:8px">Em cada temporada, os palpites da aba usam só o histórico das temporadas anteriores. Vitrôncio puro: o mesmo resultado, apostado sempre que a probabilidade do Vitrôncio × odd passava de 1.</p></section>
+  </div>`;
+}
+
+// ── Múltiplas: sugestões da rodada e calculadora ────────────────────────────
+// Odds multiplicam, e a margem da casa também: com k pernas, se o mercado estiver
+// certo, o retorno esperado é Π(q·odd) − 1. As chances supõem jogos independentes.
+export const multState = { legs: store.get('mult', {}) };
+export function multToggle(id, j) { if (multState.legs[id] === j) delete multState.legs[id]; else multState.legs[id] = j; store.set('mult', multState.legs); }
+export function multSet(legs) { multState.legs = legs; store.set('mult', legs); }
+
+/** Dados de uma perna: probabilidades do Vitrôncio, do mercado e corrigida, e a odd. */
+function legOf(m, j) {
+  const k = market(m); if (!k) return null;
+  const P = forecast(m).pre, p = KEYS.map((x) => P[x]), q = KEYS.map((x) => k[x]);
+  const b = bestAgainst(S.model.against.cells, p, q, early(m));
+  return { m, j, p: p[j], q: q[j], c: b ? b.c[j] : q[j], o: k.dec[j] };
+}
+function combo(legs) {
+  const prod = (f) => legs.reduce((a, l) => a * f(l), 1);
+  const o = prod((l) => l.o);
+  return { n: legs.length, o, p: prod((l) => l.p), q: prod((l) => l.q), c: prod((l) => l.c), ev: prod((l) => l.c) * o - 1, evQ: prod((l) => l.q) * o - 1, evP: prod((l) => l.p) * o - 1 };
+}
+const oddTxt = (v) => (v >= 100 ? Math.round(v).toLocaleString('pt-BR') : dec(v));
+function histLine(k) {
+  const h = S.model.against.multiplas?.[k]; if (!h || !h.n) return '';
+  return `Sugestões do site com ${k} perna${k > 1 ? 's' : ''} (2014–${S.season}): ${h.hits} acerto${h.hits === 1 ? '' : 's'} em ${h.n} rodadas, odd mediana ${oddTxt(h.oddMediana)}, retorno <b class="${h.ret > 0 ? 'gold' : ''}">${signed(h.ret / h.n, 0)}</b> por aposta.`;
+}
+function comboCard(title, legs, act = true) {
+  const c = combo(legs);
+  return `<div class="panel mcard"><div class="sec-h"><h3>${title}</h3><span class="sub">odd ${oddTxt(c.o)}</span>${act ? `<button class="btn sm" data-act="mload" data-legs="${legs.map((l) => `${l.m.id}:${l.j}`).join(',')}">abrir na calculadora</button>` : ''}</div>
+    <ul class="mlegs">${legs.map((l) => `<li><a href="#/jogo/${l.m.id}">${esc(team(l.m.h).abbr)} × ${esc(team(l.m.a).abbr)}</a> <b>${esc(pickName(l.m, l.j))}</b> <span class="dim">${dec(l.o)}</span></li>`).join('')}</ul>
+    <div class="kv mkv"><div><div class="k">Todas acontecem: Vitrôncio</div><div class="v">${pct(c.p, 1)}</div></div><div><div class="k">Mercado</div><div class="v">${pct(c.q, 1)}</div></div><div><div class="k">Corrigida</div><div class="v">${pct(c.c, 1)}</div></div><div><div class="k">Ganho esperado</div><div class="v ${c.ev > 0 ? 'gold' : ''}">${signed(c.ev)}</div></div></div>
+    <p class="small muted" style="margin:6px 0 0">Se o mercado estiver certo: ${signed(c.evQ)}. ${histLine(legs.length)}</p></div>`;
+}
+
+export function multiView() {
+  const A = S.model.against;
+  if (!A?.multiplas) return '<div class="wrap"><p class="muted">O histórico de múltiplas sai no próximo reajuste do modelo.</p></div>';
+  const games = upcoming().filter((m) => market(m));
+  for (const id of Object.keys(multState.legs)) if (!games.some((m) => m.id === id)) delete multState.legs[id];
+  // sugestões: os palpites do Best Against com maior probabilidade corrigida × odd
+  const picks = rows(upcoming()).ranked.map((r) => legOf(r.m, r.b.i)).filter(Boolean).sort((x, y) => y.c * y.o - x.c * x.o);
+  const sel = games.filter((m) => multState.legs[m.id] != null).map((m) => legOf(m, multState.legs[m.id])).filter(Boolean);
+  const cur = sel.length ? combo(sel) : null;
+  const m = A.margem, loss = (k) => signed((1 / (1 + m)) ** k - 1);
+  return `<div class="wrap">
+    <section data-mk="mu-h"><div class="sec-h"><h2>Múltiplas</h2><span class="sub">várias apostas numa só: as odds multiplicam</span></div>
+      <div class="panel ba-warn"><p><b>A margem da casa também multiplica.</b> Com a margem média da Série A (${pct(m, 1)} por jogo), mesmo que o mercado esteja certo o retorno esperado é ${loss(2)} com 2 pernas, ${loss(3)} com 3, ${loss(5)} com 5 e ${loss(8)} com 8. As sugestões abaixo, aplicadas em todas as rodadas desde 2014, deram ${[2, 3].map((k) => `${signed(A.multiplas[k].ret / A.multiplas[k].n, 0)} com ${k} pernas`).join(' e ')}. Não é recomendação de aposta.</p>
+      <p class="small muted">As chances supõem jogos independentes. Corrigida: a probabilidade do Best Against (mercado ajustado pelo histórico de discordâncias parecidas), multiplicada perna a perna.</p></div></section>
+
+    <section data-mk="mu-sug"><div class="sec-h"><h2>Sugestões da rodada</h2><span class="sub">os palpites do Best Against com maior ganho esperado</span></div>
+      ${picks.length >= 2 ? `<div class="duo">${comboCard('Dupla', picks.slice(0, 2))}${picks.length >= 3 ? comboCard('Tripla', picks.slice(0, 3)) : ''}</div>` : '<p class="muted">Menos de dois jogos com odds em que o Vitrôncio discorda do mercado por 5 pontos ou mais.</p>'}</section>
+
+    <section data-mk="mu-calc"><div class="sec-h"><h2>Monte sua múltipla</h2><span class="sub">escolha um resultado por jogo</span>${sel.length ? '<button class="btn sm more" data-act="mclear">limpar</button>' : ''}</div>
+      ${cur ? comboCard(`${cur.n} perna${cur.n > 1 ? 's' : ''}`, sel, false) : '<p class="muted small">Nenhum resultado escolhido.</p>'}
+      ${games.length ? `<div class="mgames">${games.map((g) => { const k = market(g), on = multState.legs[g.id]; return `<div class="mgame"><div class="t"><a href="#/jogo/${g.id}">${logo(team(g.h))}<span class="nm-full">${esc(team(g.h).name)} × ${esc(team(g.a).name)}</span><span class="nm-abbr">${esc(team(g.h).abbr)} × ${esc(team(g.a).abbr)}</span>${logo(team(g.a))}</a><span class="dim small">${esc(fmtShort(g.date))} ${fmtTime(g.date)}</span></div>
+        <div class="seg">${[0, 1, 2].map((j) => `<button class="${on === j ? 'on' : ''}" data-act="mleg" data-id="${g.id}" data-j="${j}">${j === 1 ? 'Empate' : esc(team(j === 0 ? g.h : g.a).abbr)} <b>${dec(k.dec[j])}</b></button>`).join('')}</div></div>`; }).join('')}</div>` : '<p class="muted">Nenhum jogo com odds publicadas.</p>'}</section>
+
+    <section data-mk="mu-hist"><div class="sec-h"><h2>Histórico por número de pernas</h2><span class="sub">a sugestão do site em cada rodada, 2014–${S.season}, odd média de fechamento</span></div>
+      <div class="tw"><table><thead><tr><th>Pernas</th><th>Rodadas</th><th>Acertos</th><th>Odd mediana</th><th>Retorno por aposta</th><th>Se o mercado estiver certo</th></tr></thead><tbody>
+      ${Object.entries(A.multiplas).map(([k, h]) => `<tr><td>${k}</td><td>${h.n}</td><td>${h.hits}</td><td>${oddTxt(h.oddMediana)}</td><td class="ev ${h.ret > 0 ? 'pos' : 'neg'}">${signed(h.ret / h.n, 1)}</td><td class="dim">${loss(+k)}</td></tr>`).join('')}
+      </tbody></table></div>
+      <p class="small muted" style="margin-top:8px">Em cada temporada, as sugestões usam só o histórico das temporadas anteriores. Poucos acertos com odds altas fazem o retorno variar muito de um período para outro.</p></section>
   </div>`;
 }

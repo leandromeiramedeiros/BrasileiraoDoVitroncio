@@ -1,0 +1,632 @@
+season,lg,team_id,team_name,date_vacancy,date_appointment,outgoing,incoming,manner,interim,out_interim,pre_season,position,manner_raw,src
+2009,A,6273,Grêmio,2009-05-16,,Marcelo Rospide,Paulo Autuori,sacked,0,0,0,14th,Replaced,en
+2009,A,7635,Sport,2009-05-25,,Nelsinho Baptista,Émerson Leão,resigned,0,0,0,18th,Resigned,en
+2009,A,3458,Atlético Paranaense,2009-06-07,,Geninho,Waldemar Lemos,resigned,0,0,0,20th,Resigned,en
+2009,A,7633,Náutico,2009-06-09,,Waldemar Lemos,Márcio Bittencourt,resigned,0,0,0,5th,Left to sign with Atlético Paranaense,en
+2009,A,2026,São Paulo,2009-06-19,,Muricy Ramalho,Ricardo Gomes,sacked,0,0,0,12th,Sacked,en
+2009,A,2029,Palmeiras,2009-06-26,,Wanderley Luxemburgo,Muricy Ramalho,sacked,0,0,0,4th,Sacked,en
+2009,A,7633,Náutico,2009-07-12,,Márcio Bittencourt,Geninho,resigned,0,0,0,19th,Resigned,en
+2009,A,2674,Santos,2009-07-13,,Vágner Mancini,Wanderley Luxemburgo,sacked,0,0,0,11th,Sacked,en
+2009,A,3445,Fluminense,2009-07-13,,Carlos Alberto Parreira,Renato Gaúcho,sacked,0,0,0,18th,Sacked,en
+2009,A,819,Flamengo,2009-07-23,,Cuca,Andrade,sacked,0,0,0,11th,Sacked,en
+2009,A,4813,Santo André,2009-07-27,,Sérgio Guedes,Alexandre Gallo,resigned,0,0,0,13th,Resigned,en
+2009,A,7635,Sport,2009-07-27,,Émerson Leão,Pericles Chamusca,sacked,0,0,0,17th,Sacked,en
+2009,A,3458,Atlético Paranaense,2009-07-29,,Waldemar Lemos,Antônio Lopes,resigned,0,0,0,18th,Resigned,en
+2009,A,3456,Coritiba,2009-08-09,,Renê Simões,Ney Franco,sacked,0,0,0,18th,Sacked,en
+2009,A,3457,Vitória,2009-08-10,,Paulo César Carpegiani,Vágner Mancini,sacked,0,0,0,10th,Sacked,en
+2009,A,6086,Botafogo,2009-08-10,,Ney Franco,Estevam Soares,sacked,0,0,0,15th,Sacked,en
+2009,A,7375,Grêmio Barueri,2009-08-11,,Estevam Soares,Diego Cerri,resigned,0,0,0,6th,Left to sign with Botafogo,en
+2009,A,3445,Fluminense,2009-09-01,,Renato Gaúcho,Cuca,sacked,0,0,0,20th,Sacked,en
+2009,A,1936,Internacional,2009-10-05,,Tite,Mário Sérgio,sacked,0,0,0,5th,Sacked,en
+2010,A,3454,Vasco da Gama,2010-03-25,2010-03-26,Vágner Mancini,,sacked,0,0,1,Pre-season,Sacked,en
+2010,A,3395,Goiás,2010-04-19,2010-04-24,Jorginho,,sacked,0,0,1,Pre-season,Sacked,en
+2010,A,819,Flamengo,2010-04-23,2010-04-24,Andrade,,sacked,0,0,1,Pre-season,Sacked,en
+2010,A,2029,Palmeiras,2010-05-18,2010-05-19,Antônio Carlos Zago,,sacked,0,0,0,7th,Sacked,en
+2010,A,3454,Vasco da Gama,2010-05-18,2010-05-18,Gaúcho,,sacked,0,1,0,16th,Replaced,en
+2010,A,3458,Atlético Paranaense,2010-05-25,2010-05-25,Leandro Niehues,,sacked,0,0,0,17th,Sacked,en
+2010,A,1936,Internacional,2010-05-28,2010-05-29,Jorge Fossati,,sacked,0,0,0,18th,Sacked,en
+2010,A,3458,Atlético Paranaense,2010-05-31,2010-05-31,Leandro Niehues,,sacked,0,1,0,19th,Replaced,en
+2010,A,2022,Cruzeiro,2010-06-02,2010-06-08,Adílson Batista,,resigned,0,0,0,6th,Resigned,en
+2010,A,10357,Atlético Goianiense,2010-06-07,2010-06-14,Geninho,,resigned,0,0,0,20th,Resigned,en
+2010,A,1936,Internacional,2010-06-12,2010-06-12,Enderson Moreira,,sacked,0,1,0,16th,Replaced,en
+2010,A,3454,Vasco da Gama,2010-06-12,2010-06-13,Celso Roth,,resigned,0,0,0,19th,Left to sign with Internacional,en
+2010,A,2029,Palmeiras,2010-06-13,2010-06-13,Jorge Parraga,,sacked,0,1,0,10th,Replaced,en
+2010,A,9969,Ceará,2010-06-13,2010-06-13,PC Gusmão,,resigned,0,0,0,2nd,Left to sign with Vasco da Gama,en
+2010,A,9966,Avaí,2010-07-01,2010-07-05,Péricles Chamusca,,resigned,0,0,0,12th,Left to sign with Al-Arabi,en
+2010,A,874,Corinthians,2010-07-24,2010-07-24,Mano Menezes,,resigned,0,0,0,2nd,Left to sign with Brazil,en
+2010,A,10357,Atlético Goianiense,2010-07-30,2010-08-01,Roberto Fernandes,,sacked,0,0,0,20th,Sacked,en
+2010,A,2026,São Paulo,2010-08-05,2010-08-10,Ricardo Gomes,,contract end,0,0,0,9th,Contract expired,en
+2010,A,6273,Grêmio,2010-08-08,2010-08-10,Silas,,sacked,0,0,0,18th,Sacked,en
+2010,A,9969,Ceará,2010-08-08,2010-08-09,Estevam Soares,,sacked,0,0,0,3rd,Sacked,en
+2010,A,3457,Vitória,2010-08-09,2010-08-09,Ricardo Silva,,sacked,0,0,0,16th,Sacked,en
+2010,A,7375,Grêmio Prudente,2010-08-09,2010-08-17,Toninho Cecílio,,resigned,0,0,0,14th,Left to sign with Vitória,en
+2010,A,3395,Goiás,2010-08-27,2010-08-29,Émerson Leão,,sacked,0,0,0,20th,Sacked,en
+2010,A,819,Flamengo,2010-08-27,2010-08-29,Rogério Lourenço,,sacked,0,0,0,10th,Sacked,en
+2010,A,3457,Vitória,2010-09-08,2010-09-09,Toninho Cecílio,,sacked,0,0,0,15th,Sacked,en
+2010,A,9969,Ceará,2010-09-08,2010-09-10,Mário Sérgio,,sacked,0,0,0,11th,Sacked,en
+2010,A,7375,Grêmio Prudente,2010-09-10,2010-09-10,Antônio Carlos Zago,,sacked,0,0,0,19th,Sacked,en
+2010,A,9966,Avaí,2010-09-20,2010-10-10,Antônio Lopes,,sacked,0,0,0,16th,Sacked,en
+2010,A,2674,Santos,2010-09-21,2010-09-21,Dorival Júnior,,sacked,0,0,0,6th,Sacked,en
+2010,A,7632,Atlético Mineiro,2010-09-23,2010-09-25,Vanderlei Luxemburgo,,sacked,0,0,0,18th,Sacked,en
+2010,A,7375,Grêmio Prudente,2010-09-27,2010-10-05,Marcelo Rospide,,resigned,0,0,0,20th,Resigned,en
+2010,A,2026,São Paulo,2010-10-03,2010-10-03,Sérgio Baresi,,sacked,0,0,0,11th,Replaced,en
+2010,A,3458,Atlético Paranaense,2010-10-03,2010-10-04,Paulo César Carpegiani,,resigned,0,0,0,5th,Left to sign with São Paulo,en
+2010,A,819,Flamengo,2010-10-04,2010-10-05,Silas,,sacked,0,0,0,15th,Sacked,en
+2010,A,3457,Vitória,2010-10-07,2010-10-07,Ricardo Silva,,sacked,0,0,0,14th,Sacked,en
+2010,A,874,Corinthians,2010-10-10,2010-10-17,Adílson Batista,,mutual,0,0,0,3rd,Mutual consent,en
+2010,A,3395,Goiás,2010-11-08,2010-11-08,Jorginho,,sacked,0,0,0,19th,Sacked,en
+2011,A,2674,Santos,2011-02-27,2011-04-08,Adílson Batista,,sacked,0,0,1,Pre-season,Sacked,en
+2011,A,3445,Fluminense,2011-03-13,2011-06-08,Muricy Ramalho,,resigned,0,0,1,Pre-season,Resigned,en
+2011,A,9969,Ceará,2011-03-31,2011-04-01,Dimas Filgueiras,,contract end,0,0,1,Pre-season,Contract ended,en
+2011,A,10357,Atlético Goianiense,2011-04-01,2011-04-03,Renê Simões,,sacked,0,0,1,Pre-season,Sacked,en
+2011,A,3458,Atlético Paranaense,2011-04-04,2011-04-05,Geninho,,sacked,0,0,1,Pre-season,Sacked,en
+2011,A,1936,Internacional,2011-04-08,2011-04-14,Celso Roth,,sacked,0,0,1,Pre-season,Sacked,en
+2011,A,9967,Bahia,2011-04-10,2011-04-14,Vágner Benazzi,,sacked,0,0,1,Pre-season,Sacked,en
+2011,A,9966,Avaí,2011-06-08,2011-06-14,Silas,,resigned,0,0,0,20th,Left to sign with Al-Arabi,en
+2011,A,2022,Cruzeiro,2011-06-19,2011-06-20,Cuca,,sacked,0,0,0,18th,Sacked,en
+2011,A,6273,Grêmio,2011-06-30,2011-07-02,Renato Gaúcho,,sacked,0,0,0,12th,Sacked,en
+2011,A,3458,Atlético Paranaense,2011-07-02,2011-07-04,Adílson Batista,,sacked,0,0,0,20th,Sacked,en
+2011,A,2026,São Paulo,2011-07-07,2011-07-16,Paulo César Carpegiani,,sacked,0,0,0,3rd,Sacked,en
+2011,A,10982,América (MG),2011-07-11,2011-07-12,Mauro Fernandes,,sacked,0,0,0,18th,Sacked,en
+2011,A,1936,Internacional,2011-07-18,2011-08-12,Falcão,,sacked,0,0,0,8th,Sacked,en
+2011,A,10357,Atlético Goianiense,2011-07-21,2011-08-12,Paulo César Gusmão,,other,0,0,0,17th,Personal problems,en
+2011,A,10982,América (MG),2011-08-01,2011-08-02,Antônio Lopes,,resigned,0,0,0,20th,Resigned,en
+2011,A,6273,Grêmio,2011-08-04,2011-08-04,Júlio Camargo,,sacked,0,0,0,15th,Sacked,en
+2011,A,7632,Atlético Mineiro,2011-08-07,2011-08-08,Dorival Júnior,,sacked,0,0,0,14th,Sacked,en
+2011,A,9966,Avaí,2011-08-18,2011-08-22,Alexandre Gallo,,sacked,0,0,0,19th,Sacked,en
+2011,A,3454,Vasco da Gama,2011-08-28,2011-08-29,Ricardo Gomes,,other,0,0,0,4th,Health problems (temporarily),en
+2011,A,3458,Atlético Paranaense,2011-09-01,2011-09-01,Renato Gaúcho,,resigned,0,0,0,19th,Resigned,en
+2011,A,2022,Cruzeiro,2011-09-02,2011-09-02,Joel Santana,,sacked,0,0,0,11th,Sacked,en
+2011,A,9967,Bahia,2011-09-02,2011-09-04,René Simões,,sacked,0,0,0,16th,Sacked,en
+2011,A,9969,Ceará,2011-09-11,2011-09-14,Vágner Mancini,,sacked,0,0,0,15th,Sacked,en
+2011,A,2022,Cruzeiro,2011-09-26,2011-09-26,Emerson Ávila,,sacked,0,0,0,16th,Sacked,en
+2011,A,2026,São Paulo,2011-10-16,2011-10-24,Adílson Batista,,sacked,0,0,0,6th,Sacked,en
+2011,A,9969,Ceará,2011-10-23,2011-10-24,Estevam Soares,,sacked,0,0,0,17th,Sacked,en
+2011,A,9966,Avaí,2011-11-14,2011-11-14,Toninho Cecílio,,sacked,0,0,0,20th,Sacked,en
+2011,A,6086,Botafogo,2011-11-17,2011-11-17,Caio Júnior,,sacked,0,0,0,5th,Sacked,en
+2012,A,10357,Atlético/GO,2012-05-29,,Adílson Batista,,sacked,0,0,0,10th,Sacked,en
+2012,A,2026,São Paulo,2012-06-26,,Emerson Leão,,sacked,0,0,0,8th,Sacked,en
+2012,A,10357,Atlético/GO,2012-07-09,,Hélio dos Anjos,,resigned,0,0,0,20th,Resigned,en
+2012,A,1936,Internacional,2012-07-20,,Dorival Júnior,,sacked,0,0,0,8th,Sacked,en
+2012,A,3461,Figueirense,2012-07-20,,Argel Fucks,,sacked,0,0,0,17th,Sacked,en
+2012,A,9967,Bahia,2012-07-20,,Paulo Roberto Falcão,,sacked,0,0,0,19th,Sacked,en
+2012,A,819,Flamengo,2012-07-23,,Joel Santana,,sacked,0,0,0,10th,Sacked,en
+2012,A,7635,Sport,2012-08-11,,Vágner Mancini,,resigned,0,0,0,16th,Resigned,en
+2012,A,3461,Figueirense,2012-08-24,,Hélio dos Anjos,,sacked,0,0,0,20th,Sacked,en
+2012,A,9967,Bahia,2012-08-27,,Caio Júnior,,resigned,0,0,0,16th,Resigned,en
+2012,A,3456,Coritiba,2012-09-06,,Marcelo Oliveira,,sacked,0,0,0,16th,Sacked,en
+2012,A,3454,Vasco da Gama,2012-09-09,,Cristóvão Borges,,resigned,0,0,0,4th,Resigned,en
+2012,A,10357,Atlético/GO,2012-09-13,,Jairo Araújo,,resigned,0,0,0,20th,Resigned,en
+2012,A,2029,Palmeiras,2012-09-13,,Luiz Felipe Scolari,,mutual,0,0,0,19th,Mutual consent,en
+2012,A,2029,Palmeiras,2012-09-19,,Narciso,,sacked,0,0,0,19th,Replaced,en
+2012,A,3459,Ponte Preta,2012-09-19,,Gilson Kleina,,resigned,0,0,0,11th,Left to sign with Palmeiras,en
+2012,A,7635,Sport,2012-10-06,,Waldemar Lemos,,sacked,0,0,0,17th,Sacked,en
+2012,A,3454,Vasco da Gama,2012-11-05,,Marcelo Oliveira,,sacked,0,0,0,7th,Sacked,en
+2012,A,3461,Figueirense,2012-11-05,,Márcio Goiano,,sacked,0,0,0,19th,Sacked,en
+2012,A,1936,Internacional,2012-11-20,,Fernandão,,sacked,0,0,0,8th,Sacked,en
+2013,A,2674,Santos,2013-05-31,,Muricy Ramalho,,sacked,0,0,0,14th,Sacked,en
+2013,A,7633,Náutico,2013-06-02,,Silas,,sacked,0,0,0,20th,Sacked,en
+2013,A,819,Flamengo,2013-06-05,,Jorginho,,sacked,0,0,0,19th,Sacked,en
+2013,A,3459,Ponte Preta,2013-06-06,,Guto Ferreira,,sacked,0,0,0,16th,Sacked,en
+2013,A,6273,Grêmio,2013-06-29,,Vanderlei Luxemburgo,,sacked,0,0,0,7th,Sacked,en
+2013,A,2026,São Paulo,2013-07-05,,Ney Franco,,sacked,0,0,0,6th,Sacked,en
+2013,A,3458,Atlético/PR,2013-07-08,,Ricardo Drubscky,,sacked,0,0,0,19th,Sacked,en
+2013,A,3454,Vasco da Gama,2013-07-09,,Paulo Autuori,,resigned,0,0,0,14th,Resigned / Left to sign with São Paulo,en
+2013,A,3458,Atlético/PR,2013-07-14,,Alberto,,sacked,0,0,0,19th,Replaced,en
+2013,A,4773,Portuguesa,2013-07-28,,Edson Pimenta,,sacked,0,0,0,20th,Sacked,en
+2013,A,3445,Fluminense,2013-07-29,,Abel Braga,,sacked,0,0,0,17th,Sacked,en
+2013,A,7633,Náutico,2013-08-14,,Zé Teodoro,,sacked,0,0,0,20th,Sacked,en
+2013,A,9971,Criciúma,2013-08-23,,Vadão,,sacked,0,0,0,17th,Sacked,en
+2013,A,3459,Ponte Preta,2013-08-24,,Paulo César Carpegiani,,resigned,0,0,0,17th,Resigned,en
+2013,A,3457,Vitória,2013-09-01,,Caio Júnior,,sacked,0,0,0,10th,Sacked,en
+2013,A,7633,Náutico,2013-09-05,,Jorginho,,resigned,0,0,0,20th,Resigned,en
+2013,A,2026,São Paulo,2013-09-09,,Paulo Autuori,,resigned,0,0,0,18th,Resigned,en
+2013,A,819,Flamengo,2013-09-19,,Mano Menezes,,resigned,0,0,0,15th,Resigned,en
+2013,A,7633,Náutico,2013-09-22,,Levi Gomes,,sacked,0,0,0,20th,Replaced,en
+2013,A,3456,Coritiba,2013-09-24,,Marquinhos Santos,,sacked,0,0,0,12th,Sacked,en
+2013,A,9971,Criciúma,2013-09-24,,Sílvio Criciúma,,sacked,0,0,0,17th,Sacked,en
+2013,A,3456,Coritiba,2013-09-30,,Marcelo Serrano,,sacked,0,0,0,14th,Replaced,en
+2013,A,1936,Internacional,2013-10-04,,Dunga,,sacked,0,0,0,10th,Sacked,en
+2013,A,3454,Vasco da Gama,2013-10-28,,Dorival Júnior,,sacked,0,0,0,18th,Sacked,en
+2013,A,3445,Fluminense,2013-11-11,,Vanderlei Luxemburgo,,sacked,0,0,0,18th,Sacked,en
+2013,A,3456,Coritiba,2013-11-17,,Péricles Chamusca,,sacked,0,0,0,15th,Sacked,en
+2014,A,7632,Atlético-MG,2014-04-24,,Paulo Autuori,Levir Culpi,sacked,0,0,0,10º,Demitido,pt
+2014,A,9971,Criciúma,2014-04-29,,Caio Júnior,Wagner Lopes,sacked,0,0,0,19º,Demitido,pt
+2014,A,3461,Figueirense,2014-04-30,,Vinícius Eutrópio,Guto Ferreira,sacked,0,0,0,20º,Demitido,pt
+2014,A,2029,Palmeiras,2014-05-08,,Gilson Kleina,Ricardo Gareca,sacked,0,0,0,14º,Demitido,pt
+2014,A,3457,Vitória,2014-05-12,,Ney Franco,Jorginho,resigned,0,0,0,12º,Resignado,pt
+2014,A,819,Flamengo,2014-05-12,,Jayme de Almeida,Ney Franco,sacked,0,0,0,16º,Demitido,pt
+2014,A,3458,Atlético-PR,2014-05-19,,Miguel Ángel Portugal,Doriva,resigned,0,0,0,13º,Resignado,pt
+2014,A,9318,Chapecoense,2014-05-23,,Gilmar Dal Pozzo,Celso Rodrigues,sacked,1,0,0,20º,Demitido,pt
+2014,A,3461,Figueirense,2014-07-23,,Guto Ferreira,Argel Fucks,sacked,0,0,0,18º,Demitido,pt
+2014,A,819,Flamengo,2014-07-23,,Ney Franco,Vanderlei Luxemburgo,sacked,0,0,0,20º,Demitido,pt
+2014,A,9967,Bahia,2014-07-26,,Marquinhos Santos,Gilson Kleina,sacked,0,0,0,19º,Demitido,pt
+2014,A,6273,Grêmio,2014-07-27,,Enderson Moreira,Luiz Felipe Scolari,resigned,0,0,0,10º,Resignado,pt
+2014,A,3457,Vitória,2014-08-21,,Jorginho,Ney Franco,sacked,0,0,0,19º,Demitido,pt
+2014,A,3456,Coritiba,2014-08-24,,Celso Roth,Marquinhos Santos,sacked,0,0,0,19º,Demitido,pt
+2014,A,3458,Atlético-PR,2014-08-24,,Doriva,Claudinei Oliveira,sacked,0,0,0,9º,Demitido,pt
+2014,A,9971,Criciúma,2014-08-25,,Wagner Lopes,Gilmar Dal Pozzo,sacked,0,0,0,17º,Demitido,pt
+2014,A,2029,Palmeiras,2014-09-01,,Ricardo Gareca,Dorival Júnior,sacked,0,0,0,16º,Demitido,pt
+2014,A,2674,Santos,2014-09-02,,Oswaldo de Oliveira,Enderson Moreira,sacked,0,0,0,11º,Demitido,pt
+2014,A,9318,Chapecoense,2014-09-11,,Celso Rodrigues,Jorginho,interim end,0,0,0,16º,Remanejado,pt
+2014,A,9971,Criciúma,2014-10-27,,Gilmar Dal Pozzo,Toninho Cecílio,sacked,0,0,0,20º,Demitido,pt
+2014,A,9967,Bahia,2014-11-11,,Gilson Kleina,Charles Fabian,resigned,1,0,0,19º,Resignado,pt
+2014,A,9318,Chapecoense,2014-11-17,,Jorginho,Celso Rodrigues,sacked,1,0,0,17º,Demitido,pt
+2014,A,9971,Criciúma,2014-11-20,,Toninho Cecílio,Luizinho Vieira,sacked,1,0,0,20º,Demitido,pt
+2015,B,4873,Sampaio Corrêa,2015-05-08,,Arlindo Maracanã,Léo Condé,interim end,0,1,0,2º,Remanejado,pt
+2015,A,6273,Grêmio,2015-05-19,2015-05-26,Luiz Felipe Scolari,Roger Machado,resigned,0,0,0,15th,Resigned,en
+2015,A,3445,Fluminense,2015-05-20,2015-05-21,Ricardo Drubscky,Enderson Moreira,sacked,0,0,0,11th,Sacked,en
+2015,B,3457,Vitória,2015-05-20,,Claudinei Oliveira,Vágner Mancini,sacked,0,0,0,11º,Demitido,pt
+2015,B,9965,ABC,2015-05-20,,Josué Teixeira,Gilmar Dal Pozzo,sacked,0,0,0,7º,Demitido,pt
+2015,A,819,Flamengo,2015-05-25,2015-05-28,Vanderlei Luxemburgo,Cristóvão Borges,sacked,0,0,0,17th,Sacked,en
+2015,B,4777,Mogi Mirim,2015-05-30,,Edinho Nascimento,Aílton Silva,sacked,0,0,0,19º,Demitido,pt
+2015,A,2026,São Paulo,2015-05-31,2015-06-01,Milton Cruz,Juan Carlos Osorio,mutual,0,0,0,6th,Mutual consent,en
+2015,A,2022,Cruzeiro,2015-06-02,2015-06-02,Marcelo Oliveira,Vanderlei Luxemburgo,sacked,0,0,0,19th,Sacked,en
+2015,B,10357,Atlético-GO,2015-06-03,,Marcelo Martelotte,Jorginho,sacked,0,0,0,15º,Demitido,pt
+2015,A,13143,Joinville,2015-06-04,2015-06-05,Hemerson Maria,Adílson Batista,sacked,0,0,0,20th,Sacked,en
+2015,B,15560,Boa Esporte,2015-06-07,,Ney da Matta,Moacir Júnior,sacked,0,0,0,15º,Demitido,pt
+2015,A,3456,Coritiba,2015-06-08,2015-06-10,Marquinhos Santos,Ney Franco,sacked,0,0,0,18th,Sacked,en
+2015,B,9970,CRB,2015-06-08,,Alexandre Barroso,Mazola Júnior,sacked,0,0,0,11º,Demitido,pt
+2015,A,2029,Palmeiras,2015-06-09,2015-06-15,Oswaldo de Oliveira,Marcelo Oliveira,sacked,0,0,0,15th,Sacked,en
+2015,B,9971,Criciúma,2015-06-09,,Moacir Júnior,Dejan Petković,resigned,0,0,0,14º,Resignado,pt
+2015,B,4929,Santa Cruz,2015-06-13,,Ricardinho,Marcelo Martelotte,sacked,0,0,0,18º,Demitido,pt
+2015,A,3454,Vasco,2015-06-21,2015-06-23,Doriva,Celso Roth,mutual,0,0,0,20th,Mutual consent,en
+2015,A,3395,Goiás,2015-06-22,2015-07-07,Hélio dos Anjos,Julinho Camargo,sacked,0,0,0,15th,Sacked,en
+2015,B,9969,Ceará,2015-06-27,,Silas,Geninho,sacked,0,0,0,19º,Demitido,pt
+2015,B,4777,Mogi Mirim,2015-06-30,,Aílton Silva,Sérgio Guedes,sacked,0,0,0,20º,Demitido,pt
+2015,B,3453,Paraná,2015-07-08,,Nedo Xavier,Fernando Diniz,sacked,0,0,0,15º,Demitido,pt
+2015,A,2674,Santos,2015-07-09,2015-07-09,Marcelo Fernandes,Dorival Júnior,mutual,0,0,0,17th,Mutual consent,en
+2015,B,6079,Bragantino,2015-07-09,,Osmar Loss,Wagner Lopes,resigned,0,0,0,13º,Resignado,pt
+2015,B,6086,Botafogo,2015-07-15,,René Simões,Ricardo Gomes,sacked,0,0,0,1º,Demitido,pt
+2015,B,9965,ABC,2015-07-15,,Gilmar Dal Pozzo,Toninho Cecílio,sacked,0,0,0,10º,Demitido,pt
+2015,B,10357,Atlético-GO,2015-07-21,,Jorginho,Gilberto Pereira,sacked,0,0,0,19º,Demitido,pt
+2015,A,13143,Joinville,2015-07-26,2015-07-27,Adílson Batista,PC Gusmão,sacked,0,0,0,20th,Sacked,en
+2015,B,15560,Boa Esporte,2015-07-26,,Moacir Júnior,Nedo Xavier,resigned,0,0,0,19º,Resignado,pt
+2015,B,9969,Ceará,2015-08-02,,Geninho,Marcelo Cabo,sacked,0,0,0,20º,Demitido,pt
+2015,A,3459,Ponte Preta,2015-08-03,2015-08-04,Guto Ferreira,Doriva,sacked,0,0,0,13th,Sacked,en
+2015,B,9176,Macaé,2015-08-03,,Marcelo Cabo,Josué Teixeira,poached,0,0,0,8º,Contratado pelo @@TEAM:Ceará@@,pt
+2015,A,1936,Internacional,2015-08-06,2015-08-13,Diego Aguirre,Argel Fucks,sacked,0,0,0,10th,Sacked,en
+2015,A,3461,Figueirense,2015-08-13,2015-08-17,Argel Fucks,René Simões,poached,0,0,0,16th,Signed by Internacional,en
+2015,A,3454,Vasco,2015-08-15,2015-08-16,Celso Roth,Jorginho,sacked,0,0,0,20th,Sacked,en
+2015,B,9965,ABC,2015-08-15,,Toninho Cecílio,Hélio dos Anjos,resigned,0,0,0,18º,Resignado,pt
+2015,A,819,Flamengo,2015-08-20,2015-08-20,Cristóvão Borges,Oswaldo de Oliveira,mutual,0,0,0,13th,Mutual consent,en
+2015,A,2022,Cruzeiro,2015-08-31,2015-09-01,Vanderlei Luxemburgo,Mano Menezes,sacked,0,0,0,16th,Sacked,en
+2015,B,7633,Náutico,2015-09-08,,Lisca,Gilmar Dal Pozzo,sacked,0,0,0,6º,Demitido,pt
+2015,A,9318,Chapecoense,2015-09-14,2015-09-14,Vinícius Eutrópio,Guto Ferreira,sacked,0,0,0,13th,Sacked,en
+2015,A,3445,Fluminense,2015-09-16,2015-09-17,Enderson Moreira,Eduardo Baptista,sacked,0,0,0,11th,Sacked,en
+2015,A,3461,Figueirense,2015-09-16,2015-09-22,René Simões,Hudson Coutinho,sacked,0,0,0,18th,Sacked,en
+2015,A,3395,Goiás,2015-09-17,2015-09-18,Julinho Camargo,Artur Neto,sacked,0,0,0,17th,Sacked,en
+2015,B,4777,Mogi Mirim,2015-09-17,,Sérgio Guedes,Márcio Goiano,resigned,0,0,0,20º,Resignado,pt
+2015,A,7635,Sport,2015-09-17,2015-09-19,Eduardo Baptista,Paulo Roberto Falcão,poached,0,0,0,10th,Signed by Fluminense,en
+2015,B,3453,Paraná,2015-09-27,,Fernando Diniz,Fernando Miguel,sacked,0,0,0,12º,Demitido,pt
+2015,A,3458,Atlético Paranaense,2015-09-28,2015-10-04,Milton Mendes,Cristóvão Borges,sacked,0,0,0,11th,Sacked,en
+2015,B,9969,Ceará,2015-09-29,,Marcelo Cabo,Lisca,sacked,0,0,0,17º,Demitido,pt
+2015,B,9971,Criciúma,2015-10-05,,Dejan Petković,Roberto Cavalo,sacked,0,0,0,15º,Demitido,pt
+2015,B,9967,Bahia,2015-10-06,,Sérgio Soares,Charles Fabian,sacked,0,0,0,6º,Demitido,pt
+2015,A,2026,São Paulo,2015-10-07,2015-10-07,Juan Carlos Osorio,Doriva,poached,0,0,0,5th,Signed by Mexico,en
+2015,A,3459,Ponte Preta,2015-10-07,2015-10-14,Doriva,Felipe Moreira,poached,0,0,0,9th,Signed by São Paulo,en
+2015,B,9965,ABC,2015-10-09,,Hélio dos Anjos,Sérgio China,sacked,0,0,0,18º,Demitido,pt
+2015,B,10263,Oeste,2015-10-10,,Roberto Cavalo,Renan Freitas,poached,1,0,0,14º,Contratado pelo @@TEAM:Criciúma@@,pt
+2015,A,3395,Goiás,2015-10-18,2015-10-19,Artur Neto,Danny Sérgio,resigned,0,0,0,18th,Resigned,en
+2015,B,4777,Mogi Mirim,2015-10-28,,Márcio Goiano,Toninho Cecílio,resigned,0,0,0,20º,Resignado,pt
+2015,A,3456,Coritiba,2015-11-08,2015-11-09,Ney Franco,Pachequinho,sacked,0,0,0,18th,Sacked,en
+2015,B,9176,Macaé,2015-11-08,,Josué Teixeira,Toninho Andrade,sacked,0,0,0,17º,Demitido,pt
+2015,A,2026,São Paulo,2015-11-09,2015-11-09,Doriva,Milton Cruz,sacked,0,0,0,5th,Sacked,en
+2015,B,15560,Boa Esporte,2015-11-12,,Nedo Xavier,Cesinha,resigned,0,0,0,19º,Resignado,pt
+2015,B,10357,Atlético-GO,2015-11-16,,Gilberto Pereira,João Paulo Sanches,interim end,0,0,0,15º,Remanejado,pt
+2015,A,7632,Atlético Mineiro,2015-11-26,2015-11-26,Levir Culpi,Diogo Giacomini,mutual,0,0,0,2nd,Mutual consent,en
+2015,A,819,Flamengo,2015-11-28,2015-11-28,Oswaldo de Oliveira,Jayme de Almeida,mutual,0,0,0,11th,Mutual consent,en
+2016,A,7632,Atlético Mineiro,2016-05-19,2016-05-20,Diego Aguirre,Marcelo Oliveira,resigned,0,0,0,3rd,Resigned,en
+2016,A,819,Flamengo,2016-05-26,2016-05-26,Muricy Ramalho,Zé Ricardo,resigned,0,0,0,11th,Resigned,en
+2016,A,3456,Coritiba,2016-06-02,2016-06-02,Gilson Kleina,Pachequinho,sacked,0,0,0,16th,Sacked,en
+2016,A,6154,América Mineiro,2016-06-03,2016-06-04,Givanildo Oliveira,Sérgio Vieira,sacked,0,0,0,20th,Sacked,en
+2016,A,874,Corinthians,2016-06-15,2016-06-19,Tite,Cristóvão Borges,poached,0,0,0,4th,Signed by Brazil,en
+2016,A,9318,Chapecoense,2016-06-24,2016-06-25,Guto Ferreira,Caio Júnior,poached,0,0,0,8th,Signed by Bahia,en
+2016,A,1936,Internacional,2016-07-10,2016-07-12,Argel Fucks,Falcão,sacked,0,0,0,8th,Sacked,en
+2016,A,3461,Figueirense,2016-07-11,2016-07-11,Vinícius Eutrópio,Argel Fucks,sacked,0,0,0,17th,Sacked,en
+2016,A,6154,América Mineiro,2016-07-17,2016-07-20,Sérgio Vieira,Enderson Moreira,sacked,0,0,0,20th,Sacked,en
+2016,A,2022,Cruzeiro,2016-07-25,2016-07-26,Paulo Bento,Mano Menezes,sacked,0,0,0,19th,Sacked,en
+2016,A,2026,São Paulo,2016-08-01,2016-08-12,Edgardo Bauza,Ricardo Gomes,poached,0,0,0,10th,Signed by Argentina,en
+2016,A,3456,Coritiba,2016-08-05,2016-08-05,Pachequinho,Paulo César Carpegiani,mutual,0,0,0,17th,Mutual consent,en
+2016,A,1936,Internacional,2016-08-08,2016-08-08,Falcão,Celso Roth,sacked,0,0,0,13th,Sacked,en
+2016,A,4929,Santa Cruz,2016-08-09,2016-08-12,Milton Mendes,Doriva,resigned,0,0,0,19th,Resigned,en
+2016,A,6086,Botafogo,2016-08-12,2016-08-13,Ricardo Gomes,Jair Ventura,poached,0,0,0,17th,Signed by São Paulo,en
+2016,A,3461,Figueirense,2016-08-22,2016-09-05,Argel Fucks,Tuca Guimarães,sacked,0,0,0,18th,Sacked,en
+2016,A,3457,Vitória,2016-09-10,2016-09-12,Vágner Mancini,Argel Fucks,sacked,0,0,0,18th,Sacked,en
+2016,A,6273,Grêmio,2016-09-14,2016-09-18,Roger Machado,Renato Gaúcho,resigned,0,0,0,8th,Resigned,en
+2016,A,874,Corinthians,2016-09-17,2016-09-17,Cristóvão Borges,Fábio Carille,sacked,0,0,0,6th,Sacked,en
+2016,A,3461,Figueirense,2016-09-19,2016-09-19,Tuca Guimarães,Marquinhos Santos,mutual,0,0,0,17th,Mutual consent,en
+2016,A,7635,Sport,2016-10-12,2016-10-13,Oswaldo de Oliveira,Daniel Paulista,poached,0,0,0,16th,Signed by Corinthians,en
+2016,A,874,Corinthians,2016-10-12,2016-10-12,Fábio Carille,Oswaldo de Oliveira,mutual,0,0,0,8th,Mutual consent,en
+2016,A,4929,Santa Cruz,2016-10-20,2016-10-20,Doriva,Adriano Teixeira,resigned,0,0,0,19th,Resigned,en
+2016,A,3445,Fluminense,2016-11-06,2016-11-06,Levir Culpi,Marcão,sacked,0,0,0,9th,Sacked,en
+2016,A,1936,Internacional,2016-11-17,2016-11-18,Celso Roth,Lisca,sacked,0,0,0,17th,Sacked,en
+2016,A,2026,São Paulo,2016-11-23,2016-11-23,Ricardo Gomes,Pintado,sacked,0,0,0,13th,Sacked,en
+2016,A,7632,Atlético Mineiro,2016-11-24,2016-11-24,Marcelo Oliveira,Diogo Giacomini,sacked,0,0,0,4th,Sacked,en
+2016,A,9318,Chapecoense,2016-11-29,2016-12-09,Caio Júnior,Vagner Mancini,other,0,0,0,9th,Fatal airplane accident,en
+2017,A,3458,Atlético Paranaense,2017-05-23,2017-05-23,Paulo Autuori,Eduardo Baptista,mutual,0,0,0,19th,Mutual consent,en
+2017,A,7635,Sport,2017-05-25,2017-05-29,Ney Franco,Vanderlei Luxemburgo,sacked,0,0,0,18th,Sacked,en
+2017,A,9967,Bahia,2017-05-29,2017-06-01,Guto Ferreira,Jorginho,poached,0,0,0,13th,Signed by Internacional,en
+2017,A,3457,Vitória,2017-06-03,2017-06-03,Dejan Petković,Alexandre Gallo,mutual,0,0,0,17th,Mutual consent,en
+2017,A,2674,Santos,2017-06-04,2017-06-06,Dorival Júnior,Levir Culpi,sacked,0,0,0,16th,Sacked,en
+2017,A,10357,Atlético Goianiense,2017-06-05,2017-06-07,Marcelo Cabo,Doriva,sacked,0,0,0,20th,Sacked,en
+2017,A,2026,São Paulo,2017-07-03,2017-07-05,Rogério Ceni,Dorival Júnior,sacked,0,0,0,17th,Sacked,en
+2017,A,9318,Chapecoense,2017-07-04,2017-07-05,Vagner Mancini,Vinícius Eutrópio,sacked,0,0,0,15th,Sacked,en
+2017,A,3458,Atlético Paranaense,2017-07-11,2017-07-12,Eduardo Baptista,Fabiano Soares,sacked,0,0,0,14th,Sacked,en
+2017,A,3456,Coritiba,2017-07-19,2017-07-20,Pachequinho,Marcelo Oliveira,sacked,0,0,0,13th,Sacked,en
+2017,A,3457,Vitória,2017-07-20,2017-07-22,Alexandre Gallo,Vágner Mancini,sacked,0,0,0,19th,Sacked,en
+2017,A,7632,Atlético Mineiro,2017-07-20,2017-07-21,Roger Machado,Rogério Micale,sacked,0,0,0,11th,Sacked,en
+2017,A,10357,Atlético Goianiense,2017-07-21,,Doriva,João Paulo Sanches,sacked,0,0,0,20th,Sacked,en
+2017,A,9967,Bahia,2017-07-31,,Jorginho,Preto Casagrande,sacked,0,0,0,14th,Sacked,en
+2017,A,819,Flamengo,2017-08-06,2017-08-14,Zé Ricardo,Reinaldo Rueda,sacked,0,0,0,5th,Sacked,en
+2017,A,3454,Vasco da Gama,2017-08-21,,Milton Mendes,Zé Ricardo,sacked,0,0,0,17th,Sacked,en
+2017,A,9318,Chapecoense,2017-09-11,2017-10-17,Vinícius Eutrópio,Gilson Kleina,sacked,0,0,0,18th,Sacked,en
+2017,A,3459,Ponte Preta,2017-09-16,2017-09-20,Gilson Kleina,Eduardo Baptista,sacked,0,0,0,13th,Sacked,en
+2017,A,7632,Atlético Mineiro,2017-09-24,2017-09-26,Rogério Micale,Oswaldo de Oliveira,sacked,0,0,0,11th,Sacked,en
+2017,A,9967,Bahia,2017-10-10,,Preto Casagrande,Paulo César Carpegiani,sacked,0,0,0,13th,Sacked,en
+2017,A,2029,Palmeiras,2017-10-13,2017-10-13,Cuca,Alberto Valentim,sacked,0,0,0,5th,Sacked,en
+2018,A,7635,Sport,2018-04-24,2018-04-25,Nelsinho Baptista,Claudinei Oliveira,resigned,0,0,0,17th,Resigned,en
+2018,A,9969,Ceará,2018-05-20,2018-05-21,Marcelo Chamusca,Jorginho,sacked,0,0,0,19th,Sacked,en
+2018,A,874,Corinthians,2018-05-22,2018-05-23,Fábio Carille,Osmar Loss,poached,0,0,0,4th,Signed by Al-Wehda,en
+2018,A,3454,Vasco da Gama,2018-06-02,2018-06-02,Zé Ricardo,Valdir Bigode,resigned,1,0,0,12th,Resigned,en
+2018,A,9967,Bahia,2018-06-03,2018-06-04,Guto Ferreira,Cláudio Prates,sacked,1,0,0,18th,Sacked,en
+2018,A,9969,Ceará,2018-06-04,2018-06-04,Jorginho,Lisca,resigned,0,0,0,20th,Resigned,en
+2018,A,3454,Vasco da Gama,2018-06-06,2018-06-07,Valdir Bigode,Jorginho,interim end,0,0,0,13th,End of caretaker tenure,en
+2018,A,3445,Fluminense,2018-06-16,2018-06-22,Abel Braga,Marcelo Oliveira,resigned,0,0,0,12th,Resigned,en
+2018,A,6154,América Mineiro,2018-06-16,2018-06-19,Enderson Moreira,Ricardo Drubscky,poached,0,0,0,13th,Signed by Bahia,en
+2018,A,9967,Bahia,2018-06-16,2018-06-16,Cláudio Prates,Enderson Moreira,interim end,0,0,0,17th,End of caretaker tenure,en
+2018,A,6086,Botafogo,2018-06-19,2018-06-26,Alberto Valentim,Marcos Paquetá,resigned,0,0,0,9th,Resigned,en
+2018,A,3458,Atlético Paranaense,2018-06-25,2018-06-27,Fernando Diniz,Tiago Nunes,sacked,0,0,0,18th,Sacked,en
+2018,A,6154,América Mineiro,2018-07-24,2018-07-24,Ricardo Drubscky,Adílson Batista,sacked,0,0,0,17th,Sacked,en
+2018,A,2029,Palmeiras,2018-07-26,2018-07-26,Roger Machado,Luiz Felipe Scolari,sacked,0,0,0,6th,Sacked,en
+2018,A,2674,Santos,2018-07-26,2018-07-29,Jair Ventura,Cuca,sacked,0,0,0,15th,Sacked,en
+2018,A,3457,Vitória,2018-07-28,2018-08-14,Vágner Mancini,Paulo César Carpegiani,sacked,0,0,0,16th,Sacked,en
+2018,A,6086,Botafogo,2018-08-01,2018-08-03,Marcos Paquetá,Zé Ricardo,sacked,0,0,0,11th,Sacked,en
+2018,A,9318,Chapecoense,2018-08-06,2018-08-06,Gilson Kleina,Guto Ferreira,sacked,0,0,0,16th,Sacked,en
+2018,A,7635,Sport,2018-08-12,2018-08-15,Claudinei Oliveira,Eduardo Baptista,resigned,0,0,0,14th,Resigned,en
+2018,A,3454,Vasco da Gama,2018-08-13,2018-08-27,Jorginho,Alberto Valentim,sacked,0,0,0,15th,Sacked,en
+2018,A,3453,Paraná,2018-08-14,2018-08-15,Rogério Micale,Claudinei Oliveira,sacked,0,0,0,20th,Sacked,en
+2018,A,874,Corinthians,2018-09-05,2018-09-06,Osmar Loss,Jair Ventura,resigned,0,0,0,8th,Resigned,en
+2018,A,7635,Sport,2018-09-24,2018-09-26,Eduardo Baptista,Milton Mendes,sacked,0,0,0,14th,Sacked,en
+2018,A,819,Flamengo,2018-09-28,2018-09-28,Mauricio Barbieri,Dorival Júnior,sacked,0,0,0,4th,Sacked,en
+2018,A,9318,Chapecoense,2018-10-15,2018-10-16,Guto Ferreira,Claudinei Oliveira,sacked,0,0,0,17th,Sacked,en
+2018,A,3453,Paraná,2018-10-16,2018-10-17,Claudinei Oliveira,Dado Cavalcanti,poached,0,0,0,20th,Signed by Chapecoense,en
+2018,A,7632,Atlético Mineiro,2018-10-17,2018-10-17,Thiago Larghi,Levir Culpi,sacked,0,0,0,6th,Sacked,en
+2018,A,6154,América Mineiro,2018-11-10,2018-11-11,Adílson Batista,Givanildo Oliveira,sacked,0,0,0,18th,Sacked,en
+2018,A,3445,Fluminense,2018-11-29,2018-11-29,Marcelo Oliveira,Fábio Moreno,sacked,0,0,0,14th,Sacked,en
+2019,A,3454,Vasco da Gama,2019-05-12,2019-05-13,Marcos Valadares,Vanderlei Luxemburgo,interim end,0,0,0,20th,End of caretaker tenure,en
+2019,A,819,Flamengo,2019-05-29,2019-05-29,Abel Braga,Marcelo Salles,resigned,1,0,0,6th,Resigned,en
+2019,A,819,Flamengo,2019-06-01,2019-06-01,Marcelo Salles,Jorge Jesus,interim end,0,0,0,4th,End of caretaker tenure,en
+2019,A,9966,Avaí,2019-06-17,2019-06-18,Geninho,Alberto Valentim,sacked,0,0,0,20th,Sacked,en
+2019,A,7531,CSA,2019-06-30,2019-07-02,Marcelo Cabo,Argel Fucks,sacked,0,0,0,19th,Sacked,en
+2019,A,9318,Chapecoense,2019-07-24,2019-07-24,Ney Franco,Emerson Cris,sacked,1,0,0,19th,Sacked,en
+2019,A,3395,Goiás,2019-08-04,2019-08-04,Claudinei Oliveira,Robson Gomes,resigned,1,0,0,12th,Resigned,en
+2019,A,3395,Goiás,2019-08-07,2019-08-07,Robson Gomes,Ney Franco,interim end,0,0,0,12th,End of caretaker tenure,en
+2019,A,2022,Cruzeiro,2019-08-08,2019-08-11,Mano Menezes,Rogério Ceni,resigned,0,0,0,18th,Resigned,en
+2019,A,6272,Fortaleza,2019-08-11,2019-08-12,Rogério Ceni,Zé Ricardo,poached,0,0,0,14th,Signed by Cruzeiro,en
+2019,A,3445,Fluminense,2019-08-19,2019-08-20,Fernando Diniz,Oswaldo de Oliveira,sacked,0,0,0,18th,Sacked,en
+2019,A,2029,Palmeiras,2019-09-02,2019-09-03,Luiz Felipe Scolari,Mano Menezes,sacked,0,0,0,5th,Sacked,en
+2019,A,9318,Chapecoense,2019-09-16,2019-09-16,Emerson Cris,Marquinhos Santos,interim end,0,0,0,19th,End of caretaker tenure,en
+2019,A,2022,Cruzeiro,2019-09-26,2019-09-27,Rogério Ceni,Abel Braga,sacked,0,0,0,16th,Sacked,en
+2019,A,2026,São Paulo,2019-09-26,2019-09-26,Cuca,Fernando Diniz,resigned,0,0,0,6th,Resigned,en
+2019,A,3445,Fluminense,2019-09-27,2019-09-27,Oswaldo de Oliveira,Marcão,sacked,0,0,0,16th,Sacked,en
+2019,A,6272,Fortaleza,2019-09-27,2019-09-29,Zé Ricardo,Rogério Ceni,sacked,0,0,0,15th,Sacked,en
+2019,A,9969,Ceará,2019-10-01,2019-10-02,Enderson Moreira,Adílson Batista,sacked,0,0,0,15th,Sacked,en
+2019,A,6086,Botafogo,2019-10-06,2019-10-11,Eduardo Barroca,Alberto Valentim,sacked,0,0,0,12th,Sacked,en
+2019,A,1936,Internacional,2019-10-10,2019-10-10,Odair Hellmann,Ricardo Colbachini,sacked,1,0,0,6th,Sacked,en
+2019,A,9966,Avaí,2019-10-11,2019-10-11,Alberto Valentim,Evando,poached,0,0,0,19th,Signed by Botafogo,en
+2019,A,7632,Atlético Mineiro,2019-10-13,2019-10-14,Rodrigo Santana,Vágner Mancini,sacked,0,0,0,11th,Sacked,en
+2019,A,1936,Internacional,2019-10-21,2019-10-21,Ricardo Colbachini,Zé Ricardo,interim end,0,0,0,6th,End of caretaker tenure,en
+2019,A,874,Corinthians,2019-11-03,2019-11-03,Fábio Carille,Dyego Coelho,sacked,1,0,0,8th,Sacked,en
+2019,A,3458,Athletico Paranaense,2019-11-05,2019-11-05,Tiago Nunes,Eduardo Maciel de Barros Eduardo Barros,poached,1,0,0,6th,Signed by Corinthians (to 2020),en
+2019,A,9969,Ceará,2019-11-27,2019-11-29,Adílson Batista,Argel Fucks,sacked,0,0,0,16th,Sacked,en
+2019,A,2022,Cruzeiro,2019-11-29,2019-11-29,Abel Braga,Adílson Batista,sacked,0,0,0,17th,Sacked,en
+2019,A,7531,CSA,2019-11-29,,Argel Fucks,Jacozinho,poached,1,0,0,18th,Signed with Ceará,en
+2020,A,10357,Atlético Goianiense,2019-11-30,2020-01-19,Eduardo Barroca,Cristóvão Borges,resigned,0,0,1,Pre-season,Resigned,en
+2019,A,2029,Palmeiras,2019-12-01,2019-12-02,Mano Menezes,Andrey Lopes,sacked,1,0,0,3rd,Sacked,en
+2020,A,1936,Internacional,2019-12-08,2019-12-16,Zé Ricardo,Eduardo Coudet,contract end,0,0,1,Pre-season,End of contract,en
+2020,A,3458,Athletico Paranaense,2019-12-08,2019-12-27,Eduardo Barros,Dorival Júnior,interim end,0,0,1,Pre-season,End of caretaker tenure,en
+2020,A,7632,Atlético Mineiro,2019-12-08,2020-01-02,Vágner Mancini,Rafael Dudamel,contract end,0,0,1,Pre-season,End of contract,en
+2020,A,874,Corinthians,2019-12-08,2019-11-05,Dyego Coelho,Tiago Nunes,interim end,0,0,1,Pre-season,End of caretaker tenure,en
+2020,A,2029,Palmeiras,2019-12-09,2019-12-15,Andrey Lopes,Vanderlei Luxemburgo,interim end,0,0,1,Pre-season,End of caretaker tenure,en
+2020,A,2674,Santos,2019-12-10,2019-12-23,Jorge Sampaoli,Jesualdo Ferreira,resigned,0,0,1,Pre-season,Resigned,en
+2020,A,3445,Fluminense,2019-12-11,2019-12-11,Marcão,Odair Hellmann,other,0,0,1,Pre-season,Demoted to assistant coach,en
+2020,A,3454,Vasco da Gama,2019-12-12,2019-12-16,Vanderlei Luxemburgo,Abel Braga,contract end,0,0,1,Pre-season,End of contract,en
+2020,A,3456,Coritiba,2019-12-12,2019-12-20,Jorginho,Eduardo Barroca,contract end,0,0,1,Pre-season,End of contract,en
+2020,A,6079,Red Bull Bragantino,2019-12-24,2020-01-26,Antônio Carlos Zago,Felipe Conceição,poached,0,0,1,Pre-season,Signed by Kashima Antlers,en
+2020,A,6086,Botafogo,2020-02-09,2020-02-13,Alberto Valentim,Paulo Autuori,sacked,0,0,1,Pre-season,Sacked,en
+2020,A,9969,Ceará,2020-02-09,2020-02-09,Argel Fucks,Enderson Moreira,sacked,0,0,1,Pre-season,Sacked,en
+2020,A,7635,Sport,2020-02-13,2020-02-15,Guto Ferreira,Daniel Paulista,sacked,0,0,1,Pre-season,Sacked,en
+2020,A,10357,Atlético Goianiense,2020-02-25,2020-06-25,Cristóvão Borges,Vágner Mancini,sacked,0,0,1,Pre-season,Sacked,en
+2020,A,7632,Atlético Mineiro,2020-02-27,2020-03-01,Rafael Dudamel,Jorge Sampaoli,sacked,0,0,1,Pre-season,Sacked,en
+2020,A,3454,Vasco da Gama,2020-03-16,2020-03-30,Abel Braga,Ramon Menezes,sacked,0,0,1,Pre-season,Sacked,en
+2020,A,9969,Ceará,2020-03-17,2020-03-17,Enderson Moreira,Guto Ferreira,sacked,0,0,1,Pre-season,Sacked,en
+2020,A,819,Flamengo,2020-07-17,2020-07-31,Jorge Jesus,Domènec Torrent,poached,0,0,1,Pre-season,Signed by Benfica,en
+2020,A,2674,Santos,2020-08-05,2020-08-07,Jesualdo Ferreira,Cuca,sacked,0,0,1,Pre-season,Sacked,en
+2020,A,3395,Goiás,2020-08-20,2020-08-21,Ney Franco,Thiago Larghi,sacked,0,0,0,18th,Sacked,en
+2020,A,3456,Coritiba,2020-08-20,2020-08-20,Eduardo Barroca,Mozart,sacked,1,0,0,20th,Sacked,en
+2020,A,3456,Coritiba,2020-08-24,2020-08-24,Mozart,Jorginho,interim end,0,0,0,20th,End of caretaker tenure,en
+2020,A,7635,Sport,2020-08-24,2020-08-24,Daniel Paulista,Jair Ventura,sacked,0,0,0,18th,Sacked,en
+2020,A,3458,Athletico Paranaense,2020-08-28,2020-08-28,Dorival Júnior,Eduardo Barros,sacked,1,0,0,10th,Sacked,en
+2020,A,6079,Red Bull Bragantino,2020-08-31,2020-08-31,Felipe Conceição,Marcinho,sacked,1,0,0,17th,Sacked,en
+2020,A,6079,Red Bull Bragantino,2020-09-02,2020-09-02,Marcinho,Maurício Barbieri,interim end,0,0,0,17th,End of caretaker tenure,en
+2020,A,9967,Bahia,2020-09-02,2020-09-02,Roger Machado,Cláudio Prates,sacked,1,0,0,12th,Sacked,en
+2020,A,9967,Bahia,2020-09-09,2020-09-09,Cláudio Prates,Mano Menezes,interim end,0,0,0,12th,End of caretaker tenure,en
+2020,A,874,Corinthians,2020-09-11,2020-09-11,Tiago Nunes,Dyego Coelho,sacked,1,0,0,13th,Sacked,en
+2020,A,3395,Goiás,2020-09-28,2020-09-28,Thiago Larghi,Enderson Moreira,sacked,0,0,0,20th,Sacked,en
+2020,A,6086,Botafogo,2020-10-01,2020-10-01,Paulo Autuori,Bruno Lazaroni,sacked,0,0,0,19th,Sacked,en
+2020,A,3454,Vasco da Gama,2020-10-08,2020-10-14,Ramon Menezes,Ricardo Sá Pinto,sacked,0,0,0,10th,Sacked,en
+2020,A,10357,Atlético Goianiense,2020-10-12,2020-10-12,Vágner Mancini,Eduardo Souza,poached,1,0,0,12th,Signed by Corinthians,en
+2020,A,874,Corinthians,2020-10-12,2020-10-12,Dyego Coelho,Vagner Mancini,interim end,0,0,0,17th,End of caretaker tenure,en
+2020,A,2029,Palmeiras,2020-10-14,2020-10-14,Vanderlei Luxemburgo,Andrey Lopes,sacked,1,0,0,7th,Sacked,en
+2020,A,3458,Athletico Paranaense,2020-10-22,2020-10-22,Eduardo Barros,Paulo Autuori,sacked,0,0,0,17th,Sacked,en
+2020,A,3456,Coritiba,2020-10-25,2020-10-29,Jorginho,Rodrigo Santana,sacked,0,0,0,19th,Sacked,en
+2020,A,6086,Botafogo,2020-10-28,2020-11-05,Bruno Lazaroni,Ramón Díaz,sacked,0,0,0,16th,Sacked,en
+2020,A,2029,Palmeiras,2020-10-30,2020-10-30,Andrey Lopes,Abel Ferreira,interim end,0,0,0,7th,End of caretaker tenure,en
+2020,A,10357,Atlético Goianiense,2020-11-07,2020-11-07,Eduardo Souza,Marcelo Cabo,interim end,0,0,0,13th,End of caretaker tenure,en
+2020,A,1936,Internacional,2020-11-09,2020-11-10,Eduardo Coudet,Abel Braga,poached,0,0,0,1st,Signed by Celta de Vigo,en
+2020,A,6272,Fortaleza,2020-11-09,2020-11-11,Rogério Ceni,Marcelo Chamusca,poached,0,0,0,11th,Signed by Flamengo,en
+2020,A,819,Flamengo,2020-11-09,2020-11-10,Domènec Torrent,Rogério Ceni,sacked,0,0,0,3rd,Sacked,en
+2020,A,3395,Goiás,2020-11-17,2020-11-17,Enderson Moreira,Augusto César,sacked,0,0,0,20th,Sacked,en
+2020,A,6086,Botafogo,2020-11-27,2020-11-27,Ramón Díaz,Eduardo Barroca,resigned,0,0,0,16th,Resigned,en
+2020,A,3445,Fluminense,2020-12-07,2020-12-07,Odair Hellmann,Marcão,poached,0,0,0,5th,Signed by Al-Wasl,en
+2020,A,3456,Coritiba,2020-12-13,2020-12-13,Rodrigo Santana,Pachequinho,sacked,1,0,0,19th,Sacked,en
+2020,A,9967,Bahia,2020-12-20,2020-12-21,Mano Menezes,Dado Cavalcanti,sacked,0,0,0,16th,Sacked,en
+2020,A,3454,Vasco da Gama,2020-12-29,2020-12-31,Ricardo Sá Pinto,Vanderlei Luxemburgo,sacked,0,0,0,17th,Sacked,en
+2020,A,3456,Coritiba,2020-12-31,2021-01-06,Pachequinho,Gustavo Morínigo,interim end,0,0,0,20th,End of caretaker tenure,en
+2020,A,6272,Fortaleza,2021-01-07,2021-01-07,Marcelo Chamusca,Enderson Moreira,sacked,0,0,0,15th,Sacked,en
+2021,A,17313,Cuiabá,2021-02-01,2021-04-01,Allan Aal,Alberto Valentim,mutual,0,0,1,Pre-season,Mutual agreement,en
+2020,A,2026,São Paulo,2021-02-01,2021-02-01,Fernando Diniz,Marcos Vizolli,sacked,1,0,0,4th,Sacked,en
+2020,A,6086,Botafogo,2021-02-06,2021-02-06,Eduardo Barroca,Lúcio Flávio,sacked,1,0,0,20th,Sacked,en
+2020,A,2674,Santos,2021-02-21,2021-02-22,Cuca,Marcelo Fernandes,mutual,1,0,0,8th,Mutual agreement,en
+2021,A,1936,Internacional,2021-02-26,2021-03-02,Abel Braga,Miguel Ángel Ramírez,contract end,0,0,1,Pre-season,End of contract,en
+2021,A,2026,São Paulo,2021-02-26,2021-02-26,Marcos Vizolli,Hernán Crespo,interim end,0,0,1,Pre-season,End of caretaker tenure,en
+2021,A,2674,Santos,2021-02-26,2021-02-26,Marcelo Fernandes,Ariel Holan,interim end,0,0,1,Pre-season,End of caretaker tenure,en
+2021,A,3445,Fluminense,2021-02-26,2021-02-27,Marcão,Roger Machado,other,0,0,1,Pre-season,Demoted to assistant coach,en
+2021,A,3458,Athletico Paranaense,2021-02-26,2021-03-13,Paulo Autuori,António Oliveira,poached,0,0,1,Pre-season,Appointed as club director,en
+2021,A,7632,Atlético Mineiro,2021-02-26,2021-03-05,Jorge Sampaoli,Cuca,poached,0,0,1,Pre-season,Signed by Marseille,en
+2021,A,10357,Atlético Goianiense,2021-02-27,2021-04-05,Marcelo Cabo,Jorginho,poached,0,0,1,Pre-season,Signed by Vasco da Gama,en
+2021,A,7635,Sport,2021-04-05,2021-04-15,Jair Ventura,Umberto Louzer,sacked,0,0,1,Pre-season,Sacked,en
+2021,A,9318,Chapecoense,2021-04-14,2021-04-18,Umberto Louzer,Mozart,resigned,0,0,1,Pre-season,Resigned,en
+2021,A,6273,Grêmio,2021-04-15,2021-04-21,Renato Gaúcho,Tiago Nunes,sacked,0,0,1,Pre-season,Sacked,en
+2021,A,6272,Fortaleza,2021-04-25,2021-05-04,Enderson Moreira,Juan Pablo Vojvoda,sacked,0,0,1,Pre-season,Sacked,en
+2021,A,2674,Santos,2021-04-26,2021-05-07,Ariel Holan,Fernando Diniz,resigned,0,0,1,Pre-season,Resigned,en
+2021,A,10357,Atlético Goianiense,2021-05-15,2021-05-27,Jorginho,Eduardo Barroca,resigned,0,0,1,Pre-season,Resigned,en
+2021,A,874,Corinthians,2021-05-16,2021-05-23,Vagner Mancini,Sylvinho,sacked,0,0,1,Pre-season,Sacked,en
+2021,A,9318,Chapecoense,2021-05-27,2021-05-31,Mozart,Jair Ventura,sacked,0,0,1,Pre-season,Sacked,en
+2021,A,17313,Cuiabá,2021-05-29,2021-07-03,Alberto Valentim,Jorginho,sacked,0,0,0,2nd,Sacked,en
+2021,A,1936,Internacional,2021-06-11,2021-06-19,Miguel Ángel Ramírez,Diego Aguirre,sacked,0,0,0,17th,Sacked,en
+2021,A,6154,América Mineiro,2021-06-14,2021-06-19,Lisca,Vagner Mancini,resigned,0,0,0,20th,Resigned,en
+2021,A,6273,Grêmio,2021-07-04,2021-07-07,Tiago Nunes,Luiz Felipe Scolari,sacked,0,0,0,20th,Sacked,en
+2021,A,819,Flamengo,2021-07-10,2021-07-10,Rogério Ceni,Renato Gaúcho,sacked,0,0,0,12th,Sacked,en
+2021,A,9318,Chapecoense,2021-08-02,2021-08-04,Jair Ventura,Pintado,sacked,0,0,0,20th,Sacked,en
+2021,A,9967,Bahia,2021-08-17,2021-08-18,Dado Cavalcanti,Diego Dabove,mutual,0,0,0,13th,Mutual agreement,en
+2021,A,3445,Fluminense,2021-08-21,2021-08-21,Roger Machado,Marcão,sacked,0,0,0,15th,Sacked,en
+2021,A,7635,Sport,2021-08-23,2021-08-26,Umberto Louzer,Gustavo Florentín,mutual,0,0,0,18th,Mutual agreement,en
+2021,A,9969,Ceará,2021-08-29,2021-08-30,Guto Ferreira,Tiago Nunes,sacked,0,0,0,8th,Sacked,en
+2021,A,2674,Santos,2021-09-05,2021-09-08,Fernando Diniz,Fábio Carille,sacked,0,0,0,13th,Sacked,en
+2021,A,3458,Athletico Paranaense,2021-09-09,2021-10-01,António Oliveira,Alberto Valentim,resigned,0,0,0,9th,Resigned,en
+2021,A,10357,Atlético Goianiense,2021-09-27,2021-11-11,Eduardo Barroca,Marcelo Cabo,mutual,0,0,0,12th,Mutual agreement,en
+2021,A,9967,Bahia,2021-10-06,2021-10-06,Diego Dabove,Guto Ferreira,sacked,0,0,0,17th,Sacked,en
+2021,A,6273,Grêmio,2021-10-11,2021-10-15,Luiz Felipe Scolari,Vagner Mancini,mutual,0,0,0,19th,Mutual agreement,en
+2021,A,2026,São Paulo,2021-10-13,2021-10-13,Hernán Crespo,Rogério Ceni,mutual,0,0,0,13th,Mutual agreement,en
+2021,A,6154,América Mineiro,2021-10-14,2021-10-18,Vagner Mancini,Marquinhos Santos,resigned,0,0,0,10th,"Resigned, signed by Grêmio",en
+2021,A,6270,Juventude,2021-10-18,2021-10-19,Marquinhos Santos,Jair Ventura,sacked,0,0,0,17th,Sacked,en
+2021,A,9318,Chapecoense,2021-10-26,2021-10-26,Pintado,Felipe Endres,mutual,1,0,0,20th,Mutual agreement,en
+2021,A,819,Flamengo,2021-11-29,2021-11-29,Renato Gaúcho,Maurício Souza,mutual,1,0,0,2nd,Mutual agreement,en
+2022,A,819,Flamengo,2021-12-09,2021-12-29,Maurício Souza,Paulo Sousa,interim end,0,0,1,Pre-season,End of caretaker spell,en
+2022,A,1936,Internacional,2021-12-15,2021-12-27,Diego Aguirre,Alexander Medina,mutual,0,0,1,Pre-season,Mutual agreement,en
+2022,A,3445,Fluminense,2021-12-15,2021-12-15,Marcão,Abel Braga,other,0,0,1,Pre-season,Demoted to assistant manager,en
+2022,A,17313,Cuiabá,2021-12-16,2022-01-21,Jorginho,Eduardo Oliveira,contract end,1,0,1,Pre-season,Contract ended,en
+2022,A,7632,Atlético Mineiro,2021-12-28,2022-01-13,Cuca,Antonio Mohamed,resigned,0,0,1,Pre-season,Resigned,en
+2022,A,874,Corinthians,2022-02-03,2022-02-04,Sylvinho,Fernando Lázaro,sacked,1,0,0,State leagues,Sacked,en
+2022,A,17313,Cuiabá,2022-02-04,2022-01-04,Eduardo Oliveira,Pintado,interim end,0,0,0,State leagues,End of caretaker spell,en
+2022,A,9966,Avaí,2022-02-06,2022-02-07,Claudinei Oliveira,Fabrício Bento,sacked,1,0,0,State leagues,Sacked,en
+2022,A,10357,Atlético Goianiense,2022-02-07,2022-02-07,Marcelo Cabo,Eduardo Souza,resigned,1,0,0,State leagues,Resigned,en
+2022,A,6086,Botafogo,2022-02-11,2022-02-11,Enderson Moreira,Lúcio Flávio,sacked,1,0,0,State leagues,Sacked,en
+2022,A,6270,Juventude,2022-02-11,2022-02-11,Jair Ventura,Eduardo Barros,sacked,1,0,0,State leagues,Sacked,en
+2022,A,9966,Avaí,2022-02-13,2022-02-13,Fabrício Bento,Eduardo Barroca,interim end,0,0,0,State leagues,End of caretaker spell,en
+2022,A,2674,Santos,2022-02-18,2022-02-18,Fábio Carille,Marcelo Fernandes,sacked,1,0,0,State leagues,Sacked,en
+2022,A,10357,Atlético Goianiense,2022-02-21,2022-02-22,Eduardo Souza,Umberto Louzer,interim end,0,0,0,State leagues,End of caretaker spell,en
+2022,A,874,Corinthians,2022-02-23,2022-02-23,Fernando Lázaro,Vítor Pereira,interim end,0,0,0,State leagues,End of caretaker spell,en
+2022,A,3395,Goiás,2022-02-24,2022-02-24,Glauber Ramos,Bruno Pivetti,interim end,0,0,0,State leagues,End of caretaker spell,en
+2022,A,2674,Santos,2022-02-25,2022-02-25,Marcelo Fernandes,Fabián Bustos,interim end,0,0,0,State leagues,End of caretaker spell,en
+2022,A,6270,Juventude,2022-03-03,2022-03-03,Eduardo Barros,Eduardo Baptista,interim end,0,0,0,State leagues,End of caretaker spell,en
+2022,A,3395,Goiás,2022-03-24,2022-03-25,Bruno Pivetti,Glauber Ramos,sacked,1,0,0,State leagues,Sacked,en
+2022,A,6086,Botafogo,2022-03-25,2022-03-25,Lúcio Flávio,Luís Castro,interim end,0,0,0,State leagues,End of caretaker spell,en
+2022,A,9969,Ceará,2022-03-25,2022-03-28,Tiago Nunes,Dorival Júnior,sacked,0,0,0,State leagues,Sacked,en
+2022,A,3458,Athletico Paranaense,2022-04-10,2022-04-13,Alberto Valentim,Fábio Carille,mutual,0,0,0,20th,Mutual agreement,en
+2022,A,6154,América Mineiro,2022-04-11,2022-04-12,Marquinhos Santos,Vagner Mancini,mutual,0,0,0,16th,Mutual agreement,en
+2022,A,3395,Goiás,2022-04-14,2022-04-14,Glauber Ramos,Jair Ventura,interim end,0,0,0,19th,End of caretaker spell,en
+2022,A,1936,Internacional,2022-04-15,2022-04-15,Alexander Medina,Cauan de Almeida,sacked,1,0,0,18th,Sacked,en
+2022,A,1936,Internacional,2022-04-19,2022-04-19,Cauan de Almeida,Mano Menezes,interim end,0,0,0,13th,End of caretaker spell,en
+2022,A,3445,Fluminense,2022-04-28,2022-04-30,Abel Braga,Fernando Diniz,resigned,0,0,0,13th,Resigned,en
+2022,A,3458,Athletico Paranaense,2022-05-04,2022-05-04,Fábio Carille,Luiz Felipe Scolari,sacked,0,0,0,16th,Sacked,en
+2022,A,17313,Cuiabá,2022-05-12,2022-05-12,Pintado,Luiz Fernando Iubel,sacked,1,0,0,11th,Sacked,en
+2022,A,10357,Atlético Goianiense,2022-05-15,2022-05-16,Umberto Louzer,Jorginho,sacked,0,0,0,19th,Sacked,en
+2022,A,17313,Cuiabá,2022-06-04,2022-06-04,Luiz Fernando Iubel,António Oliveira,interim end,0,0,0,17th,End of caretaker spell,en
+2022,A,819,Flamengo,2022-06-09,2022-06-10,Paulo Sousa,Dorival Júnior,sacked,0,0,0,14th,Sacked,en
+2022,A,9969,Ceará,2022-06-10,2022-06-12,Dorival Júnior,Marquinhos Santos,poached,0,0,0,12th,Signed by Flamengo,en
+2022,A,6270,Juventude,2022-06-20,2022-06-22,Eduardo Baptista,Umberto Louzer,sacked,0,0,0,20th,Sacked,en
+2022,A,2674,Santos,2022-07-07,2022-07-07,Fabián Bustos,Marcelo Fernandes,sacked,1,0,0,10th,Sacked,en
+2022,A,2674,Santos,2022-07-20,2022-07-19,Marcelo Fernandes,Lisca,interim end,0,0,0,9th,End of caretaker spell,en
+2022,A,7632,Atlético Mineiro,2022-07-22,2022-07-23,Antonio Mohamed,Cuca,sacked,0,0,0,3rd,Sacked,en
+2022,A,3456,Coritiba,2022-08-14,2022-08-14,Gustavo Morínigo,Guto Ferreira,sacked,0,0,0,18th,Sacked,en
+2022,A,9969,Ceará,2022-08-14,2022-08-16,Marquinhos Santos,Juca Antonello,sacked,1,0,0,14th,Sacked,en
+2022,A,9969,Ceará,2022-08-24,2022-08-24,Juca Antonello,Lucho González,interim end,0,0,0,15th,End of caretaker spell,en
+2022,A,10357,Atlético Goianiense,2022-08-27,2022-08-28,Jorginho,Eduardo Baptista,sacked,0,0,0,19th,Sacked,en
+2022,A,2674,Santos,2022-09-12,2022-09-12,Lisca,Orlando Ribeiro,mutual,1,0,0,10th,Mutual agreement,en
+2022,A,9966,Avaí,2022-09-12,2022-09-13,Eduardo Barroca,Lisca,sacked,0,0,0,18th,Sacked,en
+2022,A,10357,Atlético Goianiense,2022-09-29,2022-09-29,Eduardo Baptista,Eduardo Souza,mutual,1,0,0,19th,Mutual agreement,en
+2022,A,6270,Juventude,2022-10-03,2022-10-03,Umberto Louzer,Lucas Zanella,sacked,1,0,0,20th,Sacked,en
+2022,A,9966,Avaí,2022-10-24,2022-10-24,Lisca,Fabrício Bento,sacked,1,0,0,19th,Sacked,en
+2022,A,6270,Juventude,2022-10-28,2022-10-28,Lucas Zanella,Celso Roth,interim end,0,0,0,20th,End of caretaker spell,en
+2022,A,9969,Ceará,2022-10-28,2022-10-28,Lucho González,Juca Antonello,sacked,1,0,0,17th,Sacked,en
+2023,A,9967,Bahia,2022-11-06,2022-12-06,Eduardo Barroca,Renato Paiva,contract end,0,0,1,Pre-season,End of contract,en
+2023,A,3454,Vasco da Gama,2022-11-10,2022-12-06,Jorginho,Maurício Barbieri,contract end,0,0,1,Pre-season,End of contract,en
+2022,A,6079,Red Bull Bragantino,2022-11-10,2022-11-10,Maurício Barbieri,Marcinho,sacked,1,0,0,14th,Sacked,en
+2023,A,2674,Santos,2022-11-13,2022-11-16,Orlando Ribeiro,Odair Hellmann,interim end,0,0,1,Pre-season,End of caretaker spell,en
+2023,A,3395,Goiás,2022-11-13,2022-12-10,Jair Ventura,Guto Ferreira,contract end,0,0,1,Pre-season,Contract ended,en
+2023,A,3458,Athletico Paranaense,2022-11-13,2022-11-13,Luiz Felipe Scolari,Paulo Turra,poached,0,0,1,Pre-season,Appointed as club director,en
+2023,A,6079,Red Bull Bragantino,2022-11-13,2022-12-10,Marcinho,Pedro Caixinha,interim end,0,0,1,Pre-season,End of caretaker spell,en
+2023,A,874,Corinthians,2022-11-13,2022-11-20,Vítor Pereira,Fernando Lázaro,contract end,0,0,1,Pre-season,Contract ended,en
+2023,A,7632,Atlético Mineiro,2022-11-14,2022-11-19,Cuca,Eduardo Coudet,mutual,0,0,1,Pre-season,Mutual agreement,en
+2023,A,819,Flamengo,2022-11-25,2022-12-13,Dorival Júnior,Vítor Pereira,contract end,0,0,1,Pre-season,End of contract,en
+2023,A,17313,Cuiabá,2022-12-05,2022-12-09,António Oliveira,Ivo Vieira,contract end,0,0,1,Pre-season,End of contract,en
+2023,A,3456,Coritiba,2022-12-09,2022-12-13,Guto Ferreira,António Oliveira,sacked,0,0,1,Pre-season,Sacked,en
+2023,A,2022,Cruzeiro,2023-03-19,2023-03-20,Paulo Pezzolano,Pepa,mutual,0,0,0,State leagues,Mutual agreement,en
+2023,A,3395,Goiás,2023-04-10,2023-04-11,Guto Ferreira,Emerson Ávila,sacked,1,0,0,State leagues,Sacked,en
+2023,A,819,Flamengo,2023-04-11,2023-04-11,Vítor Pereira,Mário Jorge,sacked,1,0,0,State leagues,Sacked,en
+2023,A,819,Flamengo,2023-04-16,2023-04-14,Mário Jorge,Jorge Sampaoli,interim end,0,0,0,2nd,End of caretaker spell,en
+2023,A,3456,Coritiba,2023-04-18,2023-04-18,António Oliveira,Leomir de Souza,sacked,1,0,0,19th,Sacked,en
+2023,A,2026,São Paulo,2023-04-19,2023-04-20,Rogério Ceni,Dorival Júnior,sacked,0,0,0,14th,Sacked,en
+2023,A,874,Corinthians,2023-04-20,2023-04-20,Fernando Lázaro,Cuca,other,0,0,0,6th,Demoted to assistant coach,en
+2023,A,3456,Coritiba,2023-04-23,2023-04-22,Leomir de Souza,Antônio Carlos Zago,interim end,0,0,0,19th,End of caretaker spell,en
+2023,A,874,Corinthians,2023-04-27,2023-04-28,Cuca,Danilo,resigned,1,0,0,14th,Resigned,en
+2023,A,874,Corinthians,2023-05-01,2023-05-01,Danilo,Vanderlei Luxemburgo,interim end,0,0,0,16th,End of caretaker spell,en
+2023,A,17313,Cuiabá,2023-05-10,2023-05-10,Ivo Vieira,Luiz Fernando Iubel,sacked,1,0,0,17th,Sacked,en
+2023,A,17313,Cuiabá,2023-05-13,2023-05-13,Luiz Fernando Iubel,António Oliveira,interim end,0,0,0,18th,End of caretaker spell,en
+2023,A,3395,Goiás,2023-06-11,2023-06-09,Emerson Ávila,Armando Evangelista,interim end,0,0,0,17th,End of caretaker spell,en
+2023,A,7632,Atlético Mineiro,2023-06-11,2023-06-16,Eduardo Coudet,Luiz Felipe Scolari,resigned,0,0,0,3rd,Resigned,en
+2023,A,3458,Athletico Paranaense,2023-06-16,2023-06-16,Paulo Turra,Wesley Carvalho,sacked,1,0,0,7th,Sacked,en
+2023,A,2674,Santos,2023-06-22,2023-06-23,Odair Hellmann,Paulo Turra,mutual,0,0,0,13th,Mutual agreement,en
+2023,A,3454,Vasco da Gama,2023-06-23,2023-06-23,Maurício Barbieri,William Batista,sacked,1,0,0,19th,Sacked,en
+2023,A,3456,Coritiba,2023-06-27,2023-06-27,Antônio Carlos Zago,Thiago Kosloski,sacked,0,0,0,20th,Sacked,en
+2023,A,6086,Botafogo,2023-06-30,2023-07-01,Luís Castro,Cláudio Caçapa,poached,1,0,0,1st,Signed by Al Nassr,en
+2023,A,6086,Botafogo,2023-07-09,2023-07-08,Cláudio Caçapa,Bruno Lage,interim end,0,0,0,1st,End of caretaker spell,en
+2023,A,3454,Vasco da Gama,2023-07-15,2023-07-15,William Batista,Ramón Díaz,interim end,0,0,0,19th,End of caretaker spell,en
+2023,A,1936,Internacional,2023-07-17,2023-07-19,Mano Menezes,Eduardo Coudet,sacked,0,0,0,11th,Sacked,en
+2023,A,2674,Santos,2023-08-06,2023-08-06,Paulo Turra,Diego Aguirre,sacked,0,0,0,16th,Sacked,en
+2023,A,6154,América Mineiro,2023-08-07,2023-08-07,Vagner Mancini,Diogo Giacomini,sacked,1,0,0,20th,Sacked,en
+2023,A,6154,América Mineiro,2023-08-10,2023-08-09,Diogo Giacomini,Fabián Bustos,interim end,0,0,0,20th,End of caretaker spell,en
+2023,A,2022,Cruzeiro,2023-08-29,2023-08-29,Pepa,Fernando Seabra,sacked,1,0,0,12th,Sacked,en
+2023,A,2022,Cruzeiro,2023-09-05,2023-09-05,Fernando Seabra,Zé Ricardo,interim end,0,0,0,12th,End of caretaker spell,en
+2023,A,9967,Bahia,2023-09-06,2023-09-09,Renato Paiva,Rogério Ceni,sacked,0,0,0,16th,Sacked,en
+2023,A,2674,Santos,2023-09-15,2023-09-15,Diego Aguirre,Marcelo Fernandes,sacked,1,0,0,17th,Sacked,en
+2023,A,874,Corinthians,2023-09-27,2023-09-28,Vanderlei Luxemburgo,Mano Menezes,sacked,0,0,0,11th,Sacked,en
+2023,A,819,Flamengo,2023-09-28,2023-09-28,Jorge Sampaoli,Mário Jorge,sacked,1,0,0,7th,Sacked,en
+2023,A,6086,Botafogo,2023-10-03,2023-10-03,Bruno Lage,Lúcio Flávio,sacked,1,0,0,1st,Sacked,en
+2023,A,819,Flamengo,2023-10-09,2023-10-09,Mário Jorge,Tite,interim end,0,0,0,5th,End of caretaker spell,en
+2023,A,6154,América Mineiro,2023-11-09,2023-11-09,Fabián Bustos,Diogo Giacomini,sacked,1,0,0,20th,Sacked,en
+2023,A,2022,Cruzeiro,2023-11-12,2023-11-14,Zé Ricardo,Paulo Autuori,sacked,1,0,0,17th,Sacked,en
+2023,A,3395,Goiás,2023-11-14,2023-11-14,Armando Evangelista,Mário Henrique,sacked,1,0,0,18th,Sacked,en
+2023,A,6086,Botafogo,2023-11-14,2023-11-16,Lúcio Flávio,Tiago Nunes,sacked,0,0,0,2nd,Sacked,en
+2023,A,3456,Coritiba,2023-11-27,2023-11-27,Thiago Kosloski,Guto Ferreira,sacked,0,0,0,19th,Sacked,en
+2024,A,2022,Cruzeiro,2023-12-06,2023-12-20,Paulo Autuori,Nicolás Larcamón,interim end,0,0,1,Pre-season,End of caretaker spell,en
+2024,A,3458,Athletico Paranaense,2023-12-07,2024-01-03,Wesley Carvalho,Juan Carlos Osorio,interim end,0,0,1,Pre-season,End of caretaker spell,en
+2024,A,2026,São Paulo,2024-01-07,2024-01-11,Dorival Júnior,Thiago Carpini,poached,0,0,1,Pre-season,Signed by Brazil,en
+2024,A,6270,Juventude,2024-01-11,2024-01-12,Thiago Carpini,Roger Machado,poached,0,0,1,Pre-season,Signed by São Paulo,en
+2024,A,874,Corinthians,2024-02-05,2024-02-05,Mano Menezes,Thiago Kosloski,sacked,1,0,0,State leagues,Sacked,en
+2024,A,17313,Cuiabá,2024-02-09,2024-02-07,António Oliveira,Luiz Fernando Iubel,poached,1,0,0,State leagues,Signed by Corinthians,en
+2024,A,874,Corinthians,2024-02-09,2024-02-09,Thiago Kosloski,António Oliveira,sacked,0,1,0,State leagues,Sacked,en
+2024,A,6086,Botafogo,2024-02-22,2024-02-22,Tiago Nunes,Fábio Matias,sacked,1,0,0,State leagues,Sacked,en
+2024,A,3458,Athletico Paranaense,2024-03-03,2024-03-04,Juan Carlos Osorio,Cuca,sacked,0,0,0,State leagues,Sacked,en
+2024,A,7632,Atlético Mineiro,2024-03-20,2024-03-24,Luiz Felipe Scolari,Gabriel Milito,mutual,0,0,0,State leagues,Mutual agreement,en
+2024,A,6086,Botafogo,2024-04-03,2024-04-03,Fábio Matias,Artur Jorge,interim end,0,0,0,State leagues,End of caretaker spell,en
+2024,A,2022,Cruzeiro,2024-04-08,2024-04-09,Nicolás Larcamón,Fernando Seabra,sacked,0,0,0,State leagues,Sacked,en
+2024,A,2026,São Paulo,2024-04-18,2024-04-20,Thiago Carpini,Luis Zubeldía,sacked,0,0,0,19th,Sacked,en
+2024,A,3454,Vasco da Gama,2024-04-27,2024-04-27,Ramón Díaz,Rafael Paiva,sacked,1,0,0,16th,Sacked,en
+2024,A,17313,Cuiabá,2024-04-29,2024-05-01,Luiz Fernando Iubel,Petit,resigned,0,0,0,20th,Resigned,en
+2024,A,3457,Vitória,2024-05-14,2024-05-14,Léo Condé,Thiago Carpini,sacked,0,0,0,18th,Sacked,en
+2024,A,3454,Vasco da Gama,2024-05-21,2024-05-21,Rafael Paiva,Álvaro Pacheco,interim end,0,1,0,18th,End of caretaker spell,en
+2024,A,3454,Vasco da Gama,2024-06-20,2024-06-20,Álvaro Pacheco,Rafael Paiva,sacked,1,0,0,17th,Sacked,en
+2024,A,10357,Atlético Goianiense,2024-06-21,2024-06-21,Jair Ventura,Anderson Gomes,sacked,1,0,0,16th,Sacked,en
+2024,A,3445,Fluminense,2024-06-24,2024-06-24,Fernando Diniz,Marcão,sacked,1,0,0,20th,Sacked,en
+2024,A,3458,Athletico Paranaense,2024-06-24,2024-06-24,Cuca,Juca,resigned,1,0,0,5th,Resigned,en
+2024,A,3445,Fluminense,2024-07-01,2024-07-01,Marcão,Mano Menezes,interim end,0,0,0,20th,End of caretaker spell,en
+2024,A,874,Corinthians,2024-07-02,2024-07-02,António Oliveira,Raphael Laruccia,sacked,1,0,0,19th,Sacked,en
+2024,A,10357,Atlético Goianiense,2024-07-04,2024-07-04,Anderson Gomes,Vagner Mancini,interim end,0,0,0,17th,End of caretaker spell,en
+2024,A,1936,Internacional,2024-07-10,2024-07-10,Eduardo Coudet,Pablo Fernandez,sacked,1,0,0,11th,Sacked,en
+2024,A,3458,Athletico Paranaense,2024-07-10,2024-07-09,Juca,Martín Varini,interim end,0,0,0,7th,End of caretaker spell,en
+2024,A,874,Corinthians,2024-07-10,2024-07-10,Raphael Laruccia,Ramón Díaz,interim end,0,0,0,17th,End of caretaker spell,en
+2024,A,6270,Juventude,2024-07-17,2014-07-17,Roger Machado,Jair Ventura,resigned,0,0,0,12th,Resigned,en
+2024,A,1936,Internacional,2024-07-18,2024-07-18,Pablo Fernandez,Roger Machado,interim end,0,0,0,13th,End of caretaker spell,en
+2024,A,10357,Atlético Goianiense,2024-08-04,2024-08-05,Vagner Mancini,Umberto Louzer,sacked,0,0,0,20th,Sacked,en
+2024,A,17313,Cuiabá,2024-08-27,2024-08-28,Petit,Bernardo Franco,resigned,0,0,0,19th,Resigned,en
+2024,A,2022,Cruzeiro,2024-09-23,2024-09-23,Fernando Seabra,Fernando Diniz,sacked,0,0,0,7th,Sacked,en
+2024,A,3458,Athletico Paranaense,2024-09-23,2024-09-24,Martín Varini,Lucho González,sacked,0,0,0,13th,Sacked,en
+2024,A,819,Flamengo,2024-09-30,2024-09-30,Tite,Filipe Luís,sacked,0,0,0,4th,Sacked,en
+2024,A,6270,Juventude,2024-10-26,2024-10-27,Jair Ventura,Fábio Matias,sacked,0,0,0,17th,Sacked,en
+2024,A,6079,Red Bull Bragantino,2024-10-27,2024-10-31,Pedro Caixinha,Fernando Seabra,sacked,0,0,0,16th,Sacked,en
+2024,A,10357,Atlético Goianiense,2024-10-29,2024-10-29,Umberto Louzer,Anderson Gomes,resigned,1,0,0,20th,Resigned,en
+2025,A,2674,Santos,2024-11-22,2024-12-23,Leandro Zago,Pedro Caixinha,interim end,0,0,1,Pre-season,End of caretaker spell,en
+2024,A,3454,Vasco da Gama,2024-11-24,2024-11-24,Rafael Paiva,Felipe,sacked,1,0,0,11th,Sacked,en
+2025,A,9169,Mirassol,2024-11-26,2024-12-17,Mozart,Eduardo Barroca,contract end,0,0,1,Pre-season,Contract ended,en
+2024,A,7632,Atlético Mineiro,2024-12-04,2024-12-05,Gabriel Milito,Lucas Gonçalves,sacked,1,0,0,14th,Sacked,en
+2025,A,3454,Vasco da Gama,2024-12-08,2024-12-19,Felipe,Fábio Carille,interim end,0,0,1,Pre-season,End of caretaker spell,en
+2025,A,7632,Atlético Mineiro,2024-12-08,2024-12-29,Lucas Gonçalves,Cuca,interim end,0,0,1,Pre-season,End of caretaker spell,en
+2025,A,6273,Grêmio,2024-12-09,2024-12-28,Renato Gaúcho,Gustavo Quinteros,contract end,0,0,1,Pre-season,Contract ended,en
+2025,A,6086,Botafogo,2025-01-03,2025-01-05,Artur Jorge,Carlos Leiria,poached,1,0,1,Pre-season,Signed by Al-Rayyan,en
+2025,A,2022,Cruzeiro,2025-01-27,2025-01-27,Fernando Diniz,Wesley Carvalho,sacked,1,0,0,State leagues,Sacked,en
+2025,A,2022,Cruzeiro,2025-02-09,2025-02-04,Wesley Carvalho,Leonardo Jardim,interim end,0,0,0,State leagues,End of caretaker spell,en
+2025,A,6086,Botafogo,2025-02-13,2025-02-13,Carlos Leiria,Cláudio Caçapa,interim end,1,0,0,State leagues,End of caretaker spell,en
+2025,A,9169,Mirassol,2025-02-21,2025-02-21,Eduardo Barroca,Ivan Baitello,mutual,1,0,0,State leagues,Mutual agreement,en
+2025,A,6086,Botafogo,2025-02-28,2025-02-28,Cláudio Caçapa,Renato Paiva,interim end,0,0,0,State leagues,End of caretaker spell,en
+2025,A,9169,Mirassol,2025-03-13,2025-03-13,Ivan Baitello,Rafael Guanaes,interim end,0,0,0,State leagues,End of caretaker spell,en
+2025,A,3445,Fluminense,2025-03-30,2025-03-30,Mano Menezes,Marcão,sacked,1,0,0,19th,Sacked,en
+2025,A,3445,Fluminense,2025-04-03,2025-04-03,Marcão,Renato Gaúcho,interim end,0,0,0,19th,End of caretaker spell,en
+2025,A,2674,Santos,2025-04-14,2025-04-14,Pedro Caixinha,César Sampaio,sacked,1,0,0,18th,Sacked,en
+2025,A,6273,Grêmio,2025-04-16,2025-04-17,Gustavo Quinteros,James Freitas,sacked,1,0,0,17th,Sacked,en
+2025,A,874,Corinthians,2025-04-17,2025-04-17,Ramón Díaz,Orlando Ribeiro,sacked,1,0,0,13th,Sacked,en
+2025,A,6273,Grêmio,2025-04-21,2025-04-21,James Freitas,Mano Menezes,interim end,0,0,0,18th,End of caretaker spell,en
+2025,A,3454,Vasco da Gama,2025-04-27,2025-04-27,Fábio Carille,Felipe,sacked,1,0,0,11th,Sacked,en
+2025,A,874,Corinthians,2025-04-28,2025-04-28,Orlando Ribeiro,Dorival Júnior,interim end,0,0,0,12th,End of caretaker spell,en
+2025,A,2674,Santos,2025-04-29,2025-04-29,César Sampaio,Cleber Xavier,interim end,0,0,0,19th,End of caretaker spell,en
+2025,A,7635,Sport,2025-05-03,2025-05-09,Pepa,António Oliveira,sacked,0,0,0,20th,Sacked,en
+2025,A,3454,Vasco da Gama,2025-05-10,2025-05-09,Felipe,Fernando Diniz,interim end,0,0,0,17th,End of caretaker spell,en
+2025,A,6270,Juventude,2025-05-11,2025-05-13,Fábio Matias,Cláudio Tencati,mutual,0,0,0,18th,Mutual agreement,en
+2025,A,7635,Sport,2025-06-04,2025-06-07,António Oliveira,Daniel Paulista,sacked,0,0,0,20th,Sacked,en
+2025,A,2026,São Paulo,2025-06-16,2025-06-18,Luis Zubeldía,Hernán Crespo,mutual,0,0,0,14th,Mutual agreement,en
+2025,A,6086,Botafogo,2025-06-30,2025-07-08,Renato Paiva,Davide Ancelotti,sacked,0,0,0,8th,Sacked,en
+2025,A,3457,Vitória,2025-07-09,2025-07-09,Thiago Carpini,Fábio Carille,sacked,0,0,0,16th,Sacked,en
+2025,A,6272,Fortaleza,2025-07-14,2025-07-17,Juan Pablo Vojvoda,Renato Paiva,sacked,0,0,0,18th,Sacked,en
+2025,A,6270,Juventude,2025-07-29,2025-08-01,Cláudio Tencati,Gerson Ramos,sacked,1,0,0,19th,Sacked,en
+2025,A,6270,Juventude,2025-08-04,2025-08-04,Gerson Ramos,Thiago Carpini,interim end,0,0,0,19th,End of caretaker spell,en
+2025,A,2674,Santos,2025-08-17,2025-08-22,Cleber Xavier,Juan Pablo Vojvoda,sacked,0,0,0,15th,Sacked,en
+2025,A,3457,Vitória,2025-08-25,2025-08-26,Fábio Carille,Rodrigo Chagas,sacked,0,0,0,17th,Sacked,en
+2025,A,7632,Atlético Mineiro,2025-08-29,2025-08-29,Cuca,Lucas Gonçalves,sacked,1,0,0,12th,Sacked,en
+2025,A,6272,Fortaleza,2025-09-02,2025-09-03,Renato Paiva,Martín Palermo,sacked,0,0,0,19th,Sacked,en
+2025,A,7632,Atlético Mineiro,2025-09-02,2025-09-02,Lucas Gonçalves,Jorge Sampaoli,interim end,0,0,0,14th,End of caretaker spell,en
+2025,A,1936,Internacional,2025-09-21,2025-09-24,Roger Machado,Ramón Díaz,sacked,0,0,0,13th,Sacked,en
+2025,A,3445,Fluminense,2025-09-24,2025-09-25,Renato Gaúcho,Luis Zubeldía,resigned,0,0,0,8th,Resigned,en
+2025,A,3457,Vitória,2025-09-24,2025-09-24,Rodrigo Chagas,Jair Ventura,other,0,0,0,17th,Demoted to assistant coach,en
+2025,A,6079,Red Bull Bragantino,2025-10-27,2025-10-30,Fernando Seabra,Vagner Mancini,sacked,0,0,0,12th,Sacked,en
+2025,A,7635,Sport,2025-10-28,2025-10-28,Daniel Paulista,César Lucena,sacked,1,0,0,20th,Sacked,en
+2026,A,3456,Coritiba,2025-11-28,2025-12-08,Mozart,Fernando Seabra,contract end,0,0,1,Pre-season,End of contract,en
+2025,A,1936,Internacional,2025-11-29,2025-11-29,Ramón Díaz,Abel Braga,sacked,0,0,0,17th,Sacked,en
+2026,A,4936,Remo,2025-12-02,2025-12-17,Guto Ferreira,Juan Carlos Osorio,contract end,0,0,1,Pre-season,End of contract,en
+2026,A,1936,Internacional,2025-12-08,2025-12-18,Abel Braga,Paulo Pezzolano,other,0,0,1,Pre-season,Moved to director role,en
+2026,A,6273,Grêmio,2025-12-09,2025-12-12,Mano Menezes,Luís Castro,contract end,0,0,1,Pre-season,End of contract,en
+2026,A,2022,Cruzeiro,2025-12-15,2025-12-16,Leonardo Jardim,Tite,resigned,0,0,1,Pre-season,Resigned,en
+2026,A,6086,Botafogo,2025-12-17,2025-12-22,Davide Ancelotti,Martín Anselmi,resigned,0,0,1,Pre-season,Resigned,en
+2026,A,7632,Atlético Mineiro,2026-02-12,2026-02-12,Jorge Sampaoli,Lucas Gonçalves,mutual,1,0,0,14th,Mutual agreement,en
+2026,A,3454,Vasco da Gama,2026-02-22,2026-02-22,Fernando Diniz,Bruno Lazaroni,sacked,1,0,0,17th,Sacked,en
+2026,A,7632,Atlético Mineiro,2026-02-25,2026-02-24,Lucas Gonçalves,Eduardo Domínguez,interim end,0,0,0,17th,End of caretaker spell,en
+2026,A,4936,Remo,2026-03-01,2026-03-01,Juan Carlos Osorio,Flávio Garcia,sacked,1,0,0,16th,Sacked,en
+2026,A,3454,Vasco da Gama,2026-03-03,2026-03-03,Bruno Lazaroni,Renato Gaúcho,interim end,0,0,0,20th,End of caretaker spell,en
+2026,A,819,Flamengo,2026-03-03,2026-03-04,Filipe Luís,Leonardo Jardim,sacked,0,0,0,11th,Sacked,en
+2026,A,4936,Remo,2026-03-05,2026-03-05,Flávio Garcia,Léo Condé,interim end,0,0,0,16th,End of caretaker spell,en
+2026,A,2026,São Paulo,2026-03-09,2026-03-10,Hernán Crespo,Roger Machado,sacked,0,0,0,2nd,Sacked,en
+2026,A,2022,Cruzeiro,2026-03-15,2026-03-15,Tite,Wesley Carvalho,sacked,1,0,0,19th,Sacked,en
+2026,A,2674,Santos,2026-03-19,2026-03-19,Juan Pablo Vojvoda,Cuca,sacked,0,0,0,16th,Sacked,en
+2026,A,2022,Cruzeiro,2026-03-22,2026-03-22,Wesley Carvalho,Artur Jorge,interim end,0,0,0,20th,End of caretaker spell,en
+2026,A,6086,Botafogo,2026-03-22,2026-03-22,Martín Anselmi,Rodrigo Bellão,sacked,1,0,0,15th,Sacked,en
+2026,A,6086,Botafogo,2026-04-02,2026-04-02,Rodrigo Bellão,Franclim Carvalho,interim end,0,0,0,12th,End of caretaker spell,en
+2026,A,9318,Chapecoense,2026-04-03,2026-04-04,Gilmar Dal Pozzo,Celso Rodrigues,sacked,1,0,0,18th,Sacked,en
+2026,A,874,Corinthians,2026-04-05,2026-04-06,Dorival Júnior,Fernando Diniz,sacked,0,0,0,16th,Sacked,en
+2026,A,9318,Chapecoense,2026-04-05,2026-04-05,Celso Rodrigues,Fábio Matias,interim end,0,0,0,17th,End of caretaker spell,en
+2026,A,2026,São Paulo,2026-05-13,2026-05-15,Roger Machado,Dorival Júnior,sacked,0,0,0,4th,Sacked,en
+2026,A,9318,Chapecoense,2026-05-25,2026-05-26,Fábio Matias,Rafael Lacerda,sacked,0,0,0,20th,Sacked,en
+2026,A,3454,Vasco,2026-06-18,2026-07-10,Renato Gaúcho,Pedro Emanuel,mutual,0,0,0,17th,Mutual agreement,en
+2026,A,3445,Fluminense,2026-08-13,2026-08-13,Luis Zubeldía,Marcão,sacked,1,0,0,4th,Sacked,en
+2026,A,6086,Botafogo,2026-08-18,2026-08-18,Franclim Carvalho,Rodrigo Bellão,sacked,1,0,0,11th,Sacked,en
+2026,A,6273,Grêmio,2026-09-13,2026-09-14,Luís Castro,Renato Gaúcho,sacked,0,0,0,16th,Sacked,en
+2026,A,4936,Remo,2026-09-15,2026-09-16,Léo Condé,Thiago Carpini,sacked,0,0,0,19th,Sacked,en
+2026,A,6086,Botafogo,2026-09-16,2026-09-16,Rodrigo Bellão,Tite,interim end,0,0,0,14th,End of caretaker spell,en
+2026,A,1936,Internacional,2026-09-20,2026-09-23,Paulo Pezzolano,Eduardo Baptista,sacked,0,0,0,18th,Sacked,en
+2026,A,874,Corinthians,2026-10-07,2026-10-08,Fernando Diniz,William Batista,sacked,1,0,0,16th,Sacked,en
+2026,A,874,Corinthians,2026-10-11,2026-10-11,William Batista,Clarence Seedorf,interim end,0,0,0,16th,End of caretaker spell,en
+2026,A,3456,Coritiba,2026-10-27,2026-10-27,Fernando Seabra,Guilherme Bossle,sacked,1,0,0,12th,Sacked,en
+2026,A,3457,Vitória,2026-11-02,2026-11-02,Jair Ventura,Cleber dos Santos,sacked,1,0,0,14th,Sacked,en
+2026,A,9318,Chapecoense,2026-11-09,2026-11-13,Rafael Lacerda,Vinícius Bergantin,resigned,0,0,0,20th,Resigned,en
+2026,A,3457,Vitória,2026-11-10,2026-11-10,Cleber dos Santos,Rafael Lacerda,interim end,0,0,0,15th,End of caretaker spell,en

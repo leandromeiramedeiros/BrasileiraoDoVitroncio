@@ -13,6 +13,8 @@ export const RESEARCH = [
   ['Árvores de decisão com atributos de elenco', 'ganho igual ao da escalação; ficou a versão linear, que roda no navegador', '≈ −0,0008'],
   ['Copa do Brasil, Libertadores e estaduais como evidência de força', 'não entrou', '≈ 0'],
   ['Descanso, sequência de jogos, viagem, clima, clássicos, pressão contra o rebaixamento', 'não entrou', '≈ 0'],
+  ['Mudança de técnico (Wikipedia): primeiro jogo após a saída do técnico e técnico interino', 'não entrou: ganho pequeno e dado frágil (limite de acesso, interinos desatualizados)', '−0,0003'],
+  ['Múltiplas sugeridas pelo Best Against (2 a 5 pernas por rodada)', 'na aba Múltiplas, com o retrospecto', '−11% (2 pernas), −50% (3) por aposta'],
   ['Árbitro: tendência a mando e gols', 'não entrou: a ESPN quase não tem o árbitro de 2014 a 2021', '≈ 0'],
   ['Pi-ratings, Elo, GAP e Berrar combinados por árvores', 'não entrou: o ganho era só recalibração', '≈ 0'],
   ['Redes neurais sobre o histórico de cada time (DeepSets, GRU)', 'não entrou', '−0,0001 (ruído)'],

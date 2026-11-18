@@ -1,6 +1,6 @@
 // Utilitários de interface: formatação pt-BR, escape de HTML, pequenos helpers.
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const pct = (p, d = 0) => (p == null || Number.isNaN(p) ? '–' : p > 0 && p < 0.005 && d === 0 ? '<1%' : p < 1 && p > 0.995 && d === 0 ? '>99%' : `${(p * 100).toFixed(d)}%`);
+export const pct = (p, d = 0) => (p == null || Number.isNaN(p) ? '–' : p > 0 && p < 0.005 && d === 0 ? '<1%' : p < 1 && p > 0.995 && d === 0 ? '>99%' : `${(p * 100).toFixed(d).replace('.', ',')}%`);
 export const num = (v, d = 1) => (v == null || Number.isNaN(v) ? '–' : v.toFixed(d).replace('.', ','));
 const fDay = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
 const fShort = new Intl.DateTimeFormat('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });

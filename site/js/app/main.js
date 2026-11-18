@@ -12,21 +12,21 @@ import { teamsView, teamView } from './views/teams.js';
 import { modelView } from './views/model.js';
 import { calendarView, playersView, calState } from './views/extra.js';
 import { compareView, cmpState } from './views/compare.js';
-import { againstView } from './views/against.js';
+import { againstView, multiView, multToggle, multSet } from './views/against.js';
 import { initVitroncio, reactFav, reactSelf } from './vitroncio.js';
 
 const view = document.getElementById('view');
 const nav = document.getElementById('nav');
 const NAV = [['', 'Início'], ['jogos', 'Jogos'], ['campeonato', 'Campeonato'], ['times', 'Times'], ['contra', 'Best Against'], ['modelo', 'Modelo']];
 // páginas com abas internas; os endereços antigos continuam valendo
-const SUBS = { campeonato: [['', 'Tabela'], ['simulador', 'Simulador']], times: [['', 'Times'], ['jogadores', 'Jogadores']], contra: [['', 'Oportunidades'], ['comparar', 'Comparação completa']] };
+const SUBS = { campeonato: [['', 'Tabela'], ['simulador', 'Simulador']], times: [['', 'Times'], ['jogadores', 'Jogadores']], contra: [['', 'Oportunidades'], ['multiplas', 'Múltiplas'], ['comparar', 'Comparação completa']] };
 const ALIAS = { tabela: ['campeonato'], simulador: ['campeonato', 'simulador'], comparar: ['contra', 'comparar'], artilharia: ['times', 'jogadores'] };
 const route = () => { const r = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean); return ALIAS[r[0]] ? [...ALIAS[r[0]], ...r.slice(1)] : r; };
 const VIEWS = {
   jogo: (a) => matchView(a), jogos: () => calendarView(), modelo: () => modelView(), time: (a) => teamView(a),
   campeonato: (a) => (a === 'simulador' ? simulatorView() : tableView()),
   times: (a) => (a === 'jogadores' ? playersView() : teamsView()),
-  contra: (a) => (a === 'comparar' ? compareView() : againstView()),
+  contra: (a) => (a === 'comparar' ? compareView() : a === 'multiplas' ? multiView() : againstView()),
 };
 const subnav = (p, a) => (SUBS[p] ? `<div class="wrap subnav" data-mk="subnav">${SUBS[p].map(([k, l]) => `<a href="#/${p}${k ? '/' + k : ''}" class="${(a || '') === k ? 'on' : ''}">${l}</a>`).join('')}</div>` : '');
 
@@ -75,6 +75,9 @@ document.addEventListener('click', (ev) => {
   else if (act === 'whatifall') simState.all = !simState.all;
   else if (act === 'calmonth') calState.month = id;
   else if (act === 'cmpmore') cmpState.n += 60;
+  else if (act === 'mleg') multToggle(id, +el.dataset.j);
+  else if (act === 'mclear') multSet({});
+  else if (act === 'mload') multSet(Object.fromEntries(el.dataset.legs.split(',').map((x) => { const [i, j] = x.split(':'); return [i, +j]; })));
   else if (act === 'runwhatif') { if (!simState.running) runWhatIf(render); return; }
   last = ''; render();
 });
