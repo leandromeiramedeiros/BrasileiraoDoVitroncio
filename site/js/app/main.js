@@ -19,11 +19,11 @@ const view = document.getElementById('view');
 const nav = document.getElementById('nav');
 const NAV = [['', 'Início'], ['jogos', 'Jogos'], ['campeonato', 'Campeonato'], ['times', 'Times'], ['contra', 'Best Against'], ['modelo', 'Modelo']];
 // páginas com abas internas; os endereços antigos continuam valendo
-const SUBS = { campeonato: [['', 'Tabela'], ['simulador', 'Simulador']], times: [['', 'Times'], ['jogadores', 'Jogadores']], contra: [['', 'Oportunidades'], ['multiplas', 'Múltiplas'], ['comparar', 'Comparação completa']] };
+const SUBS = { campeonato: [['', 'Tabela'], ['simulador', 'Simulador']], times: [['', 'Times'], ['jogadores', 'Jogadores']], contra: [['', 'Oportunidades'], ['multiplas', 'Múltiplas'], ['comparar', '<span class="nm-full">Comparação completa</span><span class="nm-abbr">Comparação</span>']] };
 const ALIAS = { tabela: ['campeonato'], simulador: ['campeonato', 'simulador'], comparar: ['contra', 'comparar'], artilharia: ['times', 'jogadores'] };
 const route = () => { const r = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean); return ALIAS[r[0]] ? [...ALIAS[r[0]], ...r.slice(1)] : r; };
 const VIEWS = {
-  jogo: (a) => matchView(a), jogos: () => calendarView(), modelo: () => modelView(), time: (a) => teamView(a),
+  jogo: (a) => matchView(a), jogos: (a) => calendarView(a), modelo: () => modelView(), time: (a) => teamView(a),
   campeonato: (a) => (a === 'simulador' ? simulatorView() : tableView()),
   times: (a) => (a === 'jogadores' ? playersView() : teamsView()),
   contra: (a) => (a === 'comparar' ? compareView() : a === 'multiplas' ? multiView() : againstView()),
@@ -43,7 +43,7 @@ function render() {
       html = subnav(p, a) + (VIEWS[p] ? VIEWS[p](a) : homeView());
     } catch (e) { console.error(e); html = `<div class="wrap"><div class="banner">Algo deu errado ao montar esta página: ${esc(e.message)}</div></div>`; }
     if (html !== last) { morph(view, html, routeKey === lastRoute); last = html; lastRoute = routeKey; }
-    const cur = p === 'jogo' ? '' : p === 'time' ? 'times' : p || '';
+    const cur = p === 'jogo' ? 'jogos' : p === 'time' ? 'times' : p || '';
     const live = liveMatches().length;
     const navHtml = NAV.map(([k, l]) => `<a href="#/${k}" class="${k === cur ? 'on' : ''}">${l}${k === '' && live ? `<span class="navlive">${live}</span>` : ''}</a>`).join('');
     if (navHtml !== lastNav) { nav.innerHTML = navHtml; lastNav = navHtml; }
@@ -73,7 +73,7 @@ document.addEventListener('click', (ev) => {
   else if (act === 'whatif') { if (simState.fixed[id] === el.dataset.r) delete simState.fixed[id]; else simState.fixed[id] = el.dataset.r; }
   else if (act === 'clearwhatif') { simState.fixed = {}; simState.result = null; }
   else if (act === 'whatifall') simState.all = !simState.all;
-  else if (act === 'calmonth') calState.month = id;
+  else if (act === 'calmonth') { if (!id) return; calState.month = id; }
   else if (act === 'cmpmore') cmpState.n += 60;
   else if (act === 'mleg') multToggle(id, el.dataset.sel);
   else if (act === 'mclear') multSet([]);
@@ -86,7 +86,8 @@ document.addEventListener('click', (ev) => {
 document.addEventListener('change', (ev) => {
   const el = ev.target.closest('[data-change]'); if (!el) return;
   if (el.dataset.change === 'pair') { simState[el.dataset.side] = el.value; closeSim(); last = ''; render(); }
-  else if (el.dataset.change === 'calteam') { calState.team = el.value; last = ''; render(); }
+  else if (el.dataset.change === 'calteam') { location.hash = `#/jogos${el.value ? '/' + el.value : ''}`; }
+  else if (el.dataset.change === 'calmonth') { calState.month = el.value; last = ''; render(); }
   else if (el.dataset.change === 'cmpteam') { cmpState.team = el.value; last = ''; render(); }
   else if (el.dataset.change === 'modd') { multOdd(el.dataset.key, el.value); last = ''; render(); }
 });

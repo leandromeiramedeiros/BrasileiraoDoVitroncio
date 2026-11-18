@@ -20,6 +20,9 @@ Site estático (GitHub Pages) da Série A com simulador próprio. Interface e co
   - Presença fixa: marca no cabeçalho, rodapé, ao lado de toda barra de probabilidade, página "Odds" e topo da página do modelo.
   - Aparições e easter eggs ficam em `site/js/app/vitroncio.js` (a lista está no cabeçalho do arquivo). São escondidos de propósito: não anuncie na interface nem no README. Falas curtas e secas, na voz dele; nada que zombe de um time específico.
 - Página inicial curta; o detalhe fica nas páginas de jogo.
+- Listas de jogos (calendário, próximos e últimos jogos da inicial, página do time) usam linhas de largura total (`fixtureRow`/`fixtureList` em `components.js`), que nunca deixam buraco, com 1 ou 10 jogos; no celular cada linha vira dois times empilhados. Cartões (`matchCard`) só na faixa rolável do ao vivo. Não volte a pôr listas de tamanho variável em grade de cartões.
+- `#/jogos/<id do time>` mostra a campanha inteira de um time (próximos e disputados, com V/E/D); a página do time aponta para lá.
+- Layout: grades usam `minmax(0, 1fr)` (senão uma tabela larga empurra a página no celular); caixas de números (`.kv`) são flex, a última linha estica. Antes de publicar mudança de layout, confira em 1280, 768 e 390 px sem rolagem horizontal da página.
 - Menu com 6 itens: Início, Jogos, Campeonato (Tabela | Simulador), Times (Times | Jogadores), Best Against (Oportunidades | Comparação completa), Modelo. Abas internas em `SUBS` e endereços antigos em `ALIAS` (`site/js/app/main.js`). Não acrescente item ao menu sem tirar outro.
 - Página do modelo: a tabela "Pesquisa" e as referências vêm de `site/js/app/views/refs.js`. Ao testar algo novo, acrescente a linha com o efeito em 2022–2026; só cite livro ou artigo que foi de fato usado, sem inventar páginas ou DOI.
 

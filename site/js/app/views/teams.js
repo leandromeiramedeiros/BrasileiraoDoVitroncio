@@ -1,7 +1,7 @@
 // Lista de times (ranking de força) e página de cada time.
 import { S, team, strengths, table, allMatches, forecast, teamIds } from '../store.js';
 import { esc, pct, num, fmtShort, store } from '../util.js';
-import { logo, matchCard, fav, heat } from '../components.js';
+import { logo, fixtureList, fav, heat } from '../components.js';
 import { posDist } from './table.js';
 
 export function teamsView() {
@@ -49,8 +49,8 @@ export function teamView(id) {
       </div>
       ${sm ? `<p class="small muted" style="margin:12px 0 0">Posição final: ${sm.pos.map((p, i) => (p >= 0.03 ? `<span class="chip">${i + 1}º <b>${pct(p)}</b></span>` : '')).join(' ')}</p>` : ''}</section>
     ${ratingChart(id) ? `<section class="panel"><div class="sec-h"><h3>Força ao longo da temporada</h3><span class="sub">em destaque: ${esc(t.name)}; em cinza, os demais times</span></div>${ratingChart(id)}</section>` : ''}
-    ${next.length ? `<section><div class="sec-h"><h2>Próximos jogos</h2></div><div class="grid g3">${next.map((m) => matchCard(m, { day: true })).join('')}</div></section>` : ''}
-    ${past.length ? `<section><div class="sec-h"><h2>Últimos jogos</h2></div><div class="grid g3">${past.map((m) => matchCard(m, { day: true })).join('')}</div></section>` : ''}
+    ${next.length ? `<section><div class="sec-h"><h2>Próximos jogos</h2><span class="sub">C = em casa, F = fora</span><a class="more" href="#/jogos/${id}">todos os jogos</a></div>${fixtureList(next, { focus: id })}</section>` : ''}
+    ${past.length ? `<section><div class="sec-h"><h2>Últimos jogos</h2><a class="more" href="#/jogos/${id}">todos os jogos</a></div>${fixtureList(past, { focus: id })}</section>` : ''}
     ${squad.length ? `<section><div class="sec-h"><h2>Elenco</h2><span class="sub">Série A ${S.model.temporada}, até o último reajuste do modelo</span></div><div class="tw"><table><thead><tr><th>Nº</th><th class="l">Jogador</th><th>Pos</th><th>Jogos</th><th>Tit.</th><th>Min</th><th>Gols</th><th>Assist.</th><th>Final.</th><th>No alvo</th><th>CA</th><th>CV</th></tr></thead><tbody>
       ${squad.map((p) => `<tr><td class="dim">${esc(p.j)}</td><td class="l" style="font-weight:600">${esc(p.n)}</td><td class="dim">${P[p.pos]}</td><td>${p.apps}</td><td>${p.st}</td><td>${p.min}</td><td class="pts">${p.g || ''}</td><td>${p.a || ''}</td><td>${p.sh || ''}</td><td>${p.sot || ''}</td><td>${p.y || ''}</td><td>${p.r || ''}</td></tr>`).join('')}</tbody></table></div></section>` : ''}
   </div>`;

@@ -5,7 +5,7 @@ import { RESEARCH, REFS, DATA } from './refs.js';
 
 function calibChart(cal) {
   const W = 360, H = 300, pad = 36;
-  const x = (v) => pad + v * (W - pad - 10), y = (v) => H - pad - v * (H - pad - 10);
+  const x = (v) => pad + v * (W - pad - 24), y = (v) => H - pad - v * (H - pad - 10);
   const pts = cal.filter(Boolean);
   const mx = Math.max(...pts.map((p) => p.n));
   return `<svg class="chart big" viewBox="0 0 ${W} ${H}" style="max-width:420px" role="img" aria-label="Calibração">
@@ -73,18 +73,18 @@ export function modelView() {
       </div>
       <p class="small muted">RPS mede o erro das probabilidades: quanto menor, melhor.${g.rpsSemEscalacao && g.rpsSemEscalacao !== g.rps ? ' O RPS do modelo usa a escalação anunciada de cada jogo; dias antes do jogo, sem ela, o erro esperado é o da coluna "sem a escalação".' : ''} A referência simples usa sempre as frequências históricas de vitória do mandante, empate e visitante.${g.rpsRef ? ` O modelo cobre ${pct((g.rpsBase - g.rps) / (g.rpsBase - g.rpsRef))} da distância entre essa referência e o mercado.` : ''}</p>
       <div class="duo"><div class="panel"><div class="sec-h"><h3>Calibração</h3></div>${calibChart(bt.calibracao)}<p class="small muted">Probabilidade prevista (horizontal) contra frequência observada (vertical). Sobre a diagonal, o modelo está calibrado.</p></div>
-      <div class="panel"><div class="sec-h"><h3>Total de gols por jogo</h3></div><table><tr><th class="l">Gols</th>${bt.totalGols.previsto.map((_, k) => `<th>${k}${k === 8 ? '+' : ''}</th>`).join('')}</tr><tr><td class="l">Previsto</td>${bt.totalGols.previsto.map((v) => `<td>${pct(v)}</td>`).join('')}</tr><tr><td class="l">Real</td>${bt.totalGols.observado.map((v) => `<td>${pct(v)}</td>`).join('')}</tr></table>
-        <div class="sec-h" style="margin-top:16px"><h3>Por temporada</h3></div><div class="tw" style="max-height:300px;overflow:auto"><table><tr><th>Ano</th><th>Jogos</th><th>Favorito</th><th>RPS</th><th>Referência</th></tr>${seasons.map(([s, a]) => `<tr><td>${s}</td><td>${a.n}</td><td>${pct(a.acerto)}</td><td>${a.rps.toFixed(4)}</td><td>${a.rpsBase.toFixed(4)}</td></tr>`).join('')}</table></div></div></div>
+      <div class="panel"><div class="sec-h"><h3>Total de gols por jogo</h3><span class="sub">previsto e real</span></div><table><thead><tr><th class="l">Gols</th><th>Previsto</th><th>Real</th></tr></thead><tbody>${bt.totalGols.previsto.map((v, k) => `<tr><td class="l">${k}${k === 8 ? ' ou mais' : ''}</td><td>${pct(v)}</td><td>${pct(bt.totalGols.observado[k])}</td></tr>`).join('')}</tbody></table></div></div>
+      <div class="panel" style="margin-top:12px"><div class="sec-h"><h3>Por temporada</h3><span class="sub">Série A; favorito = time com a maior chance venceu</span></div><div class="tw"><table><thead><tr><th>Ano</th><th>Jogos</th><th>Favorito venceu</th><th>RPS</th><th><span class="nm-full">Referência simples</span><span class="nm-abbr">Ref.</span></th></tr></thead><tbody>${seasons.map(([s, a]) => `<tr><td>${s}</td><td>${a.n}</td><td>${pct(a.acerto)}</td><td>${a.rps.toFixed(4)}</td><td>${a.rpsBase.toFixed(4)}</td></tr>`).join('')}</tbody></table></div></div>
     </section>
     <section><div class="sec-h"><h2>Limitações</h2></div><ul>
-      <li>Não considera lesões, suspensões nem jogadores poupados; só o que aconteceu em campo.</li>
+      <li>Lesões entram só de forma indireta (titular habitual fora do último jogo), e jogadores poupados só aparecem quando a escalação sai, perto do apito.</li>
       <li>Aprende só com jogos das Séries A e B; das taças continentais usa apenas o calendário.</li>
       <li>Marcadores prováveis e dados de jogadores são atualizados só no reajuste semanal.</li>
       <li>Os dados ao vivo vêm de um serviço público da ESPN e podem atrasar ou mudar sem aviso.</li>
       <li>Não serve para apostar. As odds de fechamento erram menos que o modelo${g.rpsRef ? ` (RPS ${g.rpsRef.toFixed(4)} contra ${g.rps.toFixed(4)})` : ''}, e a casa ainda cobra margem. Entre 2013 e 2026, apostar nos resultados em que o modelo via preço bom teria perdido cerca de 6% do valor apostado.</li></ul></section>
     <section><div class="sec-h"><h2>Pesquisa</h2><span class="sub">novembro de 2026: o que foi testado para reduzir o erro</span></div>
       <p class="small muted">Cada ideia foi escolhida olhando só as temporadas de 2013 a 2021 e conferida depois em 2022–2026. Efeito: mudança no RPS de 2022–2026 (negativo é melhor).</p>
-      <div class="tw"><table><tr><th class="l">Ideia</th><th class="l">Situação</th><th>Efeito</th></tr>${RESEARCH.map(([a, b, c]) => `<tr><td class="l">${esc(a)}</td><td class="l small">${esc(b)}</td><td class="pts">${esc(c)}</td></tr>`).join('')}</table></div></section>
+      <div class="tw"><table class="research"><tr><th class="l">Ideia</th><th class="l">Situação</th><th class="l">Efeito</th></tr>${RESEARCH.map(([a, b, c]) => `<tr><td class="l">${esc(a)}</td><td class="l small">${esc(b)}</td><td class="l pts">${esc(c)}</td></tr>`).join('')}</table></div></section>
     <section><div class="sec-h"><h2>Referências</h2><span class="sub">livros, artigos e dados por trás do modelo e dos testes</span></div>
       ${REFS.map(([grp, list]) => `<h3>${esc(grp)}</h3><ul class="refs">${list.map((r) => `<li><a href="https://scholar.google.com/scholar?q=${encodeURIComponent(`"${r.title}"`)}" target="_blank" rel="noopener">${esc(r.authors)} (${r.year}). <i>${esc(r.title)}</i>.</a> ${esc(r.venue)}. <span class="dim">${esc(r.use)}.</span></li>`).join('')}</ul>`).join('')}
       <h3>Dados</h3><ul class="refs">${DATA.map(([a, b]) => `<li><b>${esc(a)}</b>: ${esc(b)}.</li>`).join('')}</ul></section>

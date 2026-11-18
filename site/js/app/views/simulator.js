@@ -24,7 +24,8 @@ export function simulatorView() {
   const whatif = rest.slice(0, shownN).map((m) => {
     const cur = simState.fixed[m.id];
     const b = (k, l) => `<button class="${cur === k ? 'on' : ''}" data-act="whatif" data-id="${m.id}" data-r="${k}">${l}</button>`;
-    return `<div class="whatif"><div class="t r"><span>${esc(team(m.h).name)}</span>${logo(team(m.h))}</div><div class="seg">${b('h', 'Casa')}${b('d', 'Emp.')}${b('a', 'Fora')}</div><div class="t">${logo(team(m.a))}<span>${esc(team(m.a).name)}</span><span class="dim small" style="margin-left:auto;white-space:nowrap">${esc(fmtShort(m.date))}</span></div></div>`;
+    const nm = (t) => `<span><span class="nm-full">${esc(t.name)}</span><span class="nm-abbr">${esc(t.abbr)}</span></span>`;
+    return `<div class="whatif" data-mk="w${m.id}"><div class="when">${esc(fmtShort(m.date))}${m.status === 'in' ? ' · em andamento' : ''}</div><div class="t r">${nm(team(m.h))}${logo(team(m.h))}</div><div class="seg">${b('h', 'Casa')}${b('d', 'Emp.')}${b('a', 'Fora')}</div><div class="t">${logo(team(m.a))}${nm(team(m.a))}</div></div>`;
   }).join('');
   let cmp = '';
   if (res && base) {

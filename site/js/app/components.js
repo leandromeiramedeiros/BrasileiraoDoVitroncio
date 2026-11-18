@@ -54,6 +54,43 @@ export function matchCard(m, { selected = false, act = null, day = false } = {})
   </a>`;
 }
 
+/**
+ * Linha de jogo para listas (calendário, próximos jogos, página do time). Ocupa a largura
+ * toda, então a lista nunca deixa buracos, com 1 ou com 10 jogos.
+ *   date: mostra o dia (desligue quando a lista já vem agrupada por dia)
+ *   focus: id do time em destaque (lista de um time só): mostra V/E/D do ponto de vista dele
+ * Probabilidades: ao vivo, as de agora; antes e depois do jogo, as pré-jogo (o resultado
+ * que aconteceu fica em destaque).
+ */
+export function fixtureRow(m, { date = true, focus = null } = {}) {
+  const H = team(m.h), A = team(m.a), f = forecast(m);
+  const played = m.status === 'in' || m.status === 'post';
+  const p = m.status === 'in' ? f.now : f.pre;
+  const res = m.status === 'post' ? (m.hg > m.ag ? 0 : m.hg === m.ag ? 1 : 2) : -1;
+  const side = (s) => {
+    const t = s === 'h' ? H : A, win = m.status === 'post' && (s === 'h' ? res === 0 : res === 2), lose = m.status === 'post' && (s === 'h' ? res === 2 : res === 0);
+    const me = focus && (s === 'h' ? m.h : m.a) === focus;
+    // no celular a linha vira duas (um time em cima do outro), com o placar de cada lado à direita
+    return `<span class="fx-t ${s} ${lose ? 'lose' : ''} ${win ? 'win' : ''} ${me ? 'me' : ''}">${logo(t)}<span class="nm">${esc(t.name)}</span>${played ? `<b class="fx-n">${s === 'h' ? m.hg : m.ag}</b>` : ''}</span>`;
+  };
+  const when = m.status === 'in' ? `<span class="livepill">${esc(statusLabel(m))}</span>`
+    : `${date ? `<b>${esc(fmtShort(m.date).replace(',', ''))}</b>` : ''}<span>${m.status === 'off' ? 'adiado' : fmtTime(m.date)}</span>`;
+  const mid = played ? `<span class="fx-sc">${m.hg}<i>–</i>${m.ag}</span>` : '<span class="fx-x">×</span>';
+  const num = [p.pH, p.pD, p.pA].map((v, i) => `<span class="${i === res ? 'hit' : ''}">${pct(v)}</span>`).join('');
+  let badge = '';
+  if (focus) {
+    const r = m.status !== 'post' ? '' : m.hg === m.ag ? 'E' : (m.h === focus) === m.hg > m.ag ? 'V' : 'D';
+    badge = `<span class="fx-res ${r}">${r || (m.h === focus ? 'C' : 'F')}</span>`;
+  }
+  const tip = m.status === 'in' ? 'chance agora' : m.status === 'post' ? 'chance pré-jogo; em destaque, o que aconteceu' : 'chance de cada resultado';
+  return `<a class="fxr ${focus ? 'focus' : ''} ${fav() && (m.h === fav() || m.a === fav()) ? 'fav' : ''}" data-mk="r${m.id}" href="#/jogo/${m.id}" style="${colors(m)}">
+    ${badge}<span class="fx-when">${when}</span>${side('h')}${mid}${side('a')}
+    <span class="fx-p" title="${tip}">${probBar(p, { sm: true })}<span class="fx-pn">${num}</span></span>
+    <span class="fx-v">${esc(m.venue || '')}</span></a>`;
+}
+/** Lista de jogos em linhas. */
+export const fixtureList = (list, opt = {}) => `<div class="fxl">${list.map((m) => fixtureRow(m, opt)).join('')}</div>`;
+
 /** Matriz de placares (mapa de calor). `now` destaca o placar atual. */
 export function scoreMatrix(dist, m, { max = 5, now = null } = {}) {
   const mx = dist.matrix; let peak = 0;
@@ -120,6 +157,6 @@ export function raceBlock(key, n, rgb) {
   const sim = S.seasonSim; if (!sim) return '<p class="muted small">Simulando…</p>';
   const rows = Object.values(sim.teams).sort((a, b) => b[key] - a[key]).slice(0, n).filter((r) => r[key] > 0.0005);
   if (!rows.length) return '<p class="muted small">Já definido.</p>';
-  return `<div class="race">${rows.map((r) => { const t = team(r.id); return `<a class="r" data-mk="r${r.id}" href="#/time/${r.id}">${logo(t)}<span>${esc(t.name)}</span><span class="b"><i style="width:${r[key] * 100}%;background:rgb(${rgb})"></i></span><span class="v">${pct(r[key])}</span></a>`; }).join('')}</div>`;
+  return `<div class="race">${rows.map((r) => { const t = team(r.id); return `<a class="r" data-mk="r${r.id}" href="#/time/${r.id}">${logo(t)}<span>${esc(t.name)}</span><span class="b"><i style="width:${r[key] * 100}%;background:rgb(${rgb})"></i></span><span class="v">${pct(r[key])}</span></a>`; }).join('')}</div>${rows.length < n ? `<p class="small dim" style="margin:10px 0 0">${rows.length === 1 ? 'Nenhum outro time' : 'Nenhum dos demais'} passa de 0,05%.</p>` : ''}`;
 }
 export { liveState, table };

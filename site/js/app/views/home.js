@@ -3,7 +3,7 @@
 // detalhe fica nas páginas de cada jogo.
 import { S, team, liveMatches, upcoming, finished, table } from '../store.js';
 import { esc, pct, dayKey, relDay, countdown, fmtTime } from '../util.js';
-import { matchCard, raceBlock, logo, fav } from '../components.js';
+import { matchCard, fixtureList, raceBlock, logo, fav } from '../components.js';
 import { matchBlock, sim } from './match.js';
 
 export const homeState = { selected: null, simHere: false };
@@ -32,7 +32,7 @@ export function homeView() {
   const groups = new Map();
   for (const m of up) { if (live.length && dayKey(m.date) === today) continue; const k = dayKey(m.date); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(m); }
   const days = [...groups.values()].slice(0, 2);
-  const upcomingHtml = days.map((list) => `<div class="day" data-mk="d${dayKey(list[0].date)}">${esc(relDay(list[0].date))}</div><div class="grid g3" data-mk="g${dayKey(list[0].date)}">${list.filter((m) => m.id !== heroId || live.length).map((m) => matchCard(m)).join('')}</div>`).join('');
+  const upcomingHtml = days.map((all) => { const list = all.filter((m) => m.id !== heroId || live.length); return list.length ? `<div class="day" data-mk="d${dayKey(list[0].date)}">${esc(relDay(list[0].date))}</div><div data-mk="g${dayKey(list[0].date)}">${fixtureList(list, { date: false })}</div>` : ''; }).join('');
 
   const f = fav(), favTeam = f && S.teams[f], favRow = favTeam && table().find((r) => r.id === f), favSim = favTeam && S.seasonSim?.teams[f];
   const favNext = favTeam && up.find((m) => m.h === f || m.a === f);
@@ -52,6 +52,6 @@ export function homeView() {
         <div class="panel"><div class="sec-h"><h3>Libertadores (G4)</h3></div>${raceBlock('libertadores', 6, '79,157,232')}</div>
         <div class="panel"><div class="sec-h"><h3>Rebaixamento</h3></div>${raceBlock('rebaixamento', 6, '239,68,82')}</div>
       </div></section>
-    ${last.length ? `<section data-mk="last"><div class="sec-h"><h2>Últimos resultados</h2><a class="more" href="#/jogos">todos</a></div><div class="grid g3">${last.map((m) => matchCard(m, { day: true })).join('')}</div></section>` : ''}
+    ${last.length ? `<section data-mk="last"><div class="sec-h"><h2>Últimos resultados</h2><a class="more" href="#/jogos">todos</a></div>${fixtureList(last)}</section>` : ''}
   </div>`;
 }

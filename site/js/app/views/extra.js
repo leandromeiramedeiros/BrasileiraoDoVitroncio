@@ -1,29 +1,47 @@
 // Calendário completo e rankings de jogadores.
 import { S, team, allMatches, teamIds } from '../store.js';
 import { esc, dayKey, relDay, fmtFull } from '../util.js';
-import { matchCard, logo, fav } from '../components.js';
+import { fixtureList, logo, fav } from '../components.js';
 
-export const calState = { month: null, team: '' };
+export const calState = { month: null };
 const MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const monthKey = (iso) => dayKey(iso).slice(0, 7);
+const byDay = (list) => { const g = new Map(); for (const m of list) { const k = dayKey(m.date); if (!g.has(k)) g.set(k, []); g.get(k).push(m); } return [...g.values()]; };
+export const calMonths = () => [...new Set(allMatches().map((m) => monthKey(m.date)))].sort();
 
-export function calendarView() {
+/** Jogos: o mês escolhido, agrupado por dia; ou, com um time (#/jogos/<id>), a campanha inteira dele. */
+export function calendarView(teamId) {
   const all = allMatches();
-  const months = [...new Set(all.map((m) => monthKey(m.date)))].sort();
+  const months = calMonths();
   const nowK = monthKey(new Date().toISOString());
   if (!calState.month || !months.includes(calState.month)) calState.month = months.includes(nowK) ? nowK : months.filter((k) => k <= nowK).at(-1) || months[0];
   const ids = teamIds().sort((a, b) => team(a).name.localeCompare(team(b).name));
-  const list = all.filter((m) => (calState.team ? m.h === calState.team || m.a === calState.team : monthKey(m.date) === calState.month));
-  const groups = new Map();
-  for (const m of list) { const k = dayKey(m.date); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(m); }
+  const tid = ids.includes(teamId) ? teamId : '';
   const done = all.filter((m) => m.status === 'post').length;
-  return `<div class="wrap"><section><div class="sec-h"><h2>Jogos</h2><span class="sub">${done} de ${all.length} partidas disputadas na Série A ${S.season}</span></div>
-    <div class="btnrow" style="margin-bottom:14px">
-      <select data-change="calteam" aria-label="Filtrar por time"><option value="">Todos os times</option>${ids.map((id) => `<option value="${id}" ${id === calState.team ? 'selected' : ''}>${esc(team(id).name)}</option>`).join('')}</select>
-      ${calState.team ? '' : months.map((k) => `<button class="btn sm ${k === calState.month ? 'on' : ''}" data-act="calmonth" data-id="${k}">${MES[+k.slice(5) - 1].slice(0, 3)}</button>`).join('')}
-    </div>
-    ${[...groups.values()].map((g) => `<div style="margin-bottom:16px"><div class="sec-h"><div class="day" style="margin:0">${esc(relDay(g[0].date))}</div></div><div class="grid g3">${g.map((m) => matchCard(m, { day: !!calState.team })).join('')}</div></div>`).join('') || '<p class="muted">Nenhum jogo neste período.</p>'}
-  </section></div>`;
+  const sel = `<select data-change="calteam" aria-label="Filtrar por time"><option value="">Todos os times</option>${ids.map((id) => `<option value="${id}" ${id === tid ? 'selected' : ''}>${esc(team(id).name)}</option>`).join('')}</select>`;
+  let body;
+  if (tid) {
+    const games = all.filter((m) => m.h === tid || m.a === tid);
+    const next = games.filter((m) => m.status !== 'post'), past = games.filter((m) => m.status === 'post').reverse();
+    const r = { V: 0, E: 0, D: 0, gp: 0, gc: 0 };
+    for (const m of past) { const [a, b] = m.h === tid ? [m.hg, m.ag] : [m.ag, m.hg]; r.gp += a; r.gc += b; r[a > b ? 'V' : a === b ? 'E' : 'D']++; }
+    const t = team(tid);
+    body = `<div class="panel favline" style="margin-bottom:14px"><a class="who" href="#/time/${tid}">${logo(t)}${esc(t.name)}</a>
+        <span><b>${3 * r.V + r.E}</b> pts em ${past.length} jogos</span><span><b>${r.V}</b>V <b>${r.E}</b>E <b>${r.D}</b>D</span><span>gols <b>${r.gp}</b>–<b>${r.gc}</b></span>
+        <span>${next.length ? `faltam <b>${next.length}</b> jogo${next.length > 1 ? 's' : ''}` : 'campanha encerrada'}</span><a class="more" href="#/time/${tid}">página do time</a></div>
+      ${next.length ? `<section><div class="sec-h"><h3>Próximos</h3><span class="sub">C = em casa, F = fora</span></div>${fixtureList(next, { focus: tid })}</section>` : ''}
+      ${past.length ? `<section><div class="sec-h"><h3>Disputados</h3><span class="sub">do mais recente ao primeiro</span></div>${fixtureList(past, { focus: tid })}</section>` : ''}`;
+  } else {
+    const i = months.indexOf(calState.month);
+    const list = all.filter((m) => monthKey(m.date) === calState.month);
+    const nav = `<span class="monthnav"><button class="btn sm" data-act="calmonth" data-id="${months[i - 1] || ''}" ${i > 0 ? '' : 'disabled'} aria-label="Mês anterior">‹</button>
+      <select data-change="calmonth" aria-label="Mês">${months.map((k) => `<option value="${k}" ${k === calState.month ? 'selected' : ''}>${MES[+k.slice(5) - 1]}</option>`).join('')}</select>
+      <button class="btn sm" data-act="calmonth" data-id="${months[i + 1] || ''}" ${i < months.length - 1 ? '' : 'disabled'} aria-label="Próximo mês">›</button></span>`;
+    body = `<div class="btnrow" style="margin-bottom:14px">${sel}${nav}<span class="muted small">${list.length} jogos em ${MES[+calState.month.slice(5) - 1].toLowerCase()}</span></div>
+      ${byDay(list).map((g) => `<div class="day">${esc(relDay(g[0].date))}</div>${fixtureList(g, { date: false })}`).join('') || '<p class="muted">Nenhum jogo neste mês.</p>'}`;
+    return `<div class="wrap"><section><div class="sec-h"><h2>Jogos</h2><span class="sub">${done} de ${all.length} partidas disputadas na Série A ${S.season}</span></div>${body}</section></div>`;
+  }
+  return `<div class="wrap"><section><div class="sec-h"><h2>Jogos</h2><span class="sub">Série A ${S.season}</span></div><div class="btnrow" style="margin-bottom:14px">${sel}</div>${body}</section></div>`;
 }
 
 export function playersView() {
