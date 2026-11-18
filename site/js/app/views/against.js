@@ -2,11 +2,12 @@
 // ganho esperado calculado com o histórico de discordâncias parecidas
 // (engine/against.js). Pedido do dono; mostra sempre o retrospecto, que na maior
 // parte das temporadas é negativo. Não é recomendação de aposta.
-import { S, team, upcoming, liveMatches, forecast, market, table, loadOdds, expected } from '../store.js';
-import { esc, pct, fmtShort, fmtTime, store } from '../util.js';
+import { S, team, upcoming, liveMatches, forecast, market, table, loadOdds, expected, loadProps, scorers } from '../store.js';
+import { esc, pct, num, fmtShort, fmtTime, store } from '../util.js';
 import { logo } from '../components.js';
 import { bestAgainst, GAPS } from '../../engine/against.js';
 import { jointProb, selProb } from '../../engine/markets.js';
+import { radarPicks, trustOf } from '../../engine/radar.js';
 import { face } from '../vitroncio.js';
 
 const KEYS = ['pH', 'pD', 'pA'];
@@ -108,6 +109,9 @@ const GROUPS = [
   ['Dupla chance', [['dc:1X', (m) => `${team(m.h).abbr} ou X`], ['dc:12', () => '1 ou 2'], ['dc:X2', (m) => `X ou ${team(m.a).abbr}`]]],
   ['Gols', ou('g', [1.5, 2.5, 3.5])],
   ['Ambos marcam', [['bt:s', () => 'Sim'], ['bt:n', () => 'Não']]],
+  ['Gols do mandante', ou('th', [0.5, 1.5, 2.5])],
+  ['Gols do visitante', ou('ta', [0.5, 1.5, 2.5])],
+  ['Não sofre gol', [['cs:h', (m) => team(m.h).abbr], ['cs:a', (m) => team(m.a).abbr]]],
   ['Cartões amarelos', ou('c', [3.5, 4.5, 5.5])],
   ['Escanteios', ou('k', [8.5, 9.5, 10.5])],
   ['Expulsão', [['v:s', () => 'Sim'], ['v:n', () => 'Não']]],
@@ -121,12 +125,17 @@ function selName(m, sel) {
   if (v === 'bt') return x === 's' ? 'Ambos marcam' : 'Ambos marcam: não';
   if (v === 'c') return `${more ? 'Mais' : 'Menos'} de ${L} cartões amarelos`;
   if (v === 'k') return `${more ? 'Mais' : 'Menos'} de ${L} escanteios`;
+  if (v === 'th' || v === 'ta') return `${v === 'th' ? H : A}: ${more ? 'mais' : 'menos'} de ${L} gol${L === '0,5' ? '' : 's'}`;
+  if (v === 'cs') return x === 'h' ? `${H} não sofre gol` : x === 'a' ? `${A} não sofre gol` : x === 'hn' ? `${H} sofre gol` : `${A} sofre gol`;
+  if (v === 'p') return `${playerName(m, x)} marca`;
   return x === 's' ? 'Tem expulsão' : 'Sem expulsão';
 }
+function playerName(m, id) { for (const t of [m.h, m.a]) { const p = (S.model.players?.[t] || []).find((x) => x.id === id); if (p) return `${p.sn || p.n} (${team(t).abbr})`; } return `jogador ${id}`; }
 /** Probabilidades e odd publicada (se houver) de uma seleção. */
 function mctx(m) {
   const f = forecast(m).pre, e = expected(m).pr;
-  return { matrix: f.matrix, pRed: 1 - (1 - f.pRedH) * (1 - f.pRedA), yc: e.yc.lh + e.yc.la, co: e.co.lh + e.co.la, disp: S.model.dispersion, cal: S.model.against?.calMercados };
+  const players = {}; for (const [t, xg] of [[m.h, f.xgH], [m.a, f.xgA]]) for (const x of scorers(t, xg)) players[x.id] = x.p;
+  return { matrix: f.matrix, pRed: 1 - (1 - f.pRedH) * (1 - f.pRedA), yc: e.yc.lh + e.yc.la, co: e.co.lh + e.co.la, disp: S.model.dispersion, cal: S.model.against?.calMercados, players };
 }
 function published(m, sel) {
   const k = market(m); if (!k) return null;
@@ -134,7 +143,8 @@ function published(m, sel) {
   if (r) { const j = 'HDA'.indexOf(r[1]); return { o: k.dec[j], q: k[KEYS[j]] }; }
   const g = /^g:([ou])(\d+\.5)$/.exec(sel);
   if (g && k.tot && +g[2] === k.tot.line) { const io = 1 / k.tot.o, iu = 1 / k.tot.u; return { o: g[1] === 'o' ? k.tot.o : k.tot.u, q: (g[1] === 'o' ? io : iu) / (io + iu) }; }
-  return null;
+  const pr = S.props.get(m.id)?.find((x) => x.sel === sel);
+  return pr ? { o: pr.o, q: pr.q, raw: pr.raw } : null;
 }
 /** Bilhete: pernas agrupadas por jogo, probabilidades conjuntas e odds. */
 function ticket(keys) {
@@ -166,6 +176,18 @@ export function multiView() {
   const A = S.model.against;
   if (!A?.multiplas) return '<div class="wrap"><p class="muted">O histórico de múltiplas sai no próximo reajuste do modelo.</p></div>';
   const games = upcoming().filter((m) => market(m));
+  loadProps(games);
+  // radar: todas as linhas com odds (resultado e total da ESPN + prop bets da DraftKings) precificadas pelo Vitrôncio
+  const offers = [];
+  for (const g of games) {
+    const k = market(g), ctx = mctx(g), seen = new Set();
+    const base = [...['H', 'D', 'A'].map((x, j) => ({ sel: `r:${x}`, o: k.dec[j], q: k[KEYS[j]] })), ...(k.tot ? [['o', k.tot.o], ['u', k.tot.u]].map(([s, o]) => ({ sel: `g:${s}${k.tot.line}`, o, q: 1 / o / (1 / k.tot.o + 1 / k.tot.u) })) : [])];
+    for (const x of [...base, ...(S.props.get(g.id) || [])]) { if (seen.has(x.sel)) continue; seen.add(x.sel); const pv = selProb(ctx, x.sel); if (Number.isFinite(pv)) offers.push({ ...x, p: pv, m: g, key: `${g.id}|${x.sel}` }); }
+  }
+  const radar = radarPicks(offers);
+  const bestPer = []; { const seen = new Set(); for (const r of [...radar].sort((u, v) => v.p * v.o - u.p * u.o)) if (!seen.has(r.m.id)) { seen.add(r.m.id); bestPer.push(r); } }
+  const rcombo = (xs) => { const P = xs.reduce((a, x) => a * x.p, 1), Q = xs.reduce((a, x) => a * x.q, 1), O = xs.reduce((a, x) => a * x.o, 1); return { P, Q, O, ev: P * O - 1, evQ: Q * O - 1 }; };
+  const nProps = games.filter((g) => S.props.get(g.id)?.length).length;
   for (const key of Object.keys(multState.legs)) if (!games.some((m) => key.startsWith(m.id + '|'))) delete multState.legs[key];
   // sugestões: os palpites do Best Against com maior probabilidade corrigida × odd, de 2 a 6 pernas
   const picks = rows(upcoming()).ranked.sort((x, y) => y.b.c[y.b.i] * y.o - x.b.c[x.b.i] * x.o).map((r) => `${r.m.id}|r:${'HDA'[r.b.i]}`);
@@ -178,9 +200,23 @@ export function multiView() {
       <div class="panel ba-warn"><p><b>A margem da casa também multiplica.</b> Com a margem média da Série A (${pct(mg, 1)} por jogo), mesmo que o mercado esteja certo o retorno esperado é ${loss(2)} com 2 pernas, ${loss(4)} com 4, ${loss(6)} com 6 e ${loss(10)} com 10. As sugestões abaixo, aplicadas em todas as rodadas desde 2014, deram ${[2, 3, 4].map((k) => `${signed(A.multiplas[k].ret / A.multiplas[k].n, 0)} com ${k} pernas`).join(', ')}. Não é recomendação de aposta.</p>
       <p class="small muted">Pernas do mesmo jogo: resultado, dupla chance, gols e ambos marcam são calculados juntos, pelo placar; cartões, escanteios e expulsão são tratados como independentes do placar. As casas costumam cobrar margem maior em múltiplas do mesmo jogo.</p></div></section>
 
-    <section data-mk="mu-sug"><div class="sec-h"><h2>Sugestões da rodada</h2><span class="sub">resultado dos jogos em que o Vitrôncio mais discorda do mercado, de 2 a 6 pernas</span></div>
+    <section data-mk="mu-radar"><div class="sec-h"><h2>Radar</h2><span class="sub">linhas em que o Vitrôncio dá bem mais chance que o mercado (pelo menos 1,25 vez e 3 pontos a mais)</span></div>
+      <p class="small muted" style="margin:0 0 8px">${games.length} jogos com odds; mercados detalhados (DraftKings) de ${nProps}. <b>Odd ≥ 3</b>: o mercado vê pouca chance. Base: <b>histórico</b> = resultado, onde há 14 temporadas de odds e o mercado costuma ter razão; <b>calibrado</b> = o Vitrôncio acerta a frequência desses mercados, mas nunca foi comparado com as odds deles; <b>não validado</b> = marcadores.</p>
+      ${radar.length ? `<div class="tw"><table class="cmp ba"><thead><tr><th class="l hide-m">Jogo</th><th class="l">Seleção</th><th>Odd</th><th><span class="nm-full">Mercado</span><span class="nm-abbr">Merc.</span></th><th>${face(16)}<span class="nm-full">Vitrôncio</span><span class="nm-abbr">Vit.</span></th><th class="hide-m">×</th><th><span class="nm-full">Ganho pelo Vitrôncio</span><span class="nm-abbr">Ganho</span></th><th class="l hide-m">Base</th><th></th></tr></thead><tbody>
+        ${radar.slice(0, 30).map((r) => `<tr class="${r.contra ? 'up' : ''}"><td class="l small hide-m"><a href="#/jogo/${r.m.id}">${esc(team(r.m.h).abbr)} × ${esc(team(r.m.a).abbr)}</a></td><td class="l wrapc"><span class="only-m small dim">${esc(team(r.m.h).abbr)} × ${esc(team(r.m.a).abbr)}</span>${esc(selName(r.m, r.sel))}${r.contra ? ' <span class="chip">odd ≥ 3</span>' : ''}</td><td>${dec(r.o)}</td><td>${pct(r.q)}${r.raw ? '*' : ''}</td><td><b>${pct(r.p)}</b></td><td class="hide-m">${num(r.ratio, 2)}</td><td class="ev ${r.ev > 0 ? 'pos' : 'neg'}">${signed(r.ev)}</td><td class="l small hide-m">${{ historico: 'histórico', calibrado: 'calibrado', nao: 'não validado' }[trustOf(r.sel)]}</td><td><button class="btn sm ${multState.legs[r.key] ? 'on' : ''}" data-act="mleg" data-id="${r.m.id}" data-sel="${r.sel}" aria-label="Pôr no bilhete">${multState.legs[r.key] ? '✓' : '+'}</button></td></tr>`).join('')}
+      </tbody></table></div>${radar.some((r) => r.raw) ? '<p class="small dim" style="margin-top:6px">* marcador: a casa só publica a odd de "sim", então a chance do mercado inclui a margem.</p>' : ''}` : `<p class="muted">${nProps ? 'Nenhuma linha em que o Vitrôncio discorde tanto do mercado agora.' : 'Carregando os mercados detalhados…'}</p>`}
+      ${bestPer.length >= 2 ? `<div class="sec-h" style="margin-top:14px"><h3>Múltiplas do radar</h3><span class="sub">a melhor linha de cada jogo, sem histórico: o registro começou em novembro de 2026</span></div>
+      <div class="tw"><table class="cmp"><thead><tr><th>Pernas</th><th class="l">Seleções</th><th>Odd</th><th>${face(16)}<span class="nm-full">Vitrôncio</span><span class="nm-abbr">Vit.</span></th><th class="hide-m">Mercado</th><th><span class="nm-full">Ganho pelo Vitrôncio</span><span class="nm-abbr">Ganho</span></th><th class="hide-m">Se o mercado estiver certo</th><th></th></tr></thead><tbody>
+        ${[2, 3, 4, 5].filter((k) => bestPer.length >= k).map((k) => { const xs = bestPer.slice(0, k), c = rcombo(xs); return `<tr><td>${k}</td><td class="l small wrapc">${xs.map((x) => `${esc(team(x.m.h).abbr)}×${esc(team(x.m.a).abbr)} <b>${esc(selName(x.m, x.sel))}</b>`).join(' · ')}</td><td>${oddTxt(c.O)}</td><td>${pct(c.P, 1)}</td><td class="hide-m">${pct(c.Q, 1)}</td><td class="ev ${c.ev > 0 ? 'pos' : 'neg'}">${signed(c.ev)}</td><td class="hide-m dim">${signed(c.evQ)}</td><td><button class="btn sm" data-act="mload" data-legs="${xs.map((x) => x.key).join(',')}">abrir</button></td></tr>`; }).join('')}
+      </tbody></table></div>` : ''}
+      ${A.radar ? radarRecord(A.radar) : '<p class="small muted" style="margin-top:8px">Os palpites do radar passam a ser registrados todo dia; o retrospecto aparece aqui depois dos primeiros jogos.</p>'}
+      ${A.zebras ? `<div class="sec-h" style="margin-top:14px"><h3>Odds contra no resultado: o que já aconteceu</h3><span class="sub">Série A 2013–${S.season}, odd média de fechamento</span></div>
+      <div class="tw"><table><thead><tr><th class="l">Odd</th><th class="l">O Vitrôncio dava</th><th>Apostas</th><th class="hide-m">Mercado</th><th class="hide-m">Vitrôncio</th><th>Aconteceu</th><th>Retorno</th></tr></thead><tbody>${A.zebras.map((z) => `<tr><td class="l">${esc(z.faixa)}</td><td class="l">${z.ratio > 1 ? `≥ ${num(z.ratio, 1)}× o mercado` : 'qualquer'}</td><td>${z.n}</td><td class="hide-m">${pct(z.mercado)}</td><td class="hide-m">${pct(z.modelo)}</td><td class="pts">${pct(z.aconteceu)}</td><td class="ev ${z.retorno > 0 ? 'pos' : 'neg'}">${signed(z.retorno, 1)}</td></tr>`).join('')}</tbody></table></div>
+      <p class="small muted" style="margin-top:6px">Azarões perdem mais que a média (as casas cobram mais neles). Quando o Vitrôncio dá bem mais chance, a perda some nas odds de 3 a 8, mas as amostras são pequenas e o resultado oscila muito.</p>` : ''}</section>
+
+    <section data-mk="mu-sug"><div class="sec-h"><h2>Sugestões com histórico</h2><span class="sub">resultado dos jogos em que o Vitrôncio mais discorda do mercado, corrigido pelo histórico, de 2 a 6 pernas</span></div>
       ${sug.length ? `<div class="tw"><table class="cmp"><thead><tr><th>Pernas</th><th class="l">Palpites</th><th>Odd</th><th>${face(16)}<span class="nm-full">Vitrôncio</span><span class="nm-abbr">Vit.</span></th><th class="hide-m">Mercado</th><th class="hide-m">Corrigida</th><th><span class="nm-full">Ganho esperado</span><span class="nm-abbr">Ganho</span></th><th class="hide-m">Histórico: acertos · retorno</th><th></th></tr></thead><tbody>
-        ${sug.map(({ k, keys, t }) => `<tr class="${t.evC > 0 ? 'up' : ''}"><td>${k}</td><td class="l small">${t.legs.map((l) => `${esc(team(l.m.h).abbr)}×${esc(team(l.m.a).abbr)} <b>${esc(l.sel === 'r:D' ? 'empate' : team(l.sel === 'r:H' ? l.m.h : l.m.a).abbr)}</b>`).join(' · ')}</td><td>${oddTxt(t.o)}</td><td>${pct(t.p, 1)}</td><td class="hide-m">${pct(t.q, 1)}</td><td class="hide-m">${pct(t.c, 1)}</td><td class="ev ${t.evC > 0 ? 'pos' : 'neg'}">${signed(t.evC)}</td><td class="small hide-m">${histCell(k)}</td><td><button class="btn sm" data-act="mload" data-legs="${keys.join(',')}">abrir</button></td></tr>`).join('')}
+        ${sug.map(({ k, keys, t }) => `<tr class="${t.evC > 0 ? 'up' : ''}"><td>${k}</td><td class="l small wrapc">${t.legs.map((l) => `${esc(team(l.m.h).abbr)}×${esc(team(l.m.a).abbr)} <b>${esc(l.sel === 'r:D' ? 'empate' : team(l.sel === 'r:H' ? l.m.h : l.m.a).abbr)}</b>`).join(' · ')}</td><td>${oddTxt(t.o)}</td><td>${pct(t.p, 1)}</td><td class="hide-m">${pct(t.q, 1)}</td><td class="hide-m">${pct(t.c, 1)}</td><td class="ev ${t.evC > 0 ? 'pos' : 'neg'}">${signed(t.evC)}</td><td class="small hide-m">${histCell(k)}</td><td><button class="btn sm" data-act="mload" data-legs="${keys.join(',')}">abrir</button></td></tr>`).join('')}
       </tbody></table></div>` : '<p class="muted">Menos de dois jogos com odds em que o Vitrôncio discorda do mercado por 5 pontos ou mais.</p>'}</section>
 
     <section data-mk="mu-calc"><div class="sec-h"><h2>Monte sua múltipla</h2><span class="sub">resultado, gols, ambos marcam, cartões, escanteios, expulsão</span>${T.n ? '<button class="btn sm more" data-act="mclear">limpar</button>' : ''}</div>
@@ -204,4 +240,12 @@ export function multiView() {
       <div class="tw"><table><thead><tr><th class="l">Mercado</th><th>Jogos</th><th>Vitrôncio previa</th><th>Aconteceu</th><th class="hide-m">Jogos com chance mais baixa</th><th class="hide-m">Jogos com chance mais alta</th><th class="l">Separa melhor que a média?</th></tr></thead><tbody>${A.mercados.map(calRow).join('')}</tbody></table></div>
       <p class="small muted" style="margin-top:8px">Sem odds históricas desses mercados, o teste é se a chance prevista bate com o que aconteceu. Nas colunas de terço: a chance média prevista no terço de jogos com menor e com maior chance, e quanto de fato aconteceu. Cartões, escanteios e expulsão são recalibrados a cada temporada só com o passado. Expulsão: a chance média bate, mas o modelo quase não distingue um jogo do outro.</p></section>` : ''}
   </div>`;
+}
+
+/** Retrospecto dos palpites registrados pelo radar (tools/radar.mjs → reajuste). */
+function radarRecord(R) {
+  const row = (lab, x) => (x?.n ? `<tr><td class="l">${lab}</td><td>${x.n}</td><td>${x.hits} <small>(${pct(x.hits / x.n)})</small></td><td>${pct(x.p)}</td><td>${pct(x.q)}</td><td class="ev ${x.ret > 0 ? 'pos' : 'neg'}">${signed(x.ret / x.n, 1)}</td></tr>` : '');
+  return `<div class="sec-h" style="margin-top:14px"><h3>Retrospecto do radar</h3><span class="sub">palpites registrados desde ${esc(R.desde ? R.desde.split('-').reverse().join('/') : '')}, odd da DraftKings no registro</span></div>
+    ${R.total?.n ? `<div class="tw"><table><thead><tr><th class="l">Palpites</th><th>Jogos</th><th>Acertos</th><th>Vitrôncio dava</th><th>Mercado dava</th><th>Retorno</th></tr></thead><tbody>
+      ${row('Todos', R.total)}${row('Odd ≥ 3', R.contra)}${row('Resultado', R.tipos?.historico)}${row('Mercados calibrados', R.tipos?.calibrado)}${row('Marcadores', R.tipos?.nao)}</tbody></table></div>` : '<p class="small muted">Nenhum jogo com palpite registrado terminou ainda.</p>'}`;
 }

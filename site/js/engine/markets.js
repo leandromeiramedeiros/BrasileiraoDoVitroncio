@@ -13,13 +13,16 @@
 // própria do total do jogo; expulsão = σ(a + b·logit p). Sem ctx.cal, usa os valores crus.
 //
 // Seleções: r:H r:D r:A · dc:1X dc:12 dc:X2 · g:o2.5 g:u2.5 (qualquer linha .5) ·
-// bt:s bt:n · c:o4.5 c:u4.5 (amarelos) · k:o9.5 k:u9.5 (escanteios) · v:s v:n (expulsão)
+// bt:s bt:n · th:o1.5 ta:u0.5 (gols de cada time) · cs:h cs:hn cs:a cs:an (não sofre / sofre gol) ·
+// c:o4.5 c:u4.5 (amarelos) · k:o9.5 k:u9.5 (escanteios) · v:s v:n (expulsão) ·
+// p:<id do jogador> (marca a qualquer momento; probabilidade em ctx.players, tratada como independente)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GOAL = {
   'r:H': (i, j) => i > j, 'r:D': (i, j) => i === j, 'r:A': (i, j) => i < j,
   'dc:1X': (i, j) => i >= j, 'dc:12': (i, j) => i !== j, 'dc:X2': (i, j) => i <= j,
   'bt:s': (i, j) => i > 0 && j > 0, 'bt:n': (i, j) => i === 0 || j === 0,
+  'cs:h': (i, j) => j === 0, 'cs:hn': (i, j) => j > 0, 'cs:a': (i, j) => i === 0, 'cs:an': (i, j) => i > 0,
 };
 
 /** Interpreta uma seleção. */
@@ -31,6 +34,9 @@ export function parseSel(id) {
     if (m[1] === 'g') return { kind: 'goal', f: m[2] === 'o' ? (i, j) => i + j > L : (i, j) => i + j < L };
     return { kind: 'count', v: m[1], lo: m[2] === 'o' ? L : -1, hi: m[2] === 'u' ? L : Infinity };
   }
+  const t = /^t([ha]):([ou])(\d+\.5)$/.exec(id);
+  if (t) { const L = +t[3], side = t[1] === 'h' ? (i) => i : (i, j) => j; return { kind: 'goal', f: t[2] === 'o' ? (i, j) => side(i, j) > L : (i, j) => side(i, j) < L }; }
+  if (/^p:\d+$/.test(id)) return { kind: 'player', id: id.slice(2) };
   if (id === 'v:s' || id === 'v:n') return { kind: 'red', yes: id === 'v:s' };
   return null;
 }
@@ -51,10 +57,11 @@ const between = (pmf, lo, hi) => { let s = 0; for (let k = 0; k < pmf.length; k+
  * Probabilidade de todas as seleções `ids` (do mesmo jogo) acontecerem juntas.
  */
 export function jointProb(ctx, ids) {
-  const goal = [], cnt = {}, red = new Set();
+  const goal = [], cnt = {}, red = new Set(), pl = [];
   for (const id of ids) {
     const s = parseSel(id); if (!s) return NaN;
     if (s.kind === 'goal') goal.push(s.f);
+    else if (s.kind === 'player') { const q = ctx.players?.[s.id]; if (q == null) return NaN; pl.push(q); }
     else if (s.kind === 'count') { const c = (cnt[s.v] ||= { lo: -1, hi: Infinity }); c.lo = Math.max(c.lo, s.lo); c.hi = Math.min(c.hi, s.hi); }
     else red.add(s.yes);
   }
@@ -69,6 +76,7 @@ export function jointProb(ctx, ids) {
     const k = ctx.cal?.[v]; if (k) { mu = Math.exp(k.a + k.b * Math.log(mu)); phi = k.phi; }
     p *= between(countPmf(mu, phi), c.lo, c.hi);
   }
+  for (const q of pl) p *= q;
   if (red.size === 2) return 0;
   if (red.size === 1) { let q = ctx.pRed; const k = ctx.cal?.v; if (k) q = 1 / (1 + Math.exp(-(k.a + k.b * Math.log(q / (1 - q))))); p *= red.has(true) ? q : 1 - q; }
   return p;

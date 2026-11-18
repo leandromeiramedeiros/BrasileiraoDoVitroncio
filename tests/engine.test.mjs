@@ -211,3 +211,18 @@ test('mercados: pernas do mesmo jogo e contagens', async () => {
   assert.equal(jointProb(ctx, ['v:s', 'v:n']), 0);
   near(jointProb(ctx, ['r:H', 'k:o9.5']), selProb(ctx, 'r:H') * selProb(ctx, 'k:o9.5'), 1e-12, 'escanteios independentes do placar');
 });
+
+test('radar: leitura das prop bets e candidatos', async () => {
+  const { parseProps, radarPicks } = await import('../site/js/engine/radar.js');
+  const it = (name, o, extra = {}) => ({ type: { name }, current: { over: { decimal: o }, ...(extra.L != null ? { target: { value: extra.L } } : {}) }, ...(extra.t ? { team: { $ref: `x/teams/${extra.t}?y` } } : {}) });
+  // escanteios: primeiro as linhas de "mais" (odds sobem com a linha), depois as de "menos"
+  const items = [it('Total Corners', 1.74, { L: 10.5 }), it('Total Corners', 1.26, { L: 8.5 }), it('Total Corners', 2.0, { L: 10.5 }), it('Total Corners', 3.5, { L: 8.5 }),
+    it('Both Teams To Score', 1.55), it('Both Teams To Score', 2.35), it('Double Chance', 1.76, { t: '10' }), it('Double Chance', 1.29, { t: '20' }), it('Double Chance', 1.29)];
+  const o = Object.fromEntries(parseProps(items, '10', '20').map((x) => [x.sel, x]));
+  assert.equal(o['k:o10.5'].o, 1.74); assert.equal(o['k:u8.5'].o, 3.5); assert.equal(o['bt:s'].o, 1.55); assert.equal(o['dc:1X'].o, 1.76);
+  near(o['k:o10.5'].q + o['k:u10.5'].q, 1, 1e-9, 'par sem margem');
+  near(o['dc:1X'].q + o['dc:X2'].q + o['dc:12'].q, 2, 1e-9, 'dupla chance soma 2');
+  const picks = radarPicks([{ sel: 'a', o: 5, q: 0.19, p: 0.27 }, { sel: 'b', o: 2, q: 0.5, p: 0.52 }]);
+  assert.deepEqual(picks.map((x) => x.sel), ['a'], 'só a discordância grande entra');
+  assert.ok(picks[0].contra, 'odd ≥ 3 marcada');
+});

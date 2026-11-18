@@ -272,3 +272,5 @@ table.ba td.hist { white-space: normal; min-width: 150px; }
 .mgrp .seg { flex-wrap: wrap; } .mgrp .seg button { flex: 1 1 30%; font-size: 12.5px; } .mgrp .seg button small { color: var(--dim); margin-left: 3px; } .mgrp .seg button.on small { color: inherit; }
 .mticket { margin-bottom: 12px; } .modd { width: 70px; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--line2); background: var(--panel2); color: var(--text); font: inherit; font-size: 13.5px; text-align: center; }
 @media (max-width: 640px) { .mticket td.msel { white-space: normal; min-width: 120px; } .modd { width: 58px; } }
+td.wrapc { white-space: normal; min-width: 200px; } @media (max-width: 640px) { td.wrapc { min-width: 130px; } table.ba td, table.ba th { padding: 7px 4px; } }
+td.ev { vertical-align: middle; }

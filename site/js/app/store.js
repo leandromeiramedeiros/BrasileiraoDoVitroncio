@@ -9,12 +9,13 @@ import { scoreDistribution, nextGoal, summarize, stepOf, compile } from '../engi
 import { buildTable, sortTable } from '../engine/season.js';
 import { decided } from '../engine/context.js';
 import { snapshotFeatures } from '../engine/lineup.js';
+import { parseProps } from '../engine/radar.js';
 import { probableLineup, scorerProbabilities, genericLineup } from '../engine/players.js';
 
 export const S = {
   model: null, state: null, teams: {}, season: null,
   matches: new Map(), applied: new Set(), lam: new Map(), details: new Map(),
-  odds: new Map(), cx: new Map(), ab: new Map(),
+  odds: new Map(), cx: new Map(), ab: new Map(), props: new Map(),
   seasonSim: null, simKey: '', simRunning: false,
   online: null, lastUpdate: null, version: 0, error: null,
 };
@@ -326,6 +327,19 @@ export function loadOdds(list) {
     }).catch(() => {});
   }
 }
+// ── prop bets da DraftKings (radar das múltiplas) — só comparação, nunca entram no modelo ──
+const propsTried = new Map();
+let propsQueue = Promise.resolve();
+/** Busca (um por vez) as odds de mercados detalhados dos próximos jogos; guarda por 10 minutos. */
+export function loadProps(list) {
+  for (const m of list) {
+    if (m.status !== 'pre' || Date.parse(m.date) - Date.now() > 8 * 864e5) continue;
+    if (Date.now() - (propsTried.get(m.id) || 0) < 600000) continue;
+    propsTried.set(m.id, Date.now());
+    propsQueue = propsQueue.then(() => api.props(m.id)).then((j) => { S.props.set(m.id, parseProps(j?.items, m.h, m.a)); S.version++; emit(); }).catch(() => {});
+  }
+}
+
 /** RPS de uma previsão 1X2 para um jogo encerrado (quanto menor, melhor). */
 export function rpsOf(p, m) {
   const y = m.hg > m.ag ? [1, 0, 0] : m.hg === m.ag ? [0, 1, 0] : [0, 0, 1];

@@ -16,6 +16,7 @@ import { scoreDistribution, calibrateLambdas, timeline, stepOf, diffIdx, menIdx 
 import { applyContext } from '../site/js/engine/context.js';
 import { bestAgainst, GAPS } from '../site/js/engine/against.js';
 import { jointProb } from '../site/js/engine/markets.js';
+import { radarPicks, trustOf } from '../site/js/engine/radar.js';
 import { buildContext, loadCities } from './lib/context.mjs';
 import { createLineupState, lineupFeatures, applyLineupMatch, teamSnapshot } from '../site/js/engine/lineup.js';
 import { createCardState, applyCardMatch, serveBans, suspendedFor, absentFeatures } from '../site/js/engine/absent.js';
@@ -498,6 +499,38 @@ const mercados = MK.map(([id, label]) => {
 }).filter(Boolean);
 log('mercados', mercados.map((x) => `${x.id} n=${x.n} prev=${x.previsto} obs=${x.aconteceu} brier=${x.brier}/${x.brierBase}`).join(' | '));
 
+// ── (6d) radar: azarões do resultado e conferência dos palpites registrados ─────
+const zebras = [];
+for (const [lo, hi, faixa] of [[3, 5, '3 a 5'], [5, 8, '5 a 8'], [8, Infinity, '8 ou mais']]) for (const rt of [0, 1.4]) {
+  let n = 0, y = 0, p = 0, q = 0, ret = 0;
+  for (const r of cmpRows) for (let i = 0; i < 3; i++) { const o = r.o[i]; if (o < lo || o >= hi || r.p[i] / r.q[i] < rt) continue; const won = r.k === i ? 1 : 0; n++; y += won; p += r.p[i]; q += r.q[i]; ret += won * o - 1; }
+  if (n) zebras.push({ faixa, ratio: rt, n, mercado: +(q / n).toFixed(4), modelo: +(p / n).toFixed(4), aconteceu: +(y / n).toFixed(4), retorno: +(ret / n).toFixed(4) });
+}
+let radarEval = null;
+try {
+  const RL = JSON.parse(await readFile(new URL('../model/data/radar/log.json', import.meta.url), 'utf8'));
+  const byId = new Map(done.map((m) => [m.id, m]));
+  const agg = () => ({ n: 0, hits: 0, p: 0, q: 0, ret: 0 });
+  const E = { desde: null, total: agg(), contra: agg(), tipos: { historico: agg(), calibrado: agg(), nao: agg() } };
+  for (const [id, e] of Object.entries(RL)) {
+    if (!E.desde || e.at < E.desde) E.desde = e.at.slice(0, 10);
+    const m = byId.get(id); if (!m) continue;
+    const one = Array.from({ length: 11 }, (_, i) => Array.from({ length: 11 }, (_, j) => (i === Math.min(10, m.hg) && j === Math.min(10, m.ag) ? 1 : 0)));
+    const corners = m.statsOk && m.stats.h.co != null && m.stats.a.co != null ? m.stats.h.co + m.stats.a.co : null;
+    const goals = new Set(m.ev.filter((x) => x.t === 'G' || x.t === 'P').map((x) => String(x.p)));
+    for (const x of radarPicks(e.offers.map(([sel, o, q, p, raw]) => ({ sel, o, q, p, raw })))) {
+      let won;
+      if (/^k:/.test(x.sel)) { if (corners == null) continue; const [, s, L] = /^k:([ou])(.+)$/.exec(x.sel); won = s === 'o' ? corners > +L : corners < +L; }
+      else if (/^p:/.test(x.sel)) { if (!m.evOk) continue; won = goals.has(x.sel.slice(2)); }
+      else won = jointProb({ matrix: one }, [x.sel]) > 0.5;
+      for (const a of [E.total, E.tipos[trustOf(x.sel)], ...(x.contra ? [E.contra] : [])]) { a.n++; a.hits += won ? 1 : 0; a.p += x.p; a.q += x.q; a.ret += (won ? x.o : 0) - 1; }
+    }
+  }
+  for (const a of [E.total, E.contra, ...Object.values(E.tipos)]) if (a.n) { a.p = +(a.p / a.n).toFixed(4); a.q = +(a.q / a.n).toFixed(4); a.ret = +a.ret.toFixed(2); }
+  radarEval = E;
+  log('radar', JSON.stringify(E.total), `desde ${E.desde}`);
+} catch { log('radar: sem registro ainda (node tools/radar.mjs)'); }
+
 // ── (7) jogadores (temporada atual, a partir dos summaries) ──────────────────
 const players = {};
 const posGroup = (ab = '') => { const a = ab.toUpperCase(); if (a === 'G' || a === 'GK') return 'G'; if (/^(CD|LB|RB|D|SW|LWB|RWB|CB)/.test(a) || a.includes('B')) return 'D'; if (a.includes('M')) return 'M'; if (/F|S|W/.test(a) && a !== 'SUB') return 'F'; return null; };
@@ -575,7 +608,7 @@ const model = {
   ratingHistory,
   players,
   backtest,
-  against: against && { ...against, mercados, calMercados: calMercados && { c: round5(calMercados.c), k: round5(calMercados.k), v: round5(calMercados.v) } },
+  against: against && { ...against, mercados, calMercados: calMercados && { c: round5(calMercados.c), k: round5(calMercados.k), v: round5(calMercados.v) }, zebras, radar: radarEval },
 };
 await writeFile(OUT, JSON.stringify(model));
 log(`model.json gravado (${((await readFile(OUT)).length / 1024).toFixed(0)} KB)`);

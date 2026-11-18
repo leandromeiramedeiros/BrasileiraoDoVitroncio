@@ -8,7 +8,8 @@
     "fetch": "node tools/fetch.mjs",
     "dataset": "node tools/dataset.mjs",
     "refit": "node tools/refit.mjs",
-    "weekly": "node tools/fetch.mjs && node tools/dataset.mjs && node tools/fetch-summaries.mjs && node tools/rosters.mjs && node tools/refit.mjs && node --test tests/*.test.mjs",
+    "radar": "node tools/radar.mjs",
+    "weekly": "node tools/fetch.mjs && node tools/dataset.mjs && node tools/fetch-summaries.mjs && node tools/rosters.mjs && node tools/refit.mjs && node tools/radar.mjs && node --test tests/*.test.mjs",
     "serve": "python3 -m http.server 8080 --directory site"
   }
 }
