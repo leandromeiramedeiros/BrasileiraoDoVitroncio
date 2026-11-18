@@ -1,6 +1,6 @@
 // Ponto de entrada: roteador por hash, laço de renderização e ações da interface.
 import { S, boot, subscribe, runSeasonSim, liveMatches } from './store.js';
-import { store, esc } from './util.js';
+import { store, esc, fmtFull } from './util.js';
 import { setTab } from './player.js';
 import { homeView, homeState } from './views/home.js';
 import { matchView, startSim, simAction, closeSim, sim, pairMatch } from './views/match.js';
@@ -37,6 +37,8 @@ function render() {
     const navHtml = NAV.map(([k, l]) => `<a href="#/${k}" class="${k === cur ? 'on' : ''}">${l}${k === '' && live ? ' <span class="livepill" style="font-size:9px;padding:1px 6px;margin-left:4px">' + live + '</span>' : ''}</a>`).join('');
     if (navHtml !== lastNav) { nav.innerHTML = navHtml; lastNav = navHtml; }
     document.title = live ? `🔴 Ao vivo · Brasileirão do Vitrôncio` : 'Brasileirão do Vitrôncio';
+    const stamp = document.getElementById('stamp');
+    if (stamp && !stamp.textContent) stamp.textContent = `${S.model.nome} · modelo reajustado em ${fmtFull(S.model.geradoEm)} · dados de jogo até ${fmtFull(S.model.dadosAte)} na foto semanal (o resto é atualizado ao vivo).`;
     runSeasonSim();
   });
 }

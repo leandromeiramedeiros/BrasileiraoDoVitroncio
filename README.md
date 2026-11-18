@@ -61,7 +61,7 @@ Não há etapa de build nem dependências: são módulos ES servidos direto.
 
 ## Publicação
 
-Cada push em `main` roda os testes e publica a pasta `site/` no branch `gh-pages` (`.github/workflows/deploy.yml`). Em **Settings → Pages**, a fonte deve ser *Deploy from a branch* → `gh-pages` / `(root)`.
+Cada push em `main` roda os testes e publica a pasta `site/` no branch `gh-pages` (`.github/workflows/deploy.yml`), que é a fonte do GitHub Pages (*Deploy from a branch* → `gh-pages` / `(root)`).
 
 ## Créditos e avisos
 
