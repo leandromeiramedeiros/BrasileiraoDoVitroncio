@@ -1,0 +1,99 @@
+diff --git a/site/js/app/views/model.js b/site/js/app/views/model.js
+index c09ddbf..1fa5f69 100644
+--- a/site/js/app/views/model.js
++++ b/site/js/app/views/model.js
+@@ -35,7 +35,7 @@ export function modelView() {
+         <div><div class="k">Último reajuste</div><div class="v s">${esc(fmtFull(M.geradoEm))}</div></div>
+       </div>
+       <h3>1. Força dos times</h3>
+-      <p>Cada time tem uma força de ataque, uma de defesa e um fator casa, com a incerteza de cada uma. Depois de cada partida, um filtro de Kalman estendido (modelo de espaço de estados com gols de Poisson) compara o resultado com o esperado e corrige as forças: mais para times pouco conhecidos, menos para times estáveis. O resultado observado combina gols (${pct(M.params.g.w)}) e finalizações (${pct(1 - M.params.g.w)}); gols com um jogador a mais valem ${pct(M.params.g.wRed)}.</p>
++      <p>Cada time tem uma força de ataque, uma de defesa e um fator casa, com a incerteza de cada uma. Depois de cada partida, um filtro de Kalman estendido (modelo de espaço de estados com gols de Poisson) compara o resultado com o esperado e corrige as forças: mais para times pouco conhecidos, menos para times estáveis. O resultado observado combina gols (${pct(M.params.g.w)}) e finalizações (${pct(1 - M.params.g.w)}); gols com um jogador a mais valem ${pct(M.params.g.wRed)}.${M.params.g.wX != null ? ` Nos jogos com registro de cada finalização (Séries A e B desde 2014), entra no lugar o xG medido pela posição e pelo tipo de cada chute, com peso de ${pct(1 - M.params.g.wX)} contra ${pct(M.params.g.wX)} do placar; chances criadas com o placar a favor valem um pouco mais, e as criadas atrás no placar, um pouco menos.` : ''}</p>
+       <p>A Série B entra para que os promovidos já cheguem avaliados, com desconto de ${e(-M.params.g.dPromoO)} no ataque e ${e(-M.params.g.dPromoD)} na defesa. A cada virada de temporada, as forças recuam ${pct(1 - M.params.g.rho)} em direção à média. Há ratings equivalentes para finalizações, escanteios, cartões e faltas.</p>
+       <h3>2. A partida</h3>
+       <p>Com os gols esperados de cada lado, a partida é uma cadeia de Markov de ${90 + hz.S1 + hz.S2} minutos. A probabilidade de gol em cada minuto depende do tempo de jogo, do placar e de expulsões, com efeitos estimados em ${hz.nMatches.toLocaleString('pt-BR')} partidas. A distribuição do placar é calculada de forma exata, e o mesmo cálculo roda ao vivo a partir do minuto e do placar atuais.</p>
+diff --git a/site/js/engine/ratings.js b/site/js/engine/ratings.js
+index 9415366..c8863db 100644
+--- a/site/js/engine/ratings.js
++++ b/site/js/engine/ratings.js
+@@ -20,7 +20,7 @@ export const CHANNELS = ['g', 'sh', 'sot', 'co', 'yc', 'fo'];
+ 
+ /** Hiperparâmetros padrão por canal (os de `g` são reotimizados no reajuste). */
+ export const DEFAULT_PARAMS = {
+-  g: { q: 0.0012, P0: 0.06, rho: 0.85, sSeason: 0.01, dPromoO: 0.18, dPromoD: 0.18, dNew: 0.15, w: 0.6, phi: 1.0, kMu: 0.004, kH: 0.004, Pg0: 0.01, qg: 0.0001, rhoG: 0.9, wRed: 0.8, mu0: Math.log(1.25), hfa0: 0.35 },
++  g: { q: 0.0012, P0: 0.06, rho: 0.85, sSeason: 0.01, dPromoO: 0.18, dPromoD: 0.18, dNew: 0.15, w: 0.6, wX: 0.15, phiX: 0.7, phi: 1.0, kMu: 0.004, kH: 0.004, Pg0: 0.01, qg: 0.0001, rhoG: 0.9, wRed: 0.8, mu0: Math.log(1.25), hfa0: 0.35 },
+   sh: { q: 0.0006, P0: 0.03, rho: 0.8, sSeason: 0.004, dPromoO: 0.05, dPromoD: 0.05, dNew: 0.05, phi: 2.0, kMu: 0.004, kH: 0.004, mu0: Math.log(12.5), hfa0: 0.2 },
+   sot: { q: 0.0006, P0: 0.03, rho: 0.8, sSeason: 0.004, dPromoO: 0.08, dPromoD: 0.08, dNew: 0.08, phi: 1.5, kMu: 0.004, kH: 0.004, mu0: Math.log(4.3), hfa0: 0.22 },
+   co: { q: 0.0006, P0: 0.03, rho: 0.8, sSeason: 0.004, dPromoO: 0.04, dPromoD: 0.04, dNew: 0.04, phi: 1.6, kMu: 0.004, kH: 0.004, mu0: Math.log(5.1), hfa0: 0.2 },
+@@ -110,7 +110,11 @@ export function observe(m, params, xg) {
+   } else { gh = m.hg; ga = m.ag; for (const e of m.ev) if (e.t === 'Y') (e.s === 'h' ? yh++ : ya++); }
+   let yH = gh, yA = ga;
+   const s = m.statsOk ? m.stats : null;
+-  if (xg && s) {
++  if (m.xg) {
++    // xG medido chute a chute (quando o reajuste tem esse dado): pesa bem mais que o placar
++    const w = params.g.wX ?? params.g.w;
++    yH = w * gh + (1 - w) * m.xg[0]; yA = w * ga + (1 - w) * m.xg[1];
++  } else if (xg && s) {
+     const xh = Math.max(0.05, xg.b0 + xg.b1 * s.h.sot + xg.b2 * Math.max(0, s.h.sh - s.h.sot));
+     const xa = Math.max(0.05, xg.b0 + xg.b1 * s.a.sot + xg.b2 * Math.max(0, s.a.sh - s.a.sot));
+     const w = params.g.w;
+@@ -135,7 +139,8 @@ export function applyMatch(state, params, m, xg, channels = CHANNELS) {
+   for (const c of channels) {
+     const y = obs[c];
+     if (!y) continue;
+-    const p = params[c], h = H.ch[c], a = A.ch[c], L = state.lg[m.lg][c];
++    const p0 = params[c], h = H.ch[c], a = A.ch[c], L = state.lg[m.lg][c];
++    const p = c === 'g' && m.xg && p0.phiX ? { ...p0, phi: p0.phiX } : p0;
+     // ruído de processo (passeio aleatório por partida)
+     h.Po += p.q; h.Pd += p.q; a.Po += p.q; a.Pd += p.q;
+     const isG = c === 'g';
+diff --git a/tools/lib/history.mjs b/tools/lib/history.mjs
+index d0b2518..227ffba 100644
+--- a/tools/lib/history.mjs
++++ b/tools/lib/history.mjs
+@@ -4,7 +4,10 @@ import { gunzipSync } from 'node:zlib';
+ /** Carrega model/data/history.json.gz e devolve partidas como objetos. */
+ export async function loadHistory() {
+   const raw = JSON.parse(gunzipSync(await readFile(new URL('../../model/data/history.json.gz', import.meta.url))).toString('utf8'));
++  // xG por finalização (posição do chute), já na escala de gols; só existe para jogos com dados de chute
++  let xg = {}; try { xg = JSON.parse(await readFile(new URL('../../model/data/xg.json', import.meta.url), 'utf8')); } catch { /* opcional */ }
+   const matches = raw.matches.map((r) => ({
++    ...(xg[r[0]] ? { xg: xg[r[0]] } : {}),
+     id: r[0], lg: r[1], season: r[2], date: r[3], status: r[4], h: r[5], a: r[6], hg: r[7], ag: r[8], evOk: !!(r[9] & 1), statsOk: !!(r[9] & 2),
+     ev: r[10].map((e) => ({ m: e[0], x: e[1], t: e[2], s: e[3], p: e[4], n: e[5], pos: e[6] })),
+     stats: r[11] ? { h: { sh: r[11][0], sot: r[11][1], co: r[11][2], fo: r[11][3], po: r[11][4] }, a: { sh: r[11][5], sot: r[11][6], co: r[11][7], fo: r[11][8], po: r[11][9] } } : null,
+diff --git a/tools/refit.mjs b/tools/refit.mjs
+index 69fb14b..b0f47e2 100644
+--- a/tools/refit.mjs
++++ b/tools/refit.mjs
+@@ -42,8 +42,8 @@ log('xG proxy', xg);
+ // ── (2) hiperparâmetros ──────────────────────────────────────────────────────
+ const params = structuredClone(prev?.params || R.DEFAULT_PARAMS);
+ for (const c of R.CHANNELS) params[c] = { ...R.DEFAULT_PARAMS[c], ...params[c] };
+-const LOGK = new Set(['q', 'P0', 'sSeason', 'phi', 'kMu', 'kH', 'Pg0', 'qg']);
+-const LGT = new Set(['rho', 'w', 'rhoG', 'wRed']);
++const LOGK = new Set(['q', 'P0', 'sSeason', 'phi', 'phiX', 'kMu', 'kH', 'Pg0', 'qg']);
++const LGT = new Set(['rho', 'w', 'wX', 'rhoG', 'wRed']);
+ const enc = (p, keys) => keys.map((k) => (LOGK.has(k) ? Math.log(Math.max(p[k], 1e-7)) : LGT.has(k) ? Math.log(Math.min(0.9999, Math.max(1e-4, p[k])) / (1 - Math.min(0.9999, Math.max(1e-4, p[k])))) : p[k]));
+ const dec = (x, keys, base) => { const p = { ...base }; keys.forEach((k, i) => { p[k] = LOGK.has(k) ? Math.exp(x[i]) : LGT.has(k) ? 1 / (1 + Math.exp(-x[i])) : x[i]; }); return p; };
+ 
+@@ -69,7 +69,7 @@ function channelLoss(c, pc, fromSeason) {
+ }
+ 
+ if (!QUICK) {
+-  const gKeys = ['q', 'P0', 'rho', 'sSeason', 'dPromoO', 'dPromoD', 'dNew', 'w', 'phi', 'kMu', 'kH', 'Pg0', 'qg', 'rhoG', 'wRed'];
++  const gKeys = ['q', 'P0', 'rho', 'sSeason', 'dPromoO', 'dPromoD', 'dNew', 'w', 'wX', 'phiX', 'phi', 'kMu', 'kH', 'Pg0', 'qg', 'rhoG', 'wRed'];
+   let x = enc(params.g, gKeys);
+   let best = Infinity;
+   for (let r = 0; r < 3; r++) {
+@@ -340,8 +340,8 @@ const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).m
+ const lastA = done.filter((m) => m.lg === 'A').at(-1);
+ const round5 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'number' ? +v.toPrecision(5) : v]));
+ const model = {
+-  version: 2,
+-  nome: 'Vitrôncio v2',
++  version: 3,
++  nome: 'Vitrôncio v3',
+   geradoEm: new Date().toISOString(),
+   dadosAte: lastA?.date,
+   temporada: seasonNow,

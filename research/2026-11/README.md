@@ -16,3 +16,15 @@ RPS do v1 no placar comum: DEV 0,20526 · HOLDOUT 0,20541 (mercado ≈ 0,2003). 
 Próximo passo mais promissor: terminar a trilha `xg/` (conferir `xg_ll` e `xg_adj_wf`, que parecem somar com o contexto) e empilhar com `final/stack.py`.
 
 Revisão de literatura (resumo): os melhores modelos sem odds ficam 0,7–2,1% atrás das casas; estávamos 2,5% atrás. Ideias em ordem de ganho esperado: força por escalação (plus-minus regularizado), variância maior na virada de temporada, mando dependente de contexto, empilhamento entre famílias de modelos, gols ajustados ao estado do jogo.
+
+## Candidato a v3 (não publicado)
+
+`v3-xg-observation.patch` troca, na observação do rating de gols, o proxy de finalizações pelo xG por chute de `model/data/xg.json` (peso `wX`, ruído `phiX`). Backtest de produção (com o contexto do v2 por cima):
+
+| | geral | 2013–2021 | 2022–2026 |
+|---|---|---|---|
+| v2 (publicado) | 0,2047 | 0,2048 | 0,2045 |
+| v3, `wX` 0,15 e `phiX` 0,7 fixos | 0,2036 | 0,2031 | 0,2045 |
+| v3, hiperparâmetros reajustados | 0,2037 | 0,2034 | 0,2045 |
+
+Ficou de fora porque (1) não melhora 2022–2026, só os anos usados na escolha; (2) o teste "matriz de placar… reproduz os gols esperados" passa a falhar (um dos lados sai da tolerância de 6%), sem diagnóstico; (3) jogos novos não têm xG por chute enquanto a etapa não for portada para `tools/`. Na pesquisa, a variante que se sustentou em 2022–2026 foi a mistura meio a meio do rating novo com o antigo (`xg_ll`), que pede dois ratings de gols lado a lado — é o próximo teste. Empilhar pi-ratings/Elo/árvores (`zoo/`) não ajudou em 2022–2026.
