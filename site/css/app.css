@@ -274,3 +274,4 @@ table.ba td.hist { white-space: normal; min-width: 150px; }
 @media (max-width: 640px) { .mticket td.msel { white-space: normal; min-width: 120px; } .modd { width: 58px; } }
 td.wrapc { white-space: normal; min-width: 200px; } @media (max-width: 640px) { td.wrapc { min-width: 130px; } table.ba td, table.ba th { padding: 7px 4px; } }
 td.ev { vertical-align: middle; }
+.mgen .gctl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; } .mgen .gctl > span { min-width: 150px; } .mgen .seg { flex-wrap: wrap; } .mgen .seg button.on { background: var(--gold); color: #14110a; }

@@ -96,7 +96,13 @@ export function againstView() {
 // chance, gols e ambos marcam são calculados juntos pela matriz de placares; cartões,
 // escanteios e expulsão como independentes do placar (engine/markets.js).
 const legsFromStore = () => { const o = store.get('mult2', null); if (o) return o; const old = store.get('mult', {}); const n = {}; for (const [id, j] of Object.entries(old)) n[`${id}|r:${'HDA'[j]}`] = { odd: null }; return n; };
-export const multState = { legs: legsFromStore(), open: {} };
+export const multState = { legs: legsFromStore(), open: {}, gen: { n: 10, types: ['k', 'c'], mode: 'prov', min: 1.25, ...store.get('gen', {}) } };
+export function genSet(k, v) {
+  const g = multState.gen;
+  if (k === 'types') g.types = g.types.includes(v) ? g.types.filter((x) => x !== v) : [...g.types, v];
+  else g[k] = k === 'mode' ? v : +v;
+  store.set('gen', g);
+}
 const saveLegs = () => store.set('mult2', multState.legs);
 export function multToggle(id, sel) { const k = `${id}|${sel}`; if (multState.legs[k]) delete multState.legs[k]; else multState.legs[k] = { odd: null }; saveLegs(); }
 export function multSet(keys) { multState.legs = Object.fromEntries(keys.map((k) => [k, { odd: null }])); saveLegs(); }
@@ -114,6 +120,8 @@ const GROUPS = [
   ['Não sofre gol', [['cs:h', (m) => team(m.h).abbr], ['cs:a', (m) => team(m.a).abbr]]],
   ['Cartões amarelos', ou('c', [3.5, 4.5, 5.5])],
   ['Escanteios', ou('k', [8.5, 9.5, 10.5])],
+  ['Finalizações', ou('s', [21.5, 23.5, 25.5])],
+  ['Chutes no gol', ou('n', [7.5, 8.5, 9.5])],
   ['Expulsão', [['v:s', () => 'Sim'], ['v:n', () => 'Não']]],
 ];
 function dec1(v) { return String(v).replace('.', ','); }
@@ -125,6 +133,8 @@ function selName(m, sel) {
   if (v === 'bt') return x === 's' ? 'Ambos marcam' : 'Ambos marcam: não';
   if (v === 'c') return `${more ? 'Mais' : 'Menos'} de ${L} cartões amarelos`;
   if (v === 'k') return `${more ? 'Mais' : 'Menos'} de ${L} escanteios`;
+  if (v === 's') return `${more ? 'Mais' : 'Menos'} de ${L} finalizações`;
+  if (v === 'n') return `${more ? 'Mais' : 'Menos'} de ${L} chutes no gol`;
   if (v === 'th' || v === 'ta') return `${v === 'th' ? H : A}: ${more ? 'mais' : 'menos'} de ${L} gol${L === '0,5' ? '' : 's'}`;
   if (v === 'cs') return x === 'h' ? `${H} não sofre gol` : x === 'a' ? `${A} não sofre gol` : x === 'hn' ? `${H} sofre gol` : `${A} sofre gol`;
   if (v === 'p') return `${playerName(m, x)} marca`;
@@ -135,7 +145,7 @@ function playerName(m, id) { for (const t of [m.h, m.a]) { const p = (S.model.pl
 function mctx(m) {
   const f = forecast(m).pre, e = expected(m).pr;
   const players = {}; for (const [t, xg] of [[m.h, f.xgH], [m.a, f.xgA]]) for (const x of scorers(t, xg)) players[x.id] = x.p;
-  return { matrix: f.matrix, pRed: 1 - (1 - f.pRedH) * (1 - f.pRedA), yc: e.yc.lh + e.yc.la, co: e.co.lh + e.co.la, disp: S.model.dispersion, cal: S.model.against?.calMercados, players };
+  return { matrix: f.matrix, pRed: 1 - (1 - f.pRedH) * (1 - f.pRedA), yc: e.yc.lh + e.yc.la, co: e.co.lh + e.co.la, sh: e.sh.lh + e.sh.la, sot: e.sot.lh + e.sot.la, disp: S.model.dispersion, cal: S.model.against?.calMercados, players };
 }
 function published(m, sel) {
   const k = market(m); if (!k) return null;
@@ -168,6 +178,55 @@ function ticket(keys) {
   }
   const n = legs.length, O = missing ? null : odds;
   return { n, legs, p, q: allMkt && !sameGame ? q : null, c: all1x2 ? c : null, o: O, missing, sameGame, ev: O ? p * O - 1 : null, evC: O && all1x2 ? c * O - 1 : null, evQ: O && allMkt && !sameGame ? q * O - 1 : null };
+}
+// ── gerador de múltipla gigante ──────────────────────────────────────────────
+const GEN_TYPES = {
+  k: ['Escanteios', ou('k', [7.5, 8.5, 9.5, 10.5, 11.5])], c: ['Cartões', ou('c', [2.5, 3.5, 4.5, 5.5, 6.5])],
+  s: ['Finalizações', ou('s', [19.5, 21.5, 23.5, 25.5])], n: ['Chutes no gol', ou('n', [6.5, 7.5, 8.5, 9.5])],
+  g: ['Gols', ou('g', [0.5, 1.5, 2.5, 3.5])], r: ['Resultado', ['r:H', 'r:D', 'r:A', 'dc:1X', 'dc:12', 'dc:X2'].map((x) => [x])],
+};
+/** Monta a múltipla: em cada jogo e mercado escolhido, a linha candidata; depois espalha pelas partidas. */
+function generate(games) {
+  const G = multState.gen, cands = [];
+  for (const g of games) {
+    const ctx = mctx(g);
+    for (const t of G.types) {
+      let best = null;
+      for (const [sel] of GEN_TYPES[t][1]) {
+        const p = selProb(ctx, sel); if (!(p > 0)) continue;
+        const pub = published(g, sel);
+        if (G.mode === 'prov') { if (1 / p < G.min) continue; const sc = p; if (!best || sc > best.sc) best = { m: g, sel, p, pub, sc }; }
+        else { if (!pub || pub.o < G.min || p / pub.q < 1.1) continue; const sc = p * pub.o - 1; if (!best || sc > best.sc) best = { m: g, sel, p, pub, sc }; }
+      }
+      if (best) cands.push(best);
+    }
+  }
+  cands.sort((x, y) => y.sc - x.sc);
+  const picked = [], per = new Map();
+  for (let round = 1; picked.length < G.n && round <= G.types.length; round++) {
+    for (const c of cands) { if (picked.length >= G.n) break; if (picked.includes(c) || (per.get(c.m.id) || 0) >= round) continue; picked.push(c); per.set(c.m.id, (per.get(c.m.id) || 0) + 1); }
+  }
+  return picked;
+}
+function genBlock(games) {
+  const G = multState.gen, legs = generate(games);
+  const T = legs.length ? ticket(legs.map((l) => `${l.m.id}|${l.sel}`)) : null;
+  const known = legs.filter((l) => l.pub).length, mg = 0.08;
+  const btn = (k, v, lab, on) => `<button class="${on ? 'on' : ''}" data-act="gen" data-k="${k}" data-v="${v}">${lab}</button>`;
+  return `<div class="panel mgen">
+    <div class="gctl"><span class="small muted">Pernas</span><div class="seg">${[5, 8, 10, 12, 15].map((n) => btn('n', n, n, G.n === n)).join('')}</div></div>
+    <div class="gctl"><span class="small muted">Mercados</span><div class="seg">${Object.entries(GEN_TYPES).map(([k, [lab]]) => btn('types', k, lab, G.types.includes(k))).join('')}</div></div>
+    <div class="gctl"><span class="small muted">Critério</span><div class="seg">${btn('mode', 'prov', 'Mais prováveis', G.mode === 'prov')}${btn('mode', 'valor', 'Vantagem sobre a casa', G.mode === 'valor')}</div></div>
+    <div class="gctl"><span class="small muted">${G.mode === 'prov' ? 'Odd justa mínima por perna' : 'Odd mínima por perna'}</span><div class="seg">${[1.15, 1.25, 1.4, 1.6, 2].map((v) => btn('min', v, dec(v), G.min === v)).join('')}</div></div>
+    ${legs.length ? `<div class="tw" style="margin-top:10px"><table><thead><tr><th class="l hide-m">Jogo</th><th class="l">Seleção</th><th>${face(16)}<span class="nm-full">Vitrôncio</span><span class="nm-abbr">Vit.</span></th><th>Odd justa</th><th>Odd da casa</th></tr></thead><tbody>
+      ${legs.map((l) => `<tr><td class="l small hide-m">${esc(team(l.m.h).abbr)} × ${esc(team(l.m.a).abbr)}</td><td class="l wrapc"><span class="only-m small dim">${esc(team(l.m.h).abbr)} × ${esc(team(l.m.a).abbr)}</span>${esc(selName(l.m, l.sel))}</td><td>${pct(l.p)}</td><td class="dim">${dec(1 / l.p)}</td><td>${l.pub ? dec(l.pub.o) : '<span class="dim">digite</span>'}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="kv mkv" style="margin-top:10px"><div><div class="k">${legs.length} pernas: todas acontecem (Vitrôncio)</div><div class="v">${pct(T.p, T.p < 0.01 ? 2 : 1)}</div></div><div><div class="k">Odd justa da múltipla</div><div class="v">${oddTxt(1 / T.p)}</div></div><div><div class="k">Odd da casa</div><div class="v">${known === legs.length ? oddTxt(T.o) : `<small>${known} de ${legs.length} pernas</small>`}</div></div><div><div class="k">${known === legs.length ? 'Ganho pelo Vitrôncio' : 'Vale a pena se a casa pagar'}</div><div class="v ${known === legs.length && T.ev > 0 ? 'gold' : ''}">${known === legs.length ? signed(T.ev) : `≥ ${oddTxt(1 / T.p)}`}</div></div></div>
+    ${legs.length < G.n ? `<p class="small" style="margin:8px 0 0">Só ${legs.length} linha${legs.length > 1 ? 's atendem' : ' atende'} aos critérios nesta rodada (pediu ${G.n}).</p>` : ''}
+    <p class="small muted" style="margin:8px 0 0">Com margem típica de ${pct(mg, 0)} por perna nesses mercados, se a casa estiver certa a múltipla de ${legs.length} pernas devolve em média ${signed((1 / (1 + mg)) ** legs.length - 1)}. Pernas do mesmo jogo em mercados diferentes (escanteios, cartões, finalizações) são tratadas como independentes. Odd justa = 1 ÷ chance do Vitrôncio.</p>
+    <div class="btnrow" style="margin-top:8px"><button class="btn sm gold" data-act="mload" data-legs="${legs.map((l) => `${l.m.id}|${l.sel}`).join(',')}">abrir no bilhete para digitar as odds</button></div>`
+    : '<p class="muted small" style="margin-top:10px">Nenhuma linha atende aos critérios. Escolha mais mercados ou uma odd mínima menor.</p>'}
+  </div>`;
 }
 const oddTxt = (v) => (v == null ? '–' : v >= 100 ? Math.round(v).toLocaleString('pt-BR') : dec(v));
 const histCell = (k) => { const h = S.model.against.multiplas?.[k]; return h?.n ? `${h.hits} em ${h.n} · <b class="${h.ret > 0 ? 'gold' : ''}">${signed(h.ret / h.n, 0)}</b>` : '–'; };
@@ -219,7 +278,10 @@ export function multiView() {
         ${sug.map(({ k, keys, t }) => `<tr class="${t.evC > 0 ? 'up' : ''}"><td>${k}</td><td class="l small wrapc">${t.legs.map((l) => `${esc(team(l.m.h).abbr)}×${esc(team(l.m.a).abbr)} <b>${esc(l.sel === 'r:D' ? 'empate' : team(l.sel === 'r:H' ? l.m.h : l.m.a).abbr)}</b>`).join(' · ')}</td><td>${oddTxt(t.o)}</td><td>${pct(t.p, 1)}</td><td class="hide-m">${pct(t.q, 1)}</td><td class="hide-m">${pct(t.c, 1)}</td><td class="ev ${t.evC > 0 ? 'pos' : 'neg'}">${signed(t.evC)}</td><td class="small hide-m">${histCell(k)}</td><td><button class="btn sm" data-act="mload" data-legs="${keys.join(',')}">abrir</button></td></tr>`).join('')}
       </tbody></table></div>` : '<p class="muted">Menos de dois jogos com odds em que o Vitrôncio discorda do mercado por 5 pontos ou mais.</p>'}</section>
 
-    <section data-mk="mu-calc"><div class="sec-h"><h2>Monte sua múltipla</h2><span class="sub">resultado, gols, ambos marcam, cartões, escanteios, expulsão</span>${T.n ? '<button class="btn sm more" data-act="mclear">limpar</button>' : ''}</div>
+    <section data-mk="mu-gen"><div class="sec-h"><h2>Múltipla gigante</h2><span class="sub">o site escolhe as pernas espalhadas pelos jogos da rodada</span></div>
+      ${genBlock(games)}</section>
+
+    <section data-mk="mu-calc"><div class="sec-h"><h2>Monte sua múltipla</h2><span class="sub">resultado, gols, ambos marcam, cartões, escanteios, finalizações, expulsão</span>${T.n ? '<button class="btn sm more" data-act="mclear">limpar</button>' : ''}</div>
       ${T.n ? `<div class="panel mticket"><div class="tw"><table><thead><tr><th class="l hide-m">Jogo</th><th class="l">Seleção</th><th>${face(16)}<span class="nm-full">Vitrôncio</span><span class="nm-abbr">Vit.</span></th><th class="hide-m">Odd justa</th><th>Odd</th><th></th></tr></thead><tbody>
         ${T.legs.map((l) => `<tr><td class="l small hide-m"><a href="#/jogo/${l.m.id}">${esc(team(l.m.h).abbr)} × ${esc(team(l.m.a).abbr)}</a></td><td class="l msel"><span class="only-m small dim">${esc(team(l.m.h).abbr)} × ${esc(team(l.m.a).abbr)}</span>${esc(selName(l.m, l.sel))}</td><td>${pct(l.p)}</td><td class="hide-m dim">${dec(1 / l.p)}</td>
           <td><input class="modd" inputmode="decimal" data-change="modd" data-key="${esc(l.key)}" value="${l.user ? dec(l.user) : l.pub ? dec(l.pub.o) : ''}" placeholder="odd" aria-label="Odd oferecida"></td><td><button class="btn sm" data-act="mleg" data-id="${l.m.id}" data-sel="${l.sel}" aria-label="Tirar">×</button></td></tr>`).join('')}

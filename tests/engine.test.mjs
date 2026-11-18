@@ -210,6 +210,10 @@ test('mercados: pernas do mesmo jogo e contagens', async () => {
   near(jointProb(ctx, ['c:o3.5', 'c:u5.5']), selProb(ctx, 'c:o3.5') - selProb(ctx, 'c:o5.5'), 1e-9, 'faixa de cartões');
   assert.equal(jointProb(ctx, ['v:s', 'v:n']), 0);
   near(jointProb(ctx, ['r:H', 'k:o9.5']), selProb(ctx, 'r:H') * selProb(ctx, 'k:o9.5'), 1e-12, 'escanteios independentes do placar');
+  const c2 = { ...ctx, sh: 23, sot: 8 };
+  near(selProb(c2, 's:o23.5') + selProb(c2, 's:u23.5'), 1, 1e-6, 'finalizações: mais + menos = 1');
+  near(jointProb(c2, ['n:o7.5', 'k:o9.5']), selProb(c2, 'n:o7.5') * selProb(c2, 'k:o9.5'), 1e-12, 'contagens diferentes, independentes');
+  assert.ok(Number.isNaN(selProb(ctx, 's:o23.5')), 'sem a média do canal: indefinido');
 });
 
 test('radar: leitura das prop bets e candidatos', async () => {

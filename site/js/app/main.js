@@ -12,7 +12,7 @@ import { teamsView, teamView } from './views/teams.js';
 import { modelView } from './views/model.js';
 import { calendarView, playersView, calState } from './views/extra.js';
 import { compareView, cmpState } from './views/compare.js';
-import { againstView, multiView, multToggle, multSet, multOdd, multOpen } from './views/against.js';
+import { againstView, multiView, multToggle, multSet, multOdd, multOpen, genSet } from './views/against.js';
 import { initVitroncio, reactFav, reactSelf } from './vitroncio.js';
 
 const view = document.getElementById('view');
@@ -79,6 +79,7 @@ document.addEventListener('click', (ev) => {
   else if (act === 'mclear') multSet([]);
   else if (act === 'mload') multSet(el.dataset.legs.split(','));
   else if (act === 'mopen') multOpen(id);
+  else if (act === 'gen') genSet(el.dataset.k, el.dataset.v);
   else if (act === 'runwhatif') { if (!simState.running) runWhatIf(render); return; }
   last = ''; render();
 });

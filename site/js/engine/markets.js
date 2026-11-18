@@ -14,9 +14,13 @@
 //
 // Seleções: r:H r:D r:A · dc:1X dc:12 dc:X2 · g:o2.5 g:u2.5 (qualquer linha .5) ·
 // bt:s bt:n · th:o1.5 ta:u0.5 (gols de cada time) · cs:h cs:hn cs:a cs:an (não sofre / sofre gol) ·
-// c:o4.5 c:u4.5 (amarelos) · k:o9.5 k:u9.5 (escanteios) · v:s v:n (expulsão) ·
+// c:o4.5 c:u4.5 (amarelos) · k:o9.5 k:u9.5 (escanteios) · f:o25.5 (faltas) · s:o23.5 (finalizações) ·
+// n:o8.5 (chutes no gol) · v:s v:n (expulsão) ·
 // p:<id do jogador> (marca a qualquer momento; probabilidade em ctx.players, tratada como independente)
 // ─────────────────────────────────────────────────────────────────────────────
+
+// contagens do jogo: letra da seleção → canal (média total em ctx[canal], dispersão em ctx.disp[canal])
+const COUNT = { c: 'yc', k: 'co', f: 'fo', s: 'sh', n: 'sot' };
 
 const GOAL = {
   'r:H': (i, j) => i > j, 'r:D': (i, j) => i === j, 'r:A': (i, j) => i < j,
@@ -28,7 +32,7 @@ const GOAL = {
 /** Interpreta uma seleção. */
 export function parseSel(id) {
   if (GOAL[id]) return { kind: 'goal', f: GOAL[id] };
-  const m = /^([gck]):([ou])(\d+(?:\.5)?)$/.exec(id);
+  const m = /^([gckfsn]):([ou])(\d+(?:\.5)?)$/.exec(id);
   if (m) {
     const L = +m[3];
     if (m[1] === 'g') return { kind: 'goal', f: m[2] === 'o' ? (i, j) => i + j > L : (i, j) => i + j < L };
@@ -42,7 +46,9 @@ export function parseSel(id) {
 }
 
 /** Distribuição de uma contagem com média mu e dispersão phi (variância = phi·mu). */
-function countPmf(mu, phi, kmax = 40) {
+function countPmf(mu, phi) {
+  // cobre a cauda inteira (finalizações chegam a 40+ por jogo)
+  const kmax = Math.max(40, Math.ceil(mu + 12 * Math.sqrt(Math.max(1, phi || 1) * mu)));
   const p = new Array(kmax + 1);
   if (!(phi > 1.02)) { p[0] = Math.exp(-mu); for (let k = 1; k <= kmax; k++) p[k] = (p[k - 1] * mu) / k; return p; }
   const r = mu / (phi - 1), q = 1 - 1 / phi;
@@ -72,7 +78,8 @@ export function jointProb(ctx, ids) {
     p *= g;
   }
   for (const [v, c] of Object.entries(cnt)) {
-    let mu = v === 'c' ? ctx.yc : ctx.co, phi = v === 'c' ? ctx.disp?.yc : ctx.disp?.co;
+    const ch = COUNT[v]; let mu = ctx[ch], phi = ctx.disp?.[ch];
+    if (!(mu > 0)) return NaN;
     const k = ctx.cal?.[v]; if (k) { mu = Math.exp(k.a + k.b * Math.log(mu)); phi = k.phi; }
     p *= between(countPmf(mu, phi), c.lo, c.hi);
   }
