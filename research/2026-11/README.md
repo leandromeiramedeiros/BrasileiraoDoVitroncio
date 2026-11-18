@@ -17,14 +17,14 @@ Próximo passo mais promissor: terminar a trilha `xg/` (conferir `xg_ll` e `xg_a
 
 Revisão de literatura (resumo): os melhores modelos sem odds ficam 0,7–2,1% atrás das casas; estávamos 2,5% atrás. Ideias em ordem de ganho esperado: força por escalação (plus-minus regularizado), variância maior na virada de temporada, mando dependente de contexto, empilhamento entre famílias de modelos, gols ajustados ao estado do jogo.
 
-## Candidato a v3 (não publicado)
+## v3 (publicado)
 
-`v3-xg-observation.patch` troca, na observação do rating de gols, o proxy de finalizações pelo xG por chute de `model/data/xg.json` (peso `wX`, ruído `phiX`). Backtest de produção (com o contexto do v2 por cima):
+O xG por chute de `model/data/xg.json` entrou como um segundo rating de gols (canal `x`: 15% placar, 85% xG, ruído 0,7 — ajustes escolhidos pela trilha só com 2013–2021), combinado no `stack` por um coeficiente estimado a cada temporada só com o passado (≈ 0,64).
 
-| | geral | 2013–2021 | 2022–2026 |
+| backtest de produção | geral | 2013–2021 | 2022–2026 |
 |---|---|---|---|
-| v2 (publicado) | 0,2047 | 0,2048 | 0,2045 |
-| v3, `wX` 0,15 e `phiX` 0,7 fixos | 0,2036 | 0,2031 | 0,2045 |
-| v3, hiperparâmetros reajustados | 0,2037 | 0,2034 | 0,2045 |
+| v2 | 0,2047 | 0,2048 | 0,2045 |
+| v3 | 0,2042 | 0,2042 | 0,2044 |
+| trocar o proxy pelo xG num rating só (descartado) | 0,2036 | 0,2031 | 0,2045 |
 
-Ficou de fora porque (1) não melhora 2022–2026, só os anos usados na escolha; (2) o teste "matriz de placar… reproduz os gols esperados" passa a falhar (um dos lados sai da tolerância de 6%), sem diagnóstico; (3) jogos novos não têm xG por chute enquanto a etapa não for portada para `tools/`. Na pesquisa, a variante que se sustentou em 2022–2026 foi a mistura meio a meio do rating novo com o antigo (`xg_ll`), que pede dois ratings de gols lado a lado — é o próximo teste. Empilhar pi-ratings/Elo/árvores (`zoo/`) não ajudou em 2022–2026.
+A troca direta rende mais no geral, mas nada em 2022–2026; a versão com dois ratings é a que não piora em nenhum período. O ganho em 2022–2026 é pequeno demais para ser distinguido de ruído. Empilhar pi-ratings/Elo/árvores (`zoo/`) não ajudou em 2022–2026.

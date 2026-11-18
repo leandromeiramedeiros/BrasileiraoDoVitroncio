@@ -87,6 +87,10 @@ if (!QUICK) {
   }
 } else log('modo rápido: hiperparâmetros reaproveitados');
 
+// segundo rating de gols (xG por chute): mesma dinâmica do rating de gols; peso do placar e ruído
+// fixados pela pesquisa de nov/2026 (escolhidos só com 2013–2021)
+params.x = { ...params.g, w: 0.15, phi: 0.7 };
+
 // ── (3) passada walk-forward ─────────────────────────────────────────────────
 const state = R.createState(params);
 const rows = [];
@@ -109,14 +113,14 @@ log(`walk-forward: ${rows.length} partidas`);
 const feats = (r, side) => {
   const o = side === 'h' ? 'lh' : 'la', sign = side === 'h' ? 1 : -1;
   const rel = (c) => Math.log(r.pr[c][o]) - (r.L[c].mu + (sign * r.L[c].hfa) / 2);
-  return [1, Math.log(r.pr.g[o]), rel('sot'), rel('sh')];
+  return [1, Math.log(r.pr.g[o]), rel('sot'), rel('sh'), Math.log(r.pr.x[o] / r.pr.g[o])];
 };
 function fitStack(sub) {
   const X = [], y = [];
   for (const r of sub) for (const s of ['h', 'a']) { X.push(feats(r, s)); y.push(s === 'h' ? r.m.hg : r.m.ag); }
   if (X.length < 3000) return null;
   const b = poissonGLM(X, y, null, { ridge: 1e-3 });
-  return { a0: b[0], a1: b[1], a2: b[2], a3: b[3] };
+  return { a0: b[0], a1: b[1], a2: b[2], a3: b[3], a4: b[4] };
 }
 const stackBySeason = {};
 const seasons = [...new Set(rows.map((r) => r.m.season))].sort();
@@ -124,7 +128,7 @@ for (const s of seasons) stackBySeason[s] = fitStack(rows.filter((r) => r.m.seas
 const stack = fitStack(rows.filter((r) => r.m.season >= 2015));
 for (const r of rows) {
   const st = stackBySeason[r.m.season];
-  const f = (side) => { if (!st) return r.pr.g[side === 'h' ? 'lh' : 'la']; const x = feats(r, side); return Math.exp(st.a0 + st.a1 * x[1] + st.a2 * x[2] + st.a3 * x[3]); };
+  const f = (side) => { if (!st) return r.pr.g[side === 'h' ? 'lh' : 'la']; const x = feats(r, side); return Math.exp(st.a0 + st.a1 * x[1] + st.a2 * x[2] + st.a3 * x[3] + st.a4 * x[4]); };
   r.lh = f('h'); r.la = f('a');
 }
 log('combinação', stack);
@@ -340,8 +344,8 @@ const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).m
 const lastA = done.filter((m) => m.lg === 'A').at(-1);
 const round5 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'number' ? +v.toPrecision(5) : v]));
 const model = {
-  version: 2,
-  nome: 'Vitrôncio v2',
+  version: 3,
+  nome: 'Vitrôncio v3',
   geradoEm: new Date().toISOString(),
   dadosAte: lastA?.date,
   temporada: seasonNow,

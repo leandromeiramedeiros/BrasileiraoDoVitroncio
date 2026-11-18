@@ -16,7 +16,10 @@
 
 import { applyContext } from './context.js';
 
-export const CHANNELS = ['g', 'sh', 'sot', 'co', 'yc', 'fo'];
+// 'x' é um segundo rating de gols: mesmo filtro do 'g', mas observando o xG medido
+// chute a chute quando o jogo tem esse dado (m.xg); sem ele, vê o mesmo que o 'g'.
+export const CHANNELS = ['g', 'sh', 'sot', 'co', 'yc', 'fo', 'x'];
+const HOME = (c) => c === 'g' || c === 'x'; // canais com fator casa próprio do time
 
 /** Hiperparâmetros padrão por canal (os de `g` são reotimizados no reajuste). */
 export const DEFAULT_PARAMS = {
@@ -27,6 +30,8 @@ export const DEFAULT_PARAMS = {
   yc: { q: 0.0004, P0: 0.02, rho: 0.7, sSeason: 0.003, dPromoO: 0, dPromoD: 0, dNew: 0, phi: 1.2, kMu: 0.004, kH: 0.004, mu0: Math.log(2.3), hfa0: -0.1 },
   fo: { q: 0.0004, P0: 0.02, rho: 0.7, sSeason: 0.003, dPromoO: 0, dPromoD: 0, dNew: 0, phi: 2.0, kMu: 0.004, kH: 0.004, mu0: Math.log(15), hfa0: -0.03 },
 };
+
+DEFAULT_PARAMS.x = { ...DEFAULT_PARAMS.g, w: 0.15, phi: 0.7 };
 
 export function createState(params = DEFAULT_PARAMS) {
   const lg = {};
@@ -43,7 +48,7 @@ function newTeam(params, lg, season, fresh) {
     const p = params[c];
     const off = fresh ? 0 : -p.dNew;
     t.ch[c] = { o: off, d: off, Po: p.P0, Pd: p.P0 };
-    if (c === 'g') { t.ch[c].g = 0; t.ch[c].Pg = p.Pg0; }
+    if (HOME(c)) { t.ch[c].g = 0; t.ch[c].Pg = p.Pg0; }
   }
   return t;
 }
@@ -65,7 +70,7 @@ export function prepareTeam(state, params, id, lg, season) {
       s.o *= r; s.d *= r;
       s.Po = Math.min(p.P0, r * r * s.Po + p.sSeason * gap);
       s.Pd = Math.min(p.P0, r * r * s.Pd + p.sSeason * gap);
-      if (c === 'g') { const rg = Math.pow(p.rhoG, gap); s.g *= rg; s.Pg = Math.min(p.Pg0, rg * rg * s.Pg + p.qg * 20 * gap); }
+      if (HOME(c)) { const rg = Math.pow(p.rhoG, gap); s.g *= rg; s.Pg = Math.min(p.Pg0, rg * rg * s.Pg + p.qg * 20 * gap); }
       if (gap > 1) { s.o = Math.min(s.o, -p.dNew); s.d = Math.min(s.d, -p.dNew); s.Po = s.Pd = p.P0; }
       else if (lg !== t.lg) {
         const sign = lg === 'A' ? -1 : 1; // subiu: fica mais fraco em relação à nova média
@@ -81,12 +86,12 @@ export function prepareTeam(state, params, id, lg, season) {
 /** Previsão de um canal: taxas esperadas e variâncias (escala log). */
 export function predictChannel(state, params, c, hId, aId, lg, neutral = false) {
   const H = state.teams[hId].ch[c], A = state.teams[aId].ch[c], L = state.lg[lg][c];
-  const g = c === 'g' && !neutral ? H.g : 0;
+  const g = HOME(c) && !neutral ? H.g : 0;
   const hfa = neutral ? 0 : L.hfa;
   const etaH = L.mu + hfa / 2 + g + H.o - A.d;
   const etaA = L.mu - hfa / 2 - g + A.o - H.d;
-  const Sh = H.Po + A.Pd + (c === 'g' ? H.Pg : 0);
-  const Sa = A.Po + H.Pd + (c === 'g' ? H.Pg : 0);
+  const Sh = H.Po + A.Pd + (HOME(c) ? H.Pg : 0);
+  const Sa = A.Po + H.Pd + (HOME(c) ? H.Pg : 0);
   return { lh: Math.exp(etaH), la: Math.exp(etaA), Sh, Sa };
 }
 
@@ -117,6 +122,7 @@ export function observe(m, params, xg) {
     yH = w * gh + (1 - w) * xh; yA = w * ga + (1 - w) * xa;
   }
   obs.g = [yH, yA];
+  if (m.xg) { const w = params.x?.w ?? 0.15; obs.x = [w * gh + (1 - w) * m.xg[0], w * ga + (1 - w) * m.xg[1]]; } else obs.x = obs.g;
   if (s) {
     obs.sh = [s.h.sh, s.a.sh];
     obs.sot = [s.h.sot, s.a.sot];
@@ -138,7 +144,7 @@ export function applyMatch(state, params, m, xg, channels = CHANNELS) {
     const p = params[c], h = H.ch[c], a = A.ch[c], L = state.lg[m.lg][c];
     // ruído de processo (passeio aleatório por partida)
     h.Po += p.q; h.Pd += p.q; a.Po += p.q; a.Pd += p.q;
-    const isG = c === 'g';
+    const isG = HOME(c);
     if (isG) h.Pg += p.qg;
     const g = isG ? h.g : 0;
     const lh = Math.exp(L.mu + L.hfa / 2 + g + h.o - a.d);
@@ -186,13 +192,13 @@ export function predictMatch(state, params, hId, aId, lg, season, neutral = fals
 /**
  * Camada de combinação ("stacking"): junta o rating de gols com os ratings de
  * finalizações para chegar aos gols esperados finais de cada lado.
- *   log λ = a0 + a1·log λ_gols + a2·rel(finalizações no alvo) + a3·rel(finalizações)
+ *   log λ = a0 + a1·log λ_gols + a2·rel(finalizações no alvo) + a3·rel(finalizações) + a4·log(λ_xG / λ_gols)
  * `rel` = quanto o time deve produzir acima/abaixo da média da liga (escala log).
  */
 export function stackLambda(pr, L, stack, neutral = false) {
   if (!stack) return { lh: pr.g.lh, la: pr.g.la };
   const rel = (c, o, sign) => Math.log(pr[c][o]) - (L[c].mu + (neutral ? 0 : (sign * L[c].hfa) / 2));
-  const f = (o, sign) => Math.exp(stack.a0 + stack.a1 * Math.log(pr.g[o]) + stack.a2 * rel('sot', o, sign) + stack.a3 * rel('sh', o, sign));
+  const f = (o, sign) => Math.exp(stack.a0 + stack.a1 * Math.log(pr.g[o]) + stack.a2 * rel('sot', o, sign) + stack.a3 * rel('sh', o, sign) + (stack.a4 && pr.x ? stack.a4 * Math.log(pr.x[o] / pr.g[o]) : 0));
   return { lh: f('lh', 1), la: f('la', -1) };
 }
 
