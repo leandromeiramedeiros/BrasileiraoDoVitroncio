@@ -7,6 +7,17 @@
 
 let animate = false;
 
+const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+/** Entrada de um item novo: abre espaço aos poucos, para a lista deslizar em vez de pular. */
+function enter(n) {
+  if (calm || !n.animate) return;
+  const h = n.getBoundingClientRect().height;
+  if (!h) return;
+  n.style.overflow = 'hidden';
+  const a = n.animate([{ maxHeight: '0px', paddingTop: '0px', paddingBottom: '0px', opacity: 0.4 }, { maxHeight: `${h}px`, opacity: 1 }], { duration: 260, easing: 'ease-out' });
+  a.onfinish = a.oncancel = () => { n.style.overflow = ''; };
+}
+
 function same(a, b) { return a.nodeType === b.nodeType && (a.nodeType !== 1 || a.tagName === b.tagName); }
 
 function syncAttrs(o, n) {
@@ -42,7 +53,7 @@ function syncChildren(oldP, newP) {
       syncNode(match, n);
     } else {
       oldP.insertBefore(n, cur);
-      if (animate && n.nodeType === 1 && n.hasAttribute('data-enter') && n.animate) n.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 280, easing: 'ease-out' });
+      if (animate && n.nodeType === 1 && n.hasAttribute('data-enter')) enter(n);
     }
   }
   while (cur) { const nx = cur.nextSibling; oldP.removeChild(cur); cur = nx; }

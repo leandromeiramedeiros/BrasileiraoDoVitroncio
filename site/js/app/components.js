@@ -45,7 +45,7 @@ export function matchCard(m, { selected = false, act = null, day = false } = {})
   const foot = m.status === 'post' ? `<span>probabilidade pré-jogo deste resultado</span><b>${pct(m.hg > m.ag ? f.pre.pH : m.hg === m.ag ? f.pre.pD : f.pre.pA)}</b>`
     : m.status === 'in' ? `<span>agora</span><span><b>${pct(p.pH)}</b> · ${pct(p.pD)} · <b>${pct(p.pA)}</b></span>`
     : `<span>empate ${pct(p.pD)}</span><span>mais provável <b>${top.h}–${top.a}</b></span>`;
-  return `<a class="mcard ${selected ? 'sel' : ''} ${isFav ? 'fav' : ''}" ${attrs} style="${colors(m)}">
+  return `<a class="mcard ${selected ? 'sel' : ''} ${isFav ? 'fav' : ''}" data-mk="c${m.id}" ${attrs} style="${colors(m)}">
     <div class="meta"><span>${when}</span><span>${esc(m.venue || '')}</span></div>
     <div class="row ${cls('h')}">${logo(H)}<span>${esc(H.name)}</span>${played ? `<span class="sc">${m.hg}</span>` : `<span class="pp">${pct(p.pH)}</span>`}</div>
     <div class="row ${cls('a')}">${logo(A)}<span>${esc(A.name)}</span>${played ? `<span class="sc">${m.ag}</span>` : `<span class="pp">${pct(p.pA)}</span>`}</div>
@@ -120,6 +120,6 @@ export function raceBlock(key, n, rgb) {
   const sim = S.seasonSim; if (!sim) return '<p class="muted small">Simulando…</p>';
   const rows = Object.values(sim.teams).sort((a, b) => b[key] - a[key]).slice(0, n).filter((r) => r[key] > 0.0005);
   if (!rows.length) return '<p class="muted small">Já definido.</p>';
-  return `<div class="race">${rows.map((r) => { const t = team(r.id); return `<a class="r" href="#/time/${r.id}">${logo(t)}<span>${esc(t.name)}</span><span class="b"><i style="width:${r[key] * 100}%;background:rgb(${rgb})"></i></span><span class="v">${pct(r[key])}</span></a>`; }).join('')}</div>`;
+  return `<div class="race">${rows.map((r) => { const t = team(r.id); return `<a class="r" data-mk="r${r.id}" href="#/time/${r.id}">${logo(t)}<span>${esc(t.name)}</span><span class="b"><i style="width:${r[key] * 100}%;background:rgb(${rgb})"></i></span><span class="v">${pct(r[key])}</span></a>`; }).join('')}</div>`;
 }
 export { liveState, table };

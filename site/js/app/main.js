@@ -74,4 +74,17 @@ document.addEventListener('change', (ev) => {
 });
 
 window.bdvLogoFail = (img) => { failedLogos.add(img.getAttribute('src')); last = ''; render(); };
+// Versão publicada: se o navegador estiver rodando arquivos antigos guardados
+// em cache, recarrega uma vez para pegar a versão nova.
+const BUILD = '__BUILD__';
+async function checkVersion() {
+  if (BUILD.startsWith('__')) return; // rodando local, sem carimbo
+  try {
+    const live = (await (await fetch(`version.txt?t=${Date.now()}`, { cache: 'no-store' })).text()).trim();
+    if (live && live !== BUILD && sessionStorage.getItem('bdv:reloaded') !== live) { sessionStorage.setItem('bdv:reloaded', live); location.reload(); }
+  } catch { /* sem rede: segue com o que tem */ }
+}
+checkVersion();
+setInterval(() => { if (!document.hidden && !sim.playing) checkVersion(); }, 5 * 60000);
+
 boot().then(render).catch((e) => { console.error(e); view.innerHTML = `<div class="wrap"><div class="banner">Não consegui carregar o modelo (${esc(e.message)}). Recarregue a página.</div></div>`; });

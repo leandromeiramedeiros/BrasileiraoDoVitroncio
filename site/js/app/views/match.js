@@ -158,7 +158,7 @@ export function matchView(id) {
   const m = S.matches.get(id);
   if (!m) return `<div class="wrap"><p class="muted">Jogo não encontrado. <a class="gold" href="#/">Voltar ao início</a></p></div>`;
   const simOn = sim.res && sim.key === `s${m.id}`;
-  return `<div class="wrap"><section>${matchBlock(m)}</section>
+  return `<div class="wrap"><section data-mk="match">${matchBlock(m)}</section>
     ${simOn ? '' : versusBlock(m)}
   </div>`;
 }

@@ -37,13 +37,13 @@ export function renderPlayer(vm) {
       <a class="side" href="#/time/${m.a}">${logo(A)}<span class="nm">${esc(A.name)}</span>${redsHtml(vm.reds?.[1])}</a>
     </div>
     <div class="clock"><span class="${vm.mode === 'live' || vm.mode === 'sim' ? 'on' : ''}">${esc(vm.clock || '')}</span></div>
-    ${vm.scorers && (vm.scorers.h.length || vm.scorers.a.length) ? `<div class="scorers"><div>${sc('h')}</div><div>${sc('a')}</div></div>` : ''}
-    ${vm.controls || ''}
-    <div class="oracle"><div class="oracle-h"><span>${label}</span><span>${esc(vm.oracleRight || '')}</span></div>
+    ${vm.scorers && (vm.scorers.h.length || vm.scorers.a.length) ? `<div class="scorers" data-mk="scorers"><div>${sc('h')}</div><div>${sc('a')}</div></div>` : ''}
+    ${vm.controls ? `<div data-mk="controls">${vm.controls}</div>` : ''}
+    <div class="oracle" data-mk="oracle"><div class="oracle-h"><span>${label}</span><span>${esc(vm.oracleRight || '')}</span></div>
       ${probBar(shown)}
       <div class="plabels"><span><b>${pct(shown.pH)}</b> ${esc(H.name)}</span><span>empate <b>${pct(shown.pD)}</b></span><span>${esc(A.name)} <b>${pct(shown.pA)}</b></span></div>
     </div>
-    ${vm.strip || ''}
+    ${vm.strip ? `<div data-mk="strip">${vm.strip}</div>` : ''}
   </div>`;
   if (vm.compact) return `<div style="${vm.colors}">${stage}</div>`;
 
@@ -51,11 +51,12 @@ export function renderPlayer(vm) {
   let body = '';
   if (tab === 'lances') {
     const all = vm.events || [], key = vm.keyEvents || [];
+    // "Principais" é o padrão sempre que existem lances principais; o seletor só aparece quando há diferença
     const canFilter = key.length > 0 && all.length > key.length;
-    const mode = canFilter ? feedState.get(vm.key) || 'principais' : 'todos';
+    const mode = key.length ? feedState.get(vm.key) || 'principais' : 'todos';
     const list = mode === 'principais' ? key : all;
     const pre = mode === 'principais' ? 'k' : 'e';
-    body = `${canFilter ? `<div class="feed-h"><div class="seg">${[['principais', 'Principais'], ['todos', 'Todos os lances']].map(([k, l]) => `<button class="${k === mode ? 'on' : ''}" data-act="feed" data-key="${esc(vm.key)}" data-mode="${k}">${l}</button>`).join('')}</div></div>` : ''}
+    body = `${canFilter ? `<div class="feed-h" data-mk="feed-h"><div class="seg">${[['principais', 'Principais'], ['todos', 'Todos os lances']].map(([k, l]) => `<button class="${k === mode ? 'on' : ''}" data-act="feed" data-key="${esc(vm.key)}" data-mode="${k}">${l}</button>`).join('')}</div></div>` : ''}
       ${list.length ? `<div class="feed" data-mk="feed-${mode}">${list.map((e, i) => eventRow(e, `${pre}${list.length - i}`)).join('')}</div>` : `<p class="muted">${vm.mode === 'live' ? 'Aguardando os primeiros lances.' : 'Sem lances registrados para este jogo.'}</p>`}`;
   } else if (tab === 'stats') {
     body = vm.stats ? `<div class="panel">${statBars(vm.stats)}</div>` : '<p class="muted">Estatísticas ainda não disponíveis.</p>';
@@ -79,6 +80,6 @@ export function renderPlayer(vm) {
       </div></div></div>`;
   }
   return `<div style="${vm.colors}">${stage}
-  <div class="tabs">${tabs.map(([k, l]) => `<button class="${k === tab ? 'on' : ''}" data-act="tab" data-key="${esc(vm.key)}" data-tab="${k}">${l}</button>`).join('')}</div>
+  <div class="tabs" data-mk="tabs">${tabs.map(([k, l]) => `<button class="${k === tab ? 'on' : ''}" data-act="tab" data-key="${esc(vm.key)}" data-tab="${k}">${l}</button>`).join('')}</div>
   <div data-mk="tab-${tab}">${body}</div></div>`;
 }

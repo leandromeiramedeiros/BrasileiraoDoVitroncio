@@ -19,7 +19,7 @@ function gap(m, p, k) {
 export function versusBlock(m) {
   if (String(m.id).startsWith('sim-')) return '';
   const k = market(m);
-  if (!k) { if (m.status !== 'pre') loadOdds([m]); return `<section class="panel"><div class="sec-h"><h3>Modelo × mercado</h3></div><p class="muted small">${m.status === 'pre' ? 'As odds deste jogo ainda não foram publicadas (costumam aparecer alguns dias antes).' : 'Buscando as odds de fechamento deste jogo…'}</p></section>`; }
+  if (!k) { if (m.status !== 'pre') loadOdds([m]); return `<section class="panel" data-mk="versus"><div class="sec-h"><h3>Modelo × mercado</h3></div><p class="muted small">${m.status === 'pre' ? 'As odds deste jogo ainda não foram publicadas (costumam aparecer alguns dias antes).' : 'Buscando as odds de fechamento deste jogo…'}</p></section>`; }
   const f = forecast(m), p = f.pre, played = m.status === 'post';
   const g = gap(m, p, k);
   const row = (lab, q, extra) => `<div class="vs-row"><div class="vs-lab">${lab}</div><div>${probBar(q)}<div class="plabels"><span><b>${pct(q.pH)}</b> ${esc(team(m.h).abbr)}</span><span>empate <b>${pct(q.pD)}</b></span><span>${esc(team(m.a).abbr)} <b>${pct(q.pA)}</b></span></div>${extra || ''}</div></div>`;
@@ -29,7 +29,7 @@ export function versusBlock(m) {
     const who = Math.abs(rm - rk) < 0.002 ? 'Empate.' : rm < rk ? 'Modelo mais preciso.' : 'Mercado mais preciso.';
     verdict = `<div class="kv" style="margin-top:12px"><div><div class="k">Aconteceu</div><div class="v s">${m.hg}–${m.ag}, ${esc(resultTxt(m))}</div></div><div><div class="k">Modelo dava</div><div class="v">${pct(pm)}</div></div><div><div class="k">Mercado dava</div><div class="v">${pct(pk)}</div></div><div><div class="k">Neste jogo</div><div class="v s">${who}</div></div></div>`;
   }
-  return `<section class="panel" style="${colors(m)}"><div class="sec-h"><h3>Modelo × mercado</h3><span class="sub">${played ? 'antes do jogo' : 'o modelo não usa as odds'}</span><a class="more" href="#/comparar">todos os jogos</a></div>
+  return `<section class="panel" data-mk="versus" style="${colors(m)}"><div class="sec-h"><h3>Modelo × mercado</h3><span class="sub">${played ? 'antes do jogo' : 'o modelo não usa as odds'}</span><a class="more" href="#/comparar">todos os jogos</a></div>
     ${row('Modelo', p)}
     ${row('Mercado', k, `<div class="small dim" style="margin-top:4px">odds: ${dec(k.dec[0])} · ${dec(k.dec[1])} · ${dec(k.dec[2])} (${esc(k.src)}${k.kind === 'pre' ? ', agora' : k.src.includes('fechamento') ? '' : ', fechamento'}) · margem da casa retirada</div>`)}
     ${played ? verdict : `<p class="small muted" style="margin:12px 0 0">Maior diferença: o modelo dá <b style="color:var(--text)">${g.v > 0 ? '+' : ''}${(g.v * 100).toFixed(0)} pontos percentuais</b> para ${esc(g.lab)} em relação ao mercado.</p>`}

@@ -12,7 +12,7 @@ export function tableView() {
   const rows = table(), sim = S.seasonSim, f = fav();
   const body = rows.map((r) => {
     const t = team(r.id), s = sim?.teams[r.id];
-    return `<tr class="${zone(r.rank)} ${r.id === f ? 'fav' : ''}"><td class="pos">${r.rank}</td><td class="team"><a href="#/time/${r.id}">${logo(t)}<span>${esc(t.name)}</span>${r.live ? ' <span class="livepill"></span>' : ''}</a></td>
+    return `<tr data-mk="t${r.id}" class="${zone(r.rank)} ${r.id === f ? 'fav' : ''}"><td class="pos">${r.rank}</td><td class="team"><a href="#/time/${r.id}">${logo(t)}<span>${esc(t.name)}</span>${r.live ? ' <span class="livepill"></span>' : ''}</a></td>
       <td class="pts">${r.pts}</td><td>${r.j}</td><td>${r.v}</td><td>${r.e}</td><td>${r.d}</td><td>${r.gp}</td><td>${r.gc}</td><td>${r.gp - r.gc > 0 ? '+' : ''}${r.gp - r.gc}</td><td>${formDots(r.form)}</td>
       ${s ? `<td class="pts" title="faixa provável: ${s.ptsLo}–${s.ptsHi}">${s.pts.toFixed(0)}</td><td>${heat(s.titulo)}</td><td>${heat(s.libertadores, '69,167,255')}</td><td>${heat(s.sulAmericana, '31,209,127')}</td><td>${heat(s.rebaixamento, '255,61,77')}</td><td>${posDist(s.pos)}</td>` : '<td colspan="6" class="muted small">simulando…</td>'}</tr>`;
   }).join('');
