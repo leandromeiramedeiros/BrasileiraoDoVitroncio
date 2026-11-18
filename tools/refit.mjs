@@ -301,7 +301,9 @@ try {
 const keep = Object.fromEntries(Object.entries(state.teams).filter(([, t]) => t.season >= seasonNow - 1).map(([id, t]) => [id, { lg: t.lg, season: t.season, n: t.n, ch: Object.fromEntries(Object.entries(t.ch).map(([c, s]) => [c, Object.fromEntries(Object.entries(s).map(([k, v]) => [k, +v.toFixed(5)]))])) }]));
 const lgOut = {}; for (const L of ['A', 'B']) { lgOut[L] = {}; for (const c of R.CHANNELS) lgOut[L][c] = { mu: +state.lg[L][c].mu.toFixed(5), hfa: +state.lg[L][c].hfa.toFixed(5), n: state.lg[L][c].n }; }
 const teamMeta = Object.fromEntries(Object.keys(keep).map((id) => [id, teams[id]]));
-const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).map((m) => ({ id: m.id, date: m.date, status: m.status, h: m.h, a: m.a, hg: m.hg, ag: m.ag, venue: m.venue, city: m.city }));
+const preLam = new Map(rows.filter((r) => r.m.lg === 'A' && r.m.season === seasonNow).map((r) => [r.m.id, [+r.lh.toFixed(4), +r.la.toFixed(4)]]));
+// calendário da temporada; jogos já aplicados levam o λ pré-jogo (para gráficos de jogos passados)
+const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).map((m) => ({ id: m.id, date: m.date, status: m.status, h: m.h, a: m.a, hg: m.hg, ag: m.ag, venue: m.venue, city: m.city, ...(preLam.has(m.id) ? { lam: preLam.get(m.id), ev: m.ev.filter((e) => e.t !== 'Y').map((e) => [e.m, e.x, e.t, e.s, e.n]) } : {}) }));
 const lastA = done.filter((m) => m.lg === 'A').at(-1);
 const round5 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'number' ? +v.toPrecision(5) : v]));
 const model = {
