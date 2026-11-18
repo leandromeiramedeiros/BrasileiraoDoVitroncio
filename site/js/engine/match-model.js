@@ -122,6 +122,39 @@ export function scoreDistribution(hz, lh, la, start = null) {
   return { matrix, pH, pD, pA, xgH, xgA, pRedH, pRedA };
 }
 
+/**
+ * Caminho inverso: dadas as probabilidades-alvo de vitória do mandante e do
+ * visitante (por exemplo, vindas de um conjunto de modelos), encontra os gols
+ * esperados (lh, la) com que a cadeia reproduz essas probabilidades. Assim
+ * qualquer previsão 1X2 vira uma distribuição completa de placares, coerente
+ * com o ao vivo. `total` (opcional) fixa a soma lh+la e ajusta só o equilíbrio
+ * entre os lados (nesse caso casa pH/(pH+pA) em vez dos dois alvos).
+ */
+export function lambdasFromProbs(hz, pH, pA, { total = null, init = null } = {}) {
+  const f = (x) => { const d = scoreDistribution(hz, Math.exp(x[0]), Math.exp(x[1])); return [d.pH, d.pA]; };
+  if (total) {
+    // busca 1-D na fração do mandante
+    const target = pH / (pH + pA);
+    let lo = 0.03, hi = 0.97;
+    for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; const d = scoreDistribution(hz, total * mid, total * (1 - mid)); if (d.pH / (d.pH + d.pA) < target) lo = mid; else hi = mid; }
+    const s = (lo + hi) / 2;
+    return { lh: total * s, la: total * (1 - s) };
+  }
+  let x = init ? [Math.log(init[0]), Math.log(init[1])] : [Math.log(1.2 + 1.2 * (pH - pA)), Math.log(1.2 - 1.2 * (pH - pA) + 0.05)];
+  for (let it = 0; it < 30; it++) {
+    const y = f(x), r = [y[0] - pH, y[1] - pA];
+    if (Math.abs(r[0]) + Math.abs(r[1]) < 1e-7) break;
+    const h = 1e-4, y0 = f([x[0] + h, x[1]]), y1 = f([x[0], x[1] + h]);
+    const J = [[(y0[0] - y[0]) / h, (y1[0] - y[0]) / h], [(y0[1] - y[1]) / h, (y1[1] - y[1]) / h]];
+    const det = J[0][0] * J[1][1] - J[0][1] * J[1][0];
+    if (Math.abs(det) < 1e-12) break;
+    let dx = [(r[0] * J[1][1] - r[1] * J[0][1]) / det, (J[0][0] * r[1] - J[1][0] * r[0]) / det];
+    const mx = Math.max(Math.abs(dx[0]), Math.abs(dx[1])); if (mx > 0.7) dx = dx.map((v) => (v * 0.7) / mx);
+    x = [Math.min(2.2, Math.max(-3.5, x[0] - dx[0])), Math.min(2.2, Math.max(-3.5, x[1] - dx[1]))];
+  }
+  return { lh: Math.exp(x[0]), la: Math.exp(x[1]) };
+}
+
 /** Probabilidade de quem marca o PRÓXIMO gol (ou de não sair mais gol). */
 export function nextGoal(hz, lh, la, start = null) {
   const c = compile(hz);

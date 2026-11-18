@@ -4,10 +4,16 @@ Site estático (GitHub Pages) da Série A com simulador próprio. Interface e co
 
 ## Regras do projeto
 
-- Não é ferramenta de aposta. As odds aparecem no site **apenas como comparação** (página "Vitrôncio × Mercado" e bloco na página do jogo: simulação × odds × resultado) e como régua no backtest. **Nunca** viram entrada, alvo ou critério de seleção do modelo — a comparação só faz sentido se o modelo for independente do mercado. Nada de linguagem de "aposta de valor".
+- Não é ferramenta de aposta. As odds aparecem no site **apenas como comparação** (página "Odds" e bloco na página do jogo: modelo × odds × resultado) e como régua no backtest. **Nunca** viram entrada, alvo ou critério de seleção do modelo — a comparação só faz sentido se o modelo for independente do mercado. Nada de linguagem de "aposta de valor".
 - `site/js/engine/` é JS puro compartilhado entre navegador e `tools/`. Qualquer mudança no motor precisa manter os dois lados funcionando; rode `npm test`.
 - O dono autorizou push direto em `main` (cada push publica o site).
 - Teste de interface: sirva `site/` e use Playwright com respostas gravadas da ESPN (a CDN deles recusa navegador headless). Não tente contornar esse bloqueio.
+
+## Interface
+
+- O HTML de cada página é gerado por inteiro, mas quem aplica no DOM é `site/js/app/morph.js` (atualização incremental). Listas que crescem usam `data-mk` como chave estável; não troque por `innerHTML`, senão volta a piscar.
+- Tom dos textos: direto e neutro ("modelo", "probabilidade"). Sem emoji, sem exclamações, sem personagem. O nome Vitrôncio aparece só na marca e na página do modelo.
+- Página inicial curta; o detalhe fica nas páginas de jogo.
 
 ## Reajuste semanal (o pedido mais comum)
 

@@ -11,9 +11,9 @@ Série A do Campeonato Brasileiro ao vivo, com as chances de cada jogo e do camp
 | Início | Jogo ao vivo em destaque (placar gigante, relógio, lances, estatísticas, chance de vitória minuto a minuto). Com mais de um jogo rolando, cartões para trocar. Próximos jogos com previsão, a corrida pelo título/G4/Z4 e os últimos resultados. |
 | Jogo | Previsão completa (mapa de placares, gols esperados, quem marca, escanteios, cartões) e o botão **Assistir simulação**: uma versão sorteada do jogo, narrada minuto a minuto. |
 | Jogos | Calendário completo da temporada, por mês ou por time. |
-| Artilharia | Artilheiros, assistências, finalizações, cartões e minutos. |
-| Classificação | Tabela em tempo real + chances de título, Libertadores, Sul-Americana e rebaixamento. |
-| Vitrôncio × Mercado | O que a simulação diz × o que as odds dizem; nos jogos passados, também o que aconteceu e quem chegou mais perto. As odds não entram no modelo. |
+| Jogadores | Artilheiros, assistências, finalizações, cartões e minutos. |
+| Tabela | Tabela em tempo real + chances de título, Libertadores, Sul-Americana e rebaixamento. |
+| Odds (modelo × mercado) | O que a simulação diz × o que as odds dizem; nos jogos passados, também o que aconteceu e quem chegou mais perto. As odds não entram no modelo. |
 | Simulador | Confronto livre entre quaisquer dois times e o "E se…?" (trave resultados futuros e veja a corrida mudar). |
 | Times | Ranking de força (ataque/defesa), página de cada clube com evolução, jogos e elenco. |
 | O modelo | Como o Vitrôncio pensa e o quanto ele acerta (backtest). |

@@ -22,7 +22,7 @@ export function calendarView() {
       <select data-change="calteam" aria-label="Filtrar por time"><option value="">Todos os times</option>${ids.map((id) => `<option value="${id}" ${id === calState.team ? 'selected' : ''}>${esc(team(id).name)}</option>`).join('')}</select>
       ${calState.team ? '' : months.map((k) => `<button class="btn sm ${k === calState.month ? 'on' : ''}" data-act="calmonth" data-id="${k}">${MES[+k.slice(5) - 1].slice(0, 3)}</button>`).join('')}
     </div>
-    ${[...groups.values()].map((g) => `<div style="margin-bottom:16px"><div class="sec-h"><h3 style="font-size:16px;color:var(--gold)">${esc(relDay(g[0].date))}</h3></div><div class="grid g3">${g.map((m) => matchCard(m, { day: !!calState.team })).join('')}</div></div>`).join('') || '<p class="muted">Nenhum jogo neste período.</p>'}
+    ${[...groups.values()].map((g) => `<div style="margin-bottom:16px"><div class="sec-h"><div class="day" style="margin:0">${esc(relDay(g[0].date))}</div></div><div class="grid g3">${g.map((m) => matchCard(m, { day: !!calState.team })).join('')}</div></div>`).join('') || '<p class="muted">Nenhum jogo neste período.</p>'}
   </section></div>`;
 }
 
@@ -32,13 +32,13 @@ export function playersView() {
   const tbl = (title, sub, sorted, cols) => `<div class="panel"><div class="sec-h"><h3>${title}</h3><span class="sub">${sub}</span></div><div class="tw"><table><thead><tr><th>#</th><th class="l">Jogador</th>${cols.map((c) => `<th>${c[0]}</th>`).join('')}</tr></thead><tbody>
     ${sorted.slice(0, 15).map((p, i) => `<tr class="${p.tid === fav() ? 'fav' : ''}"><td class="pos">${i + 1}</td><td class="team"><a href="#/time/${p.tid}">${logo(team(p.tid))}<span>${esc(p.n)}</span></a></td>${cols.map((c, k) => `<td class="${k === 0 ? 'pts' : ''}">${c[1](p)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
   const per90 = (v, p) => (p.min >= 450 ? ((v / p.min) * 90).toFixed(2).replace('.', ',') : '–');
-  return `<div class="wrap"><section><div class="sec-h"><h2>Artilharia e números</h2><span class="sub">Série A ${S.model.temporada} · dados até ${esc(fmtFull(S.model.dadosAte))}</span></div>
+  return `<div class="wrap"><section><div class="sec-h"><h2>Jogadores</h2><span class="sub">Série A ${S.model.temporada} · dados até ${esc(fmtFull(S.model.dadosAte))}</span></div>
     <div class="grid g2">
-      ${tbl('Artilheiros', 'gols', [...rows].sort((a, b) => b.g - a.g || a.min - b.min), [['Gols', (p) => p.g], ['Pên.', (p) => p.pk || ''], ['Jogos', (p) => p.apps], ['Gols/90', (p) => per90(p.g, p)]])}
-      ${tbl('Garçons', 'assistências', [...rows].sort((a, b) => b.a - a.a || a.min - b.min), [['Assist.', (p) => p.a], ['Jogos', (p) => p.apps], ['Assist./90', (p) => per90(p.a, p)]])}
-      ${tbl('Quem mais finaliza', 'finalizações', [...rows].sort((a, b) => b.sh - a.sh), [['Final.', (p) => p.sh], ['No alvo', (p) => p.sot], ['Gols', (p) => p.g], ['Final./90', (p) => per90(p.sh, p)]])}
-      ${tbl('Os mais advertidos', 'cartões', [...rows].sort((a, b) => b.y + 3 * b.r - (a.y + 3 * a.r)), [['Amarelos', (p) => p.y], ['Vermelhos', (p) => p.r || ''], ['Jogos', (p) => p.apps]])}
+      ${tbl('Artilheiros', '', [...rows].sort((a, b) => b.g - a.g || a.min - b.min), [['Gols', (p) => p.g], ['Pên.', (p) => p.pk || ''], ['Jogos', (p) => p.apps], ['Gols/90', (p) => per90(p.g, p)]])}
+      ${tbl('Assistências', '', [...rows].sort((a, b) => b.a - a.a || a.min - b.min), [['Assist.', (p) => p.a], ['Jogos', (p) => p.apps], ['Assist./90', (p) => per90(p.a, p)]])}
+      ${tbl('Finalizações', '', [...rows].sort((a, b) => b.sh - a.sh), [['Final.', (p) => p.sh], ['No alvo', (p) => p.sot], ['Gols', (p) => p.g], ['Final./90', (p) => per90(p.sh, p)]])}
+      ${tbl('Cartões', '', [...rows].sort((a, b) => b.y + 3 * b.r - (a.y + 3 * a.r)), [['Amarelos', (p) => p.y], ['Vermelhos', (p) => p.r || ''], ['Jogos', (p) => p.apps]])}
       ${tbl('Participações em gol', 'gols + assistências', [...rows].sort((a, b) => b.g + b.a - (a.g + a.a)), [['G+A', (p) => p.g + p.a], ['Gols', (p) => p.g], ['Assist.', (p) => p.a], ['Min', (p) => p.min]])}
-      ${tbl('Homens de ferro', 'minutos em campo', [...rows].sort((a, b) => b.min - a.min), [['Min', (p) => p.min], ['Jogos', (p) => p.apps], ['Titular', (p) => p.st]])}
-    </div><p class="small muted" style="margin-top:10px">Os números de jogadores são atualizados no reajuste semanal do modelo.</p></section></div>`;
+      ${tbl('Minutos em campo', '', [...rows].sort((a, b) => b.min - a.min), [['Min', (p) => p.min], ['Jogos', (p) => p.apps], ['Titular', (p) => p.st]])}
+    </div><p class="small muted" style="margin-top:10px">Atualizado a cada reajuste semanal do modelo.</p></section></div>`;
 }

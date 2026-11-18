@@ -1,11 +1,12 @@
 // Componentes de interface (funções que devolvem HTML).
-import { S, team, forecast, table, liveState, market } from './store.js';
-import { esc, pct, num, fmtTime, fmtShort, relDay, teamColor, store } from './util.js';
+import { S, team, forecast, table, liveState } from './store.js';
+import { esc, pct, fmtTime, fmtShort, teamColor, store } from './util.js';
 
 export const fav = () => store.get('fav', null);
+export const failedLogos = new Set();
 export function logo(t, cls = '') {
-  if (!t?.logo) return `<span class="logo fallback ${cls}">${esc(t?.abbr || '?')}</span>`;
-  return `<img class="logo ${cls}" src="${esc(t.logo)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;logo fallback ${cls}&quot;>${esc(t.abbr || '?')}</span>'">`;
+  if (!t?.logo || failedLogos.has(t.logo)) return `<span class="logo fallback ${cls}">${esc((t?.abbr || '?').slice(0, 3))}</span>`;
+  return `<img class="logo ${cls}" src="${esc(t.logo)}" alt="" loading="lazy" onerror="bdvLogoFail(this)">`;
 }
 export const colors = (m) => `--tc-h:${teamColor(team(m.h))};--tc-a:${distinct(teamColor(team(m.h)), teamColor(team(m.a)))}`;
 function distinct(a, b) { // evita duas cores quase iguais lado a lado
@@ -37,18 +38,19 @@ export function matchCard(m, { selected = false, act = null, day = false } = {})
   const H = team(m.h), A = team(m.a), f = forecast(m), p = m.status === 'pre' || m.status === 'off' ? f.pre : f.now;
   const played = m.status === 'in' || m.status === 'post';
   const top = f.pre.sum.top[0];
-  const k = market(m);
-  const mk = k ? `<div class="mk" title="probabilidades implícitas nas odds, sem a margem da casa"><span>mercado</span><span>${pct(k.pH)}</span><span>${pct(k.pD)}</span><span>${pct(k.pA)}</span></div>` : '';
   const isFav = fav() && (m.h === fav() || m.a === fav());
   const attrs = act ? `href="#/" data-act="${act}" data-id="${m.id}"` : `href="#/jogo/${m.id}"`;
-  const cls = (side) => (m.status !== 'post' ? '' : (side === 'h' ? m.hg > m.ag : m.ag > m.hg) ? 'win' : m.hg === m.ag ? '' : 'lose');
+  const cls = (side) => (m.status !== 'post' || m.hg === m.ag ? '' : (side === 'h' ? m.hg > m.ag : m.ag > m.hg) ? '' : 'lose');
+  const when = m.status === 'in' ? `<span class="livepill">${esc(statusLabel(m))}</span>` : `${day || m.status === 'post' ? `${esc(fmtShort(m.date))}${m.status === 'pre' ? ' · ' : ''}` : ''}${m.status === 'post' ? '' : esc(statusLabel(m))}`;
+  const foot = m.status === 'post' ? `<span>probabilidade pré-jogo deste resultado</span><b>${pct(m.hg > m.ag ? f.pre.pH : m.hg === m.ag ? f.pre.pD : f.pre.pA)}</b>`
+    : m.status === 'in' ? `<span>agora</span><span><b>${pct(p.pH)}</b> · ${pct(p.pD)} · <b>${pct(p.pA)}</b></span>`
+    : `<span>empate ${pct(p.pD)}</span><span>mais provável <b>${top.h}–${top.a}</b></span>`;
   return `<a class="mcard ${selected ? 'sel' : ''} ${isFav ? 'fav' : ''}" ${attrs} style="${colors(m)}">
-    <div class="meta"><span>${day ? `${esc(fmtShort(m.date))} · ` : ''}${m.status === 'in' ? '<span class="livepill">' + esc(statusLabel(m)) + '</span>' : esc(statusLabel(m))}</span><span>${esc(m.venue || '')}</span></div>
+    <div class="meta"><span>${when}</span><span>${esc(m.venue || '')}</span></div>
     <div class="row ${cls('h')}">${logo(H)}<span>${esc(H.name)}</span>${played ? `<span class="sc">${m.hg}</span>` : `<span class="pp">${pct(p.pH)}</span>`}</div>
     <div class="row ${cls('a')}">${logo(A)}<span>${esc(A.name)}</span>${played ? `<span class="sc">${m.ag}</span>` : `<span class="pp">${pct(p.pA)}</span>`}</div>
-    ${m.status === 'post' ? '' : `<div style="margin-top:8px">${probBar(p, { sm: true })}</div>`}
-    ${m.status === 'pre' && k ? `<div class="mk"><span>Vitrôncio</span><span>${pct(f.pre.pH)}</span><span>${pct(f.pre.pD)}</span><span>${pct(f.pre.pA)}</span></div>${mk}` : ''}
-    <div class="foot">${m.status === 'post' ? `<span>Vitrôncio dava ${pct(m.hg > m.ag ? f.pre.pH : m.hg === m.ag ? f.pre.pD : f.pre.pA)} para esse resultado${k ? ` · mercado ${pct(m.hg > m.ag ? k.pH : m.hg === m.ag ? k.pD : k.pA)}` : ''}</span>` : m.status === 'in' ? `<span>empate ${pct(p.pD)}</span><span>gols esperados até o fim: ${num(p.xgH + p.xgA)}</span>` : `<span>empate ${pct(p.pD)}</span><span>placar mais provável <b style="color:var(--text)">${top.h}–${top.a}</b></span>`}</div>
+    ${m.status === 'post' ? '' : `<div style="margin-top:7px">${probBar(p, { sm: true })}</div>`}
+    <div class="foot">${foot}</div>
   </a>`;
 }
 
@@ -61,7 +63,7 @@ export function scoreMatrix(dist, m, { max = 5, now = null } = {}) {
     h += `<tr><th>${i}</th>`;
     for (let j = 0; j <= max; j++) {
       const p = mx[i][j], a = Math.pow(p / (peak || 1), 0.75);
-      const col = i > j ? '69,167,255' : i < j ? '255,154,61' : '160,175,190';
+      const col = i > j ? '79,157,232' : i < j ? '240,149,74' : '150,163,180';
       const dead = now && (i < now[0] || j < now[1]);
       h += `<td class="${now && now[0] === i && now[1] === j ? 'now' : ''} ${dead ? 'dead' : ''}" style="background:rgba(${col},${(0.08 + a * 0.82).toFixed(2)})" title="${i}–${j}: ${pct(p, 1)}">${p >= 0.005 ? pct(p) : ''}</td>`;
     }
@@ -83,11 +85,11 @@ export function wpChart(tl, m, { total = null } = {}) {
   const hz = S.model.hazard, half = 45 + hz.S1;
   const marks = tl.events.filter((e) => e.step <= last.t).map((e) => {
     const cx = x(e.step + 1), isG = e.t !== 'R';
-    return `<g><line x1="${cx}" x2="${cx}" y1="${pad.t}" y2="${Hh - pad.b}" stroke="${isG ? 'rgba(255,210,31,.55)' : 'rgba(255,61,77,.55)'}" stroke-dasharray="3 3"/><circle cx="${cx}" cy="${e.s === 'h' ? Hh - pad.b - 8 : pad.t + 8}" r="5" fill="${isG ? '#ffd21f' : '#ff3d4d'}"><title>${esc(e.n || '')} ${e.m}'${e.x ? '+' + e.x : ''}</title></circle></g>`;
+    return `<g><line x1="${cx}" x2="${cx}" y1="${pad.t}" y2="${Hh - pad.b}" stroke="${isG ? 'rgba(242,194,48,.5)' : 'rgba(239,68,82,.5)'}" stroke-dasharray="3 3"/><circle cx="${cx}" cy="${e.s === 'h' ? Hh - pad.b - 8 : pad.t + 8}" r="4.5" fill="${isG ? '#f2c230' : '#ef4452'}"><title>${esc(e.n || '')} ${e.m}'${e.x ? '+' + e.x : ''}</title></circle></g>`;
   }).join('');
   const grid = [0.25, 0.5, 0.75].map((v) => `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.07)"/><text x="${pad.l - 6}" y="${y(v) + 4}" text-anchor="end">${v * 100}%</text>`).join('');
   const ticks = [[0, "0'"], [half, 'int.'], [n, 'fim']].map(([t, l]) => `<text x="${x(t)}" y="${Hh - 6}" text-anchor="${t === 0 ? 'start' : t === n ? 'end' : 'middle'}">${l}</text>`).join('');
-  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Chance de vitória ao longo do jogo">
+  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Probabilidade de vitória ao longo do jogo">
     <rect x="${pad.l}" y="${pad.t}" width="${W - pad.l - pad.r}" height="${Hh - pad.t - pad.b}" fill="rgba(125,143,163,.28)" rx="4"/>
     <path d="${homeArea}" fill="var(--tc-h)" opacity=".85"/><path d="${awayArea}" fill="var(--tc-a)" opacity=".85"/>
     ${grid}<line x1="${x(half)}" x2="${x(half)}" y1="${pad.t}" y2="${Hh - pad.b}" stroke="rgba(255,255,255,.25)"/>${marks}
@@ -95,9 +97,9 @@ export function wpChart(tl, m, { total = null } = {}) {
   </svg><div class="legend"><span><i style="background:var(--tc-h)"></i>${esc(team(m.h).name)} vence</span><span><i style="background:rgba(125,143,163,.6)"></i>empate</span><span><i style="background:var(--tc-a)"></i>${esc(team(m.a).name)} vence</span><span><i style="background:var(--gold);border-radius:50%"></i>gol</span><span><i style="background:var(--red);border-radius:50%"></i>expulsão</span></div>`;
 }
 
-const ICON = { goal: '⚽', own: '⚽', yellow: '', red: '', sub: '⇄', kickoff: '▶', whistle: '⏸', pen: '⚠', corner: '⚑', shot: '◎', save: '🧤', miss: '◎', var: '📺', offside: '⚐', foul: '✋', halftime: '⏸', second: '▶', end: '⏹' };
-export function eventRow(e, isNew = false) {
-  return `<div class="ev ${e.type || ''} ${e.side || ''} ${isNew ? 'new' : ''}"><span class="t">${esc(e.label || '')}</span><span class="ic">${ICON[e.type] ?? '·'}</span><span>${esc(e.text)}</span></div>`;
+/** Linha de lance. `key` estável = o mesmo elemento entre atualizações (não pisca). */
+export function eventRow(e, key = null) {
+  return `<div class="ev ${e.type || ''} ${e.side || ''}"${key ? ` data-mk="${key}" data-enter` : ''}><span class="t">${esc(e.label || '')}</span><span class="ic"></span><span>${esc(e.text)}</span></div>`;
 }
 export function statBars(st) {
   const row = (lab, a, b, suffix = '') => {
@@ -109,15 +111,15 @@ export function statBars(st) {
 }
 export function scorerList(list, n = 6) {
   const mx = Math.max(...list.slice(0, n).map((x) => x.p), 0.01);
-  return `<div class="plist">${list.slice(0, n).map((x) => `<div class="p"><span class="j">${esc(x.j || '')}</span><span>${esc(x.n)} <span class="dim small">${x.gols ? `${x.gols} gol${x.gols > 1 ? 's' : ''} no campeonato` : ''}</span></span><span class="pc">${pct(x.p)}</span><span class="pb"><i style="width:${(x.p / mx) * 100}%"></i></span></div>`).join('')}</div>`;
+  return `<div class="plist">${list.slice(0, n).map((x) => `<div class="p"><span class="j">${esc(x.j || '')}</span><span>${esc(x.n)}${x.gols ? ` <span class="dim small">${x.gols} gol${x.gols > 1 ? 's' : ''}</span>` : ''}</span><span class="pc">${pct(x.p)}</span><span class="pb"><i style="width:${(x.p / mx) * 100}%"></i></span></div>`).join('')}</div>`;
 }
 export function heat(p, rgb = '255,210,31') { return `<span class="heat" style="background:rgba(${rgb},${(Math.pow(p, 0.6) * 0.75).toFixed(2)})">${pct(p)}</span>`; }
 
-/** Bloco "corrida" (título ou rebaixamento) com as chances da simulação. */
+/** Lista de probabilidades da simulação de temporada (título, G4, Z4). */
 export function raceBlock(key, n, rgb) {
-  const sim = S.seasonSim; if (!sim) return '<div class="skeleton" style="height:150px"></div>';
+  const sim = S.seasonSim; if (!sim) return '<p class="muted small">Simulando…</p>';
   const rows = Object.values(sim.teams).sort((a, b) => b[key] - a[key]).slice(0, n).filter((r) => r[key] > 0.0005);
-  if (!rows.length) return '<p class="muted small">Nada em disputa por aqui.</p>';
+  if (!rows.length) return '<p class="muted small">Já definido.</p>';
   return `<div class="race">${rows.map((r) => { const t = team(r.id); return `<a class="r" href="#/time/${r.id}">${logo(t)}<span>${esc(t.name)}</span><span class="b"><i style="width:${r[key] * 100}%;background:rgb(${rgb})"></i></span><span class="v">${pct(r[key])}</span></a>`; }).join('')}</div>`;
 }
 export { liveState, table };

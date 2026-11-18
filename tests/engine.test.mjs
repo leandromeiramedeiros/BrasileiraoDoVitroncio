@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import * as R from '../site/js/engine/ratings.js';
-import { scoreDistribution, nextGoal, summarize, timeline, stepOf, liveState } from '../site/js/engine/match-model.js';
+import { scoreDistribution, nextGoal, summarize, timeline, stepOf, liveState, lambdasFromProbs } from '../site/js/engine/match-model.js';
 import { simulateSeason, buildTable } from '../site/js/engine/season.js';
 import { simulateMatch } from '../site/js/engine/sim-match.js';
 import { probableLineup, scorerProbabilities, genericLineup } from '../site/js/engine/players.js';
@@ -105,4 +105,17 @@ test('jogadores: escalação provável e artilheiros', () => {
   assert.ok(sp[0].p > 0.1 && sp[0].p < 0.7);
   const exp = sp.reduce((s, x) => s + x.xg, 0);
   assert.ok(exp > 1.2 && exp <= 1.5);
+});
+
+test('caminho inverso: probabilidades-alvo viram gols esperados coerentes', () => {
+  for (const [lh, la] of [[1.5, 1.0], [2.3, 0.7], [0.9, 1.6], [1.1, 1.1]]) {
+    const d = scoreDistribution(hz, lh, la);
+    const r = lambdasFromProbs(hz, d.pH, d.pA);
+    near(r.lh, lh, 0.01, 'lh'); near(r.la, la, 0.01, 'la');
+    const t = lambdasFromProbs(hz, d.pH, d.pA, { total: lh + la });
+    near(t.lh, lh, 0.01, 'lh com total fixo'); near(t.la, la, 0.01, 'la com total fixo');
+  }
+  // alvo "estranho" (empate alto demais) ainda devolve algo utilizável
+  const w = lambdasFromProbs(hz, 0.30, 0.25);
+  assert.ok(w.lh > 0.05 && w.la > 0.05 && Number.isFinite(w.lh + w.la));
 });

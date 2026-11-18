@@ -22,42 +22,43 @@ export function preBody(m, f) {
       <div><div class="k">Ambos marcam</div><div class="v">${pct(s.btts)}</div></div>
       <div><div class="k">${esc(H.abbr)} não sofre gol</div><div class="v">${pct(s.cleanSheetH)}</div></div>
       <div><div class="k">${esc(A.abbr)} não sofre gol</div><div class="v">${pct(s.cleanSheetA)}</div></div>
-      <div><div class="k">Primeiro gol</div><div class="v" style="font-size:17px">${esc(H.abbr)} ${pct(f.pre.next.pH)} · ${esc(A.abbr)} ${pct(f.pre.next.pA)}</div></div>
-      <div><div class="k">Alguém expulso</div><div class="v">${pct(1 - (1 - f.pre.pRedH) * (1 - f.pre.pRedA))}</div></div>
+      <div><div class="k">Primeiro gol</div><div class="v s">${esc(H.abbr)} ${pct(f.pre.next.pH)} · ${esc(A.abbr)} ${pct(f.pre.next.pA)}</div></div>
+      <div><div class="k">Alguma expulsão</div><div class="v">${pct(1 - (1 - f.pre.pRedH) * (1 - f.pre.pRedA))}</div></div>
     </div>
     <div class="duo">
-      <div class="panel"><div class="sec-h"><h3>Mapa de placares</h3></div>${scoreMatrix(f.pre, m)}
-        <p class="small muted center" style="margin:10px 0 0">Mais prováveis: ${s.top.slice(0, 5).map((x) => `<span class="chip"><b>${x.h}–${x.a}</b> ${pct(x.p)}</span>`).join(' ')}</p></div>
-      <div class="panel"><div class="sec-h"><h3>Números esperados</h3></div>
+      <div class="panel"><div class="sec-h"><h3>Placares</h3></div>${scoreMatrix(f.pre, m)}</div>
+      <div class="panel"><div class="sec-h"><h3>Estatísticas esperadas</h3></div>
         <table><tr><th class="l"></th><th>${esc(H.abbr)}</th><th>${esc(A.abbr)}</th></tr>
         <tr><td class="l">Finalizações</td><td>${num(pr.sh.lh)}</td><td>${num(pr.sh.la)}</td></tr>
         <tr><td class="l">No alvo</td><td>${num(pr.sot.lh)}</td><td>${num(pr.sot.la)}</td></tr>
         <tr><td class="l">Escanteios</td><td>${num(pr.co.lh)}</td><td>${num(pr.co.la)}</td></tr>
         <tr><td class="l">Cartões amarelos</td><td>${num(pr.yc.lh)}</td><td>${num(pr.yc.la)}</td></tr>
         <tr><td class="l">Faltas</td><td>${num(pr.fo.lh)}</td><td>${num(pr.fo.la)}</td></tr></table>
-        <p class="small muted" style="margin:10px 0 0">Total de gols: ${s.totals.slice(0, 6).map((p, k) => `<span class="chip">${k}${k === 5 ? '+' : ''}: <b>${pct(k === 5 ? s.totals.slice(5).reduce((a, b) => a + b, 0) : p)}</b></span>`).join(' ')}</p>
+        <p class="small muted" style="margin:10px 0 0">Total de gols: ${s.totals.slice(0, 5).map((p, k) => `<span class="chip">${k}${k === 4 ? '+' : ''} <b>${pct(k === 4 ? s.totals.slice(4).reduce((a, b) => a + b, 0) : p)}</b></span>`).join(' ')}</p>
       </div>
     </div>
     <div class="duo" style="margin-top:14px">
-      <div class="panel"><div class="sec-h"><h3>Quem marca · ${esc(H.name)}</h3>${isReal ? `<span class="sub">${formDots(form(m.h))}</span>` : ''}</div>${scorerList(sH)}</div>
-      <div class="panel"><div class="sec-h"><h3>Quem marca · ${esc(A.name)}</h3>${isReal ? `<span class="sub">${formDots(form(m.a))}</span>` : ''}</div>${scorerList(sA)}</div>
+      <div class="panel"><div class="sec-h"><h3>Marcadores prováveis · ${esc(H.name)}</h3>${isReal ? `<span class="sub">${formDots(form(m.h))}</span>` : ''}</div>${scorerList(sH)}</div>
+      <div class="panel"><div class="sec-h"><h3>Marcadores prováveis · ${esc(A.name)}</h3>${isReal ? `<span class="sub">${formDots(form(m.a))}</span>` : ''}</div>${scorerList(sA)}</div>
     </div>
-    <p class="small dim" style="margin-top:10px">"Quem marca" usa a escalação provável (titulares recentes). Com a escalação oficial, os números podem mudar.</p>`;
+    <p class="small dim" style="margin-top:8px">Marcadores calculados com a escalação provável (titulares recentes).</p>`;
 }
 
 const probableLineups = (m) => { const f = (id) => { const L = lineup(id); return { formation: '', provavel: true, xi: L.xi.map((p) => ({ id: p.id, n: p.n, j: p.j, pos: { G: 'GOL', D: 'DEF', M: 'MEI', F: 'ATA' }[p.pos] })), bench: [] }; }; return { h: f(m.h), a: f(m.a) }; };
 const goalList = (m) => { const out = { h: [], a: [] }; for (const e of m.ev) if ('GPO'.includes(e.t)) out[e.s].push({ n: e.n || 'Gol', t: `${e.m}'${e.x ? '+' + e.x : ''}${e.t === 'P' ? ' (pên.)' : e.t === 'O' ? ' (contra)' : ''}` }); return out; };
-const evText = (m, e) => { const T = team(e.s === 'h' ? m.h : m.a).name; return e.t === 'R' ? `Cartão vermelho: ${e.n || ''} (${T})` : e.t === 'Y' ? `Cartão amarelo: ${e.n || ''} (${T})` : e.t === 'O' ? `Gol contra! ${e.n || ''} marca para o ${T}` : `Gol do ${T}! ${e.n || ''}${e.t === 'P' ? ' (pênalti)' : ''}`; };
+const evText = (m, e) => { const T = team(e.s === 'h' ? m.h : m.a).name; return e.t === 'R' ? `Cartão vermelho para ${e.n || ''} (${T}).` : e.t === 'Y' ? `Cartão amarelo para ${e.n || ''} (${T}).` : e.t === 'O' ? `Gol contra de ${e.n || ''}. Gol para o ${T}.` : `Gol do ${T}. ${e.n || ''}${e.t === 'P' ? ' (pênalti)' : ''}`; };
 
 /** View model de um jogo real. */
-export function realVM(m) {
+export function realVM(m, { compact = false } = {}) {
   const f = forecast(m);
   const mode = m.status === 'in' ? 'live' : m.status === 'post' ? 'post' : 'pre';
   if (mode !== 'pre' || Math.abs(new Date(m.date) - Date.now()) < 3 * 3600000) loadDetails(m);
   const det = S.details.get(m.id);
-  const base = { key: `m${m.id}`, m, mode, colors: colors(m), e: f.e, pre: f.pre, probs: f.now, dist: f.now, next: f.now.next, info: `${fmtFull(m.date)}${m.venue ? ' · ' + m.venue : ''}` };
+  const base = { key: `m${m.id}`, m, mode, compact, colors: colors(m), e: f.e, pre: f.pre, probs: f.now, dist: f.now, next: f.now.next, info: `${fmtFull(m.date)}${m.venue ? ' · ' + m.venue : ''}` };
   if (mode === 'pre') {
-    return { ...base, score: null, clock: m.status === 'off' ? 'Adiado' : `${relDay(m.date)} · ${fmtTime(m.date)}`, oracleRight: m.status === 'off' ? '' : `começa ${countdown(m.date)}`, preBody: preBody(m, f), lineups: det?.lineups || probableLineups(m), events: [] };
+    return { ...base, score: null, clock: m.status === 'off' ? 'Adiado' : `${relDay(m.date)} · ${fmtTime(m.date)}`, oracleRight: m.status === 'off' ? '' : `começa ${countdown(m.date)}`, preBody: compact ? '' : preBody(m, f), lineups: det?.lineups || probableLineups(m), events: [],
+      controls: m.status === 'off' ? '' : `<div class="simctl"><button class="btn sm gold" data-act="simstart" data-id="${m.id}"${compact ? ' data-home="1"' : ''}>Simular este jogo</button>${compact ? `<a class="btn sm" href="#/jogo/${m.id}">Previsão completa</a>` : ''}<span class="muted small">a simulação sorteia um resultado possível e mostra minuto a minuto</span></div>`,
+      strip: compact ? `<div class="strip-kv"><span>gols esperados <b>${num(f.e.lh, 2)} × ${num(f.e.la, 2)}</b></span><span>placar mais provável <b>${f.pre.sum.top[0].h}–${f.pre.sum.top[0].a}</b></span><span>mais de 2,5 gols <b>${pct(f.pre.sum.over25)}</b></span><span>ambos marcam <b>${pct(f.pre.sum.btts)}</b></span></div>` : '' };
   }
   const derived = m.ev.filter((e) => e.t !== 'Y' || mode === 'live').map((e) => ({ label: `${e.m}'${e.x ? '+' + e.x : ''}`, type: e.t === 'R' ? 'red' : e.t === 'Y' ? 'yellow' : e.t === 'O' ? 'own' : 'goal', side: e.s, text: evText(m, e) })).reverse();
   const events = det?.commentary?.length ? det.commentary : det?.key?.length ? det.key : derived;
@@ -66,7 +67,7 @@ export function realVM(m) {
     ...base, score: [m.hg, m.ag], reds: [reds(m, 'h'), reds(m, 'a')], scorers: goalList(m),
     clock: mode === 'post' ? 'Fim de jogo' : /HALFTIME/.test(m.statusName) ? 'Intervalo' : m.clock || 'Ao vivo',
     oracleRight: mode === 'live' ? `antes do jogo: ${pct(f.pre.pH)} · ${pct(f.pre.pD)} · ${pct(f.pre.pA)}` : '',
-    tl: wpTimeline(m), events, latest: (det?.key?.length ? det.key : derived).slice(0, 3), stats: st, lineups: det?.lineups || null,
+    tl: wpTimeline(m), events, keyEvents: det?.key?.length ? det.key : derived, stats: st, lineups: det?.lineups || null,
   };
 }
 
@@ -107,6 +108,8 @@ function simState(step) {
   for (const e of sim.res.events) { if (e.t >= step) break; if (e.type === 'goal') (e.side === 'h' ? hg++ : ag++); else if (e.type === 'red') (e.side === 'h' ? rh++ : ra++); }
   return { step, hg, ag, rh, ra };
 }
+const KEY_TYPES = new Set(['goal', 'red', 'yellow', 'sub', 'kickoff', 'halftime', 'second', 'end']);
+const toRow = (e) => ({ label: e.label, type: e.type === 'goal' && e.kind === 'own' ? 'own' : e.type, side: e.side, text: e.text });
 export function simVM() {
   const m = sim.m, hz = S.model.hazard, n = sim.res.steps, step = Math.min(n, Math.floor(sim.pos));
   const done = step >= n;
@@ -129,26 +132,26 @@ export function simVM() {
   const evs = shown.filter((e) => e.type === 'goal' || e.type === 'red').map((e) => ({ step: e.t, t: e.type === 'red' ? 'R' : 'G', s: e.side, n: e.player, m: parseInt(e.label) || 0, x: 0 }));
   const speeds = [[45, 'Rápido'], [150, 'Normal'], [420, 'Lento']];
   const controls = `<div class="simctl">
-      ${done ? '<button class="btn sm gold" data-act="sim" data-do="again">↻ Simular de novo</button>' : sim.playing ? '<button class="btn sm" data-act="sim" data-do="pause">❚❚ Pausar</button>' : '<button class="btn sm gold" data-act="sim" data-do="play">▶ Continuar</button>'}
-      ${done ? '' : '<button class="btn sm" data-act="sim" data-do="end">⏭ Ir para o fim</button>'}
+      ${done ? '<button class="btn sm gold" data-act="sim" data-do="again">Simular de novo</button>' : sim.playing ? '<button class="btn sm" data-act="sim" data-do="pause">Pausar</button>' : '<button class="btn sm gold" data-act="sim" data-do="play">Continuar</button>'}
+      ${done ? '' : '<button class="btn sm" data-act="sim" data-do="end">Ir para o fim</button>'}
       ${speeds.map(([v, l]) => `<button class="btn sm ${sim.dur === v ? 'on' : ''}" data-act="sim" data-do="speed" data-val="${v}">${l}</button>`).join('')}
       <span class="progress"><i style="width:${(sim.pos / n) * 100}%"></i></span>
-      <button class="btn sm" data-act="sim" data-do="close">✕ Fechar</button>
+      <button class="btn sm" data-act="sim" data-do="close">Fechar</button>
     </div>`;
   const lu = (id) => { const L = lineup(id); return { formation: '', provavel: true, xi: L.xi.map((p) => ({ n: p.n, j: p.j, pos: { G: 'GOL', D: 'DEF', M: 'MEI', F: 'ATA' }[p.pos] })), bench: [] }; };
   return {
     key: sim.key, m, mode: 'sim', colors: colors(m), e: sim.e, pre, probs: d, dist: d, next: done ? null : nextGoal(hz, sim.e.lh, sim.e.la, st),
     score: [st.hg, st.ag], reds: [st.rh, st.ra], scorers: scorersL, clock: done ? 'Fim de jogo' : half ? 'Intervalo' : tlSteps[Math.min(n - 1, step)].label,
-    info: 'Uma das infinitas versões possíveis deste jogo', oracleRight: `antes do jogo: ${pct(pre.pH)} · ${pct(pre.pD)} · ${pct(pre.pA)}`,
-    tl: { points: sim.wp.slice(0, step + 1), events: evs, total: n }, events: shown.filter((e) => e.type !== 'corner' || true).map((e) => ({ label: e.label, type: e.type === 'goal' && e.kind === 'own' ? 'own' : e.type, side: e.side, text: e.text })).reverse(),
-    latest: shown.filter((e) => ['goal', 'red', 'yellow', 'sub'].includes(e.type)).slice(-3).reverse().map((e) => ({ label: e.label, type: e.type, side: e.side, text: e.text })), stats, lineups: { h: lu(m.h), a: lu(m.a) }, controls,
+    info: 'Um resultado possível, sorteado pelo modelo', oracleRight: `antes do jogo: ${pct(pre.pH)} · ${pct(pre.pD)} · ${pct(pre.pA)}`,
+    tl: { points: sim.wp.slice(0, step + 1), events: evs, total: n }, events: shown.map(toRow).reverse(),
+    keyEvents: shown.filter((e) => KEY_TYPES.has(e.type)).map(toRow).reverse(), stats, lineups: { h: lu(m.h), a: lu(m.a) }, controls,
   };
 }
 
 /** Bloco completo (player) de um jogo; se houver simulação ativa para ele, mostra a simulação. */
-export function matchBlock(m) {
+export function matchBlock(m, opts = {}) {
   if (sim.res && sim.key === `s${m.id}`) return renderPlayer(simVM());
-  return renderPlayer(realVM(m));
+  return renderPlayer(realVM(m, opts));
 }
 
 export function matchView(id) {
@@ -157,7 +160,6 @@ export function matchView(id) {
   const simOn = sim.res && sim.key === `s${m.id}`;
   return `<div class="wrap"><section>${matchBlock(m)}</section>
     ${simOn ? '' : versusBlock(m)}
-    ${m.status === 'pre' && !simOn ? `<section class="btnrow"><button class="btn gold" data-act="simstart" data-id="${m.id}">▶ Assistir uma simulação deste jogo</button><span class="muted small">Cada simulação é diferente — o placar segue as probabilidades acima.</span></section>` : ''}
   </div>`;
 }
 
@@ -168,5 +170,5 @@ export function pairBlock(h, a) {
   if (sim.res && sim.key === `s${m.id}`) return renderPlayer(simVM());
   const f = forecastPair(h, a);
   const L = (id) => { const x = lineup(id); return { formation: '', provavel: true, xi: x.xi.map((p) => ({ n: p.n, j: p.j, pos: { G: 'GOL', D: 'DEF', M: 'MEI', F: 'ATA' }[p.pos] })), bench: [] }; };
-  return renderPlayer({ key: `m${m.id}`, m, mode: 'pre', colors: colors(m), e: f.e, pre: f.pre, probs: f.pre, dist: f.pre, score: null, clock: 'Confronto hipotético', info: `${team(h).name} em casa`, preBody: preBody(m, f), lineups: { h: L(h), a: L(a) }, events: [] });
+  return renderPlayer({ key: `m${m.id}`, m, mode: 'pre', colors: colors(m), e: f.e, pre: f.pre, probs: f.pre, dist: f.pre, score: null, clock: 'Confronto hipotético', info: `mando do ${team(h).name}`, controls: '<div class="simctl"><button class="btn sm gold" data-act="simpair">Simular este jogo</button></div>', preBody: preBody(m, f), lineups: { h: L(h), a: L(a) }, events: [] });
 }

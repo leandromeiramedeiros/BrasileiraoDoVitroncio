@@ -1,7 +1,9 @@
 // Ponto de entrada: roteador por hash, laço de renderização e ações da interface.
 import { S, boot, subscribe, runSeasonSim, liveMatches } from './store.js';
 import { store, esc, fmtFull } from './util.js';
-import { setTab } from './player.js';
+import { failedLogos } from './components.js';
+import { setTab, setFeed } from './player.js';
+import { morph } from './morph.js';
 import { homeView, homeState } from './views/home.js';
 import { matchView, startSim, simAction, closeSim, sim, pairMatch } from './views/match.js';
 import { tableView } from './views/table.js';
@@ -13,33 +15,29 @@ import { compareView, cmpState } from './views/compare.js';
 
 const view = document.getElementById('view');
 const nav = document.getElementById('nav');
-const NAV = [['', 'Início'], ['jogos', 'Jogos'], ['tabela', 'Classificação'], ['simulador', 'Simulador'], ['comparar', 'Vitrôncio × Mercado'], ['times', 'Times'], ['artilharia', 'Artilharia'], ['modelo', 'O modelo']];
+const NAV = [['', 'Início'], ['jogos', 'Jogos'], ['tabela', 'Tabela'], ['simulador', 'Simulador'], ['comparar', 'Odds'], ['times', 'Times'], ['artilharia', 'Jogadores'], ['modelo', 'Modelo']];
 const route = () => location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
 
-let last = '', lastNav = '', queued = false;
+let last = '', lastNav = '', lastRoute = null, queued = false;
 function render() {
   if (queued) return; queued = true;
   requestAnimationFrame(() => {
     queued = false;
     if (!S.model) return;
     const [p, a] = route();
+    const routeKey = `${p || ''}/${a || ''}`;
     let html;
     try {
       html = p === 'jogo' ? matchView(a) : p === 'tabela' ? tableView() : p === 'simulador' ? simulatorView() : p === 'times' ? teamsView() : p === 'time' ? teamView(a) : p === 'modelo' ? modelView() : p === 'jogos' ? calendarView() : p === 'comparar' ? compareView() : p === 'artilharia' ? playersView() : homeView();
     } catch (e) { console.error(e); html = `<div class="wrap"><div class="banner">Algo deu errado ao montar esta página: ${esc(e.message)}</div></div>`; }
-    if (html !== last) {
-      // preserva a rolagem da lista de lances ao redesenhar
-      const feed = view.querySelector('.feed'); const st = feed ? feed.scrollTop : 0;
-      view.innerHTML = html; last = html;
-      const nf = view.querySelector('.feed'); if (nf && st) nf.scrollTop = st;
-    }
+    if (html !== last) { morph(view, html, routeKey === lastRoute); last = html; lastRoute = routeKey; }
     const cur = p === 'jogo' ? '' : p === 'time' ? 'times' : p || '';
     const live = liveMatches().length;
-    const navHtml = NAV.map(([k, l]) => `<a href="#/${k}" class="${k === cur ? 'on' : ''}">${l}${k === '' && live ? ' <span class="livepill" style="font-size:9px;padding:1px 6px;margin-left:4px">' + live + '</span>' : ''}</a>`).join('');
+    const navHtml = NAV.map(([k, l]) => `<a href="#/${k}" class="${k === cur ? 'on' : ''}">${l}${k === '' && live ? `<span class="navlive">${live}</span>` : ''}</a>`).join('');
     if (navHtml !== lastNav) { nav.innerHTML = navHtml; lastNav = navHtml; }
-    document.title = live ? `🔴 Ao vivo · Brasileirão do Vitrôncio` : 'Brasileirão do Vitrôncio';
+    document.title = live ? 'Ao vivo · Brasileirão do Vitrôncio' : 'Brasileirão do Vitrôncio';
     const stamp = document.getElementById('stamp');
-    if (stamp && !stamp.textContent) stamp.textContent = `${S.model.nome} · modelo reajustado em ${fmtFull(S.model.geradoEm)} · dados de jogo até ${fmtFull(S.model.dadosAte)} na foto semanal (o resto é atualizado ao vivo).`;
+    if (stamp && !stamp.textContent) stamp.textContent = `${S.model.nome} · reajustado em ${fmtFull(S.model.geradoEm)}`;
     runSeasonSim();
   });
 }
@@ -53,6 +51,7 @@ document.addEventListener('click', (ev) => {
   const act = el.dataset.act, id = el.dataset.id;
   if (el.tagName === 'A') ev.preventDefault();
   if (act === 'tab') setTab(el.dataset.key, el.dataset.tab);
+  else if (act === 'feed') setFeed(el.dataset.key, el.dataset.mode);
   else if (act === 'selectlive') { homeState.selected = id; window.scrollTo({ top: 0, behavior: 'smooth' }); }
   else if (act === 'simstart') { const m = S.matches.get(id); if (m) { homeState.simHere = !!el.dataset.home; startSim(m, render); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
   else if (act === 'simpair') { if (simState.h !== simState.a) startSim(pairMatch(simState.h, simState.a), render); }
@@ -61,6 +60,7 @@ document.addEventListener('click', (ev) => {
   else if (act === 'fav') { store.set('fav', store.get('fav') === id ? null : id); }
   else if (act === 'whatif') { if (simState.fixed[id] === el.dataset.r) delete simState.fixed[id]; else simState.fixed[id] = el.dataset.r; }
   else if (act === 'clearwhatif') { simState.fixed = {}; simState.result = null; }
+  else if (act === 'whatifall') simState.all = !simState.all;
   else if (act === 'calmonth') calState.month = id;
   else if (act === 'cmpmore') cmpState.n += 60;
   else if (act === 'runwhatif') { if (!simState.running) runWhatIf(render); return; }
@@ -73,4 +73,5 @@ document.addEventListener('change', (ev) => {
   else if (el.dataset.change === 'cmpteam') { cmpState.team = el.value; last = ''; render(); }
 });
 
+window.bdvLogoFail = (img) => { failedLogos.add(img.getAttribute('src')); last = ''; render(); };
 boot().then(render).catch((e) => { console.error(e); view.innerHTML = `<div class="wrap"><div class="banner">Não consegui carregar o modelo (${esc(e.message)}). Recarregue a página.</div></div>`; });

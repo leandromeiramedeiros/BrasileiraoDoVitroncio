@@ -80,7 +80,7 @@ async function refreshSeason() {
   try {
     merge(await api.scoreboard(String(S.season)));
     S.online = true; S.lastUpdate = Date.now(); S.error = null;
-  } catch (e) { S.online = false; S.error = 'Sem conexão com os dados ao vivo — mostrando a última foto do modelo.'; }
+  } catch (e) { S.online = false; S.error = 'Sem conexão com os dados ao vivo. Mostrando os dados do último reajuste do modelo.'; }
   emit();
 }
 
@@ -212,7 +212,8 @@ export function seasonInputs(fixed = {}) {
   const rest = allMatches().filter((m) => m.status === 'pre' || m.status === 'in' || m.status === 'off');
   const fixtures = rest.map((m) => { const e = expected(m); return { id: m.id, h: m.h, a: m.a, lh: e.lh, la: e.la, live: m.status === 'in' ? liveState(m) : null }; });
   const tm = Object.values(S.state.teams).filter((t) => t.lg === 'A');
-  const sigma = Math.sqrt(tm.reduce((s, t) => s + t.ch.g.Po + t.ch.g.Pd, 0) / Math.max(1, 2 * tm.length));
+  // incerteza de força por time; o fator 0,8 saiu da validação em temporadas passadas (tools/season-backtest.mjs)
+  const sigma = 0.8 * Math.sqrt(tm.reduce((s, t) => s + t.ch.g.Po + t.ch.g.Pd, 0) / Math.max(1, 2 * tm.length));
   return { hz: S.model.hazard, ids, table: T, fixtures, sigma, fixed };
 }
 export function runSeasonSim({ n = 20000, fixed = {}, onDone = null } = {}) {
