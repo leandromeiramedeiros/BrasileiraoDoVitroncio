@@ -28,11 +28,14 @@ export const store = {
   get(k, d = null) { try { const v = localStorage.getItem(`bdv:${k}`); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(`bdv:${k}`, JSON.stringify(v)); } catch { /* sem armazenamento */ } },
 };
-/** Cor legível do time sobre fundo escuro. */
+/** Cor do time, clareada quando for escura demais para o fundo do site. */
 export function teamColor(t) {
-  const pickc = (hex) => { if (!hex) return null; const n = parseInt(hex, 16); const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255; const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b; return { hex: `#${hex}`, lum }; };
-  const a = pickc(t?.color), b = pickc(t?.alt);
-  if (a && a.lum > 60) return a.hex;
-  if (b && b.lum > 60) return b.hex;
-  return a && a.lum > 25 ? a.hex : '#9fb3c8';
+  const parse = (hex) => { if (!hex || !/^[0-9a-f]{6}$/i.test(hex)) return null; const n = parseInt(hex, 16); const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255]; return { c, lum: 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] }; };
+  const fmt = (c) => `#${c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
+  let a = parse(t?.color);
+  const b = parse(t?.alt);
+  if ((!a || a.lum < 28) && b && b.lum >= 28) a = b; // preto/quase preto: usa a cor alternativa
+  if (!a) return '#9fb3c8';
+  if (a.lum < 50) { const k = Math.min(0.45, (50 - a.lum) / 100 + 0.1); a.c = a.c.map((v) => v + (255 - v) * k); }
+  return fmt(a.c);
 }

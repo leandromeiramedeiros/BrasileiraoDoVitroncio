@@ -7,7 +7,7 @@ function calibChart(cal) {
   const x = (v) => pad + v * (W - pad - 10), y = (v) => H - pad - v * (H - pad - 10);
   const pts = cal.filter(Boolean);
   const mx = Math.max(...pts.map((p) => p.n));
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" style="max-width:420px" role="img" aria-label="Calibração">
+  return `<svg class="chart big" viewBox="0 0 ${W} ${H}" style="max-width:420px" role="img" aria-label="Calibração">
     <line x1="${x(0)}" y1="${y(0)}" x2="${x(1)}" y2="${y(1)}" stroke="rgba(255,255,255,.3)" stroke-dasharray="4 4"/>
     ${[0, 0.25, 0.5, 0.75, 1].map((v) => `<text x="${x(v)}" y="${H - 14}" text-anchor="middle">${v * 100}%</text><text x="${pad - 6}" y="${y(v) + 4}" text-anchor="end">${v * 100}%</text><line x1="${x(v)}" x2="${x(v)}" y1="${y(0)}" y2="${y(1)}" stroke="rgba(255,255,255,.05)"/><line x1="${x(0)}" x2="${x(1)}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.05)"/>`).join('')}
     <path d="${pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.previsto).toFixed(1)},${y(p.observado).toFixed(1)}`).join('')}" fill="none" stroke="var(--gold)" stroke-width="2"/>
@@ -16,7 +16,7 @@ function calibChart(cal) {
 }
 function barChart(vals, labels, color = 'var(--gold)', fmt = (v) => v.toFixed(2)) {
   const W = 520, H = 190, pad = { l: 8, r: 8, t: 18, b: 34 }, n = vals.length, bw = (W - pad.l - pad.r) / n, mx = Math.max(...vals);
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" style="max-width:560px">${vals.map((v, i) => { const h = (v / mx) * (H - pad.t - pad.b); return `<rect x="${pad.l + i * bw + 5}" y="${H - pad.b - h}" width="${bw - 10}" height="${h}" rx="4" fill="${color}" opacity=".9"/><text x="${pad.l + i * bw + bw / 2}" y="${H - pad.b - h - 5}" text-anchor="middle" style="fill:var(--text)">${fmt(v)}</text><text x="${pad.l + i * bw + bw / 2}" y="${H - 14}" text-anchor="middle">${labels[i]}</text>`; }).join('')}</svg>`;
+  return `<svg class="chart big" viewBox="0 0 ${W} ${H}" style="max-width:560px">${vals.map((v, i) => { const h = (v / mx) * (H - pad.t - pad.b); return `<rect x="${pad.l + i * bw + 5}" y="${H - pad.b - h}" width="${bw - 10}" height="${h}" rx="4" fill="${color}" opacity=".9"/><text x="${pad.l + i * bw + bw / 2}" y="${H - pad.b - h - 5}" text-anchor="middle" style="fill:var(--text)">${fmt(v)}</text><text x="${pad.l + i * bw + bw / 2}" y="${H - 14}" text-anchor="middle">${labels[i]}</text>`; }).join('')}</svg>`;
 }
 
 export function modelView() {
@@ -64,7 +64,7 @@ export function modelView() {
       <p class="small muted">RPS mede o erro das probabilidades (quanto menor, melhor). ${g.rpsRef ? `O mercado profissional é a régua mais dura que existe: o Vitrôncio fecha ${pct((g.rpsBase - g.rps) / (g.rpsBase - g.rpsRef))} da distância entre o chute ingênuo e essa régua usando só resultados e estatísticas de jogo.` : ''}</p>
       <div class="duo"><div class="panel"><div class="sec-h"><h3 style="margin:0;color:var(--text)">Calibração</h3></div>${calibChart(bt.calibracao)}<p class="small muted">Quando ele diz 60%, acontece perto de 60%? Pontos sobre a diagonal = sim.</p></div>
       <div class="panel"><div class="sec-h"><h3 style="margin:0;color:var(--text)">Total de gols por jogo</h3></div><table><tr><th class="l">Gols</th>${bt.totalGols.previsto.map((_, k) => `<th>${k}${k === 8 ? '+' : ''}</th>`).join('')}</tr><tr><td class="l">Previsto</td>${bt.totalGols.previsto.map((v) => `<td>${pct(v)}</td>`).join('')}</tr><tr><td class="l">Real</td>${bt.totalGols.observado.map((v) => `<td>${pct(v)}</td>`).join('')}</tr></table>
-        <div class="sec-h" style="margin-top:16px"><h3 style="margin:0;color:var(--text)">Por temporada</h3></div><div class="tw" style="max-height:260px;overflow:auto"><table><tr><th>Ano</th><th>Jogos</th><th>Favorito</th><th>RPS</th><th>Ingênuo</th></tr>${seasons.map(([s, a]) => `<tr><td>${s}</td><td>${a.n}</td><td>${pct(a.acerto)}</td><td>${a.rps.toFixed(4)}</td><td>${a.rpsBase.toFixed(4)}</td></tr>`).join('')}</table></div></div></div>
+        <div class="sec-h" style="margin-top:16px"><h3 style="margin:0;color:var(--text)">Por temporada</h3></div><div class="tw" style="max-height:330px;overflow:auto"><table><tr><th>Ano</th><th>Jogos</th><th>Favorito</th><th>RPS</th><th>Ingênuo</th></tr>${seasons.map(([s, a]) => `<tr><td>${s}</td><td>${a.n}</td><td>${pct(a.acerto)}</td><td>${a.rps.toFixed(4)}</td><td>${a.rpsBase.toFixed(4)}</td></tr>`).join('')}</table></div></div></div>
     </section>
     <section><div class="sec-h"><h2>Limites conhecidos</h2></div><ul>
       <li>Ele não sabe de lesões, suspensões, poupados nem de reforços que ainda não jogaram — só vê o que acontece em campo.</li>

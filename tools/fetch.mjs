@@ -20,7 +20,7 @@ async function exists(u) { try { await access(u); return true; } catch { return 
 async function download(url, dest) {
   for (let i = 0; i < 4; i++) {
     try {
-      await run('curl', ['-sS', '--fail', '--max-time', '240', '-o', dest, url]);
+      await run('curl', ['-sSL', '--fail', '--max-time', '240', '-o', dest, url]);
       return;
     } catch (e) {
       if (i === 3) throw e;
@@ -49,4 +49,6 @@ async function worker() {
   }
 }
 await Promise.all([worker(), worker(), worker()]);
+// referência de mercado para o backtest (opcional; nunca aparece no site)
+try { await download('https://www.football-data.co.uk/new/BRA.csv', new URL('BRA.csv', CACHE).pathname); console.log('  ok referência de mercado'); } catch { console.log('  (referência de mercado indisponível — o backtest segue sem ela)'); }
 console.log('pronto.');

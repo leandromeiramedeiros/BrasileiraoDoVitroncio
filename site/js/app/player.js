@@ -45,7 +45,7 @@ export function renderPlayer(vm) {
     }
   }
   const sc = (side) => (vm.scorers?.[side] || []).map((s) => `<b>${esc(s.n)}</b> ${esc(s.t)}`).join(' · ');
-  return `<div class="stage" style="${vm.colors}">
+  return `<div style="${vm.colors}"><div class="stage">
     <div class="stage-top"><span>${tag}</span><span>${esc(vm.info || '')}</span></div>
     <div class="board">
       <a class="side" href="#/time/${m.h}">${logo(H)}<span class="nm">${esc(H.name)}</span>${redsHtml(vm.reds?.[0])}</a>
@@ -62,5 +62,5 @@ export function renderPlayer(vm) {
   </div>
   ${vm.latest?.length && tab !== 'lances' ? `<div class="latest" style="margin-top:12px">${vm.latest.map((e) => eventRow(e)).join('')}</div>` : ''}
   <div class="tabs">${tabs.map(([k, l]) => `<button class="${k === tab ? 'on' : ''}" data-act="tab" data-key="${esc(vm.key)}" data-tab="${k}">${l}</button>`).join('')}</div>
-  <div>${body}</div>`;
+  <div>${body}</div></div>`;
 }
