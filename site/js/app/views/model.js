@@ -26,8 +26,8 @@ export function modelView() {
   const e = (v) => `${v >= 0 ? '+' : ''}${((Math.exp(v) - 1) * 100).toFixed(0)}%`;
   const seasons = Object.entries(bt.temporadas);
   return `<div class="wrap prose">
-    <section><div class="sec-h"><h2>Como o modelo funciona</h2></div>
-      <p>Todas as probabilidades do site vêm de um modelo estatístico próprio, o Vitrôncio. Ele não usa odds de casas de aposta e não é recomendação de aposta.</p>
+    <section data-mk="vith"><div class="vit-hero"><img src="img/vitroncio-olho.webp" width="345" height="680" alt="Victor, o Vitrôncio, olhando por cima dos óculos"><div><h2>Como o Vitrôncio pensa</h2>
+      <p>O modelo leva o nome do Victor, o Vitrôncio. Todas as probabilidades do site vêm dele: um modelo estatístico próprio, que não usa odds de casas de aposta. Não é recomendação de aposta.</p></div></div>
       <div class="kv">
         <div><div class="k">Partidas na base</div><div class="v">${M.base.partidas.toLocaleString('pt-BR')}</div></div>
         <div><div class="k">Séries A e B</div><div class="v">desde ${M.base.desde}</div></div>

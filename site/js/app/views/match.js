@@ -8,6 +8,7 @@ import { simulateMatch } from '../../engine/sim-match.js';
 import { scoreDistribution, nextGoal, summarize, compile, timeline } from '../../engine/match-model.js';
 import { makeRng } from '../../engine/rng.js';
 import { versusBlock } from './compare.js';
+import { reactSim } from '../vitroncio.js';
 
 // ── previsão pré-jogo (corpo da aba "Previsão") ──────────────────────────────
 export function preBody(m, f) {
@@ -48,6 +49,12 @@ const probableLineups = (m) => { const f = (id) => { const L = lineup(id); retur
 const goalList = (m) => { const out = { h: [], a: [] }; for (const e of m.ev) if ('GPO'.includes(e.t)) out[e.s].push({ n: e.n || 'Gol', t: `${e.m}'${e.x ? '+' + e.x : ''}${e.t === 'P' ? ' (pên.)' : e.t === 'O' ? ' (contra)' : ''}` }); return out; };
 const evText = (m, e) => { const T = team(e.s === 'h' ? m.h : m.a).name; return e.t === 'R' ? `Cartão vermelho para ${e.n || ''} (${T}).` : e.t === 'Y' ? `Cartão amarelo para ${e.n || ''} (${T}).` : e.t === 'O' ? `Gol contra de ${e.n || ''}. Gol para o ${T}.` : `Gol do ${T}. ${e.n || ''}${e.t === 'P' ? ' (pênalti)' : ''}`; };
 
+/** Como o palpite pré-jogo se saiu num jogo encerrado. */
+function verdict(m, p) {
+  const q = m.hg > m.ag ? p.pH : m.hg === m.ag ? p.pD : p.pA;
+  return q >= Math.max(p.pH, p.pD, p.pA) ? `acertou o resultado (dava ${pct(q)})` : q < 0.15 ? `zebra: dava ${pct(q)} para este resultado` : `dava ${pct(q)} para este resultado`;
+}
+
 /** View model de um jogo real. */
 export function realVM(m, { compact = false } = {}) {
   const f = forecast(m);
@@ -66,7 +73,7 @@ export function realVM(m, { compact = false } = {}) {
   return {
     ...base, score: [m.hg, m.ag], reds: [reds(m, 'h'), reds(m, 'a')], scorers: goalList(m),
     clock: mode === 'post' ? 'Fim de jogo' : /HALFTIME/.test(m.statusName) ? 'Intervalo' : m.clock || 'Ao vivo',
-    oracleRight: mode === 'live' ? `antes do jogo: ${pct(f.pre.pH)} · ${pct(f.pre.pD)} · ${pct(f.pre.pA)}` : '',
+    oracleRight: mode === 'live' ? `antes do jogo: ${pct(f.pre.pH)} · ${pct(f.pre.pD)} · ${pct(f.pre.pA)}` : verdict(m, f.pre),
     tl: wpTimeline(m), events, keyEvents: det?.key?.length ? det.key : derived, stats: st, lineups: det?.lineups || null,
   };
 }
@@ -75,13 +82,19 @@ export function realVM(m, { compact = false } = {}) {
 export const sim = { key: null, m: null, res: null, pos: 0, playing: false, dur: 150, timer: null, wp: [], cfg: null, onTick: null };
 const TICK = 200;
 export function stopSim() { clearInterval(sim.timer); sim.timer = null; sim.playing = false; }
+// fim de um jogo simulado: o Vitrôncio pode reagir (uma vez por simulação)
+function simEnded() {
+  if (!sim.res || sim.reacted) return; sim.reacted = true;
+  const st = simState(sim.res.steps), pre = scoreDistribution(S.model.hazard, sim.e.lh, sim.e.la);
+  reactSim({ hg: st.hg, ag: st.ag, pre, top: summarize(pre).top[0] });
+}
 export function closeSim() { stopSim(); sim.key = null; sim.res = null; }
 export function startSim(m, onTick) {
   stopSim();
   const real = !String(m.id).startsWith('sim-');
   const e = real ? expected(m) : expectedPair(m.h, m.a);
   const cfg = { home: { name: team(m.h).name, lineup: lineup(m.h) }, away: { name: team(m.a).name, lineup: lineup(m.a) }, lh: e.lh, la: e.la, rates: { sh: [e.pr.sh.lh, e.pr.sh.la], sot: [e.pr.sot.lh, e.pr.sot.la], co: [e.pr.co.lh, e.pr.co.la], yc: [e.pr.yc.lh, e.pr.yc.la], fo: [e.pr.fo.lh, e.pr.fo.la] } };
-  Object.assign(sim, { key: `s${m.id}`, m, res: simulateMatch(S.model, cfg, makeRng((Math.random() * 2 ** 32) >>> 0)), pos: 0, wp: [], cfg, e, onTick });
+  Object.assign(sim, { reacted: false, key: `s${m.id}`, m, res: simulateMatch(S.model, cfg, makeRng((Math.random() * 2 ** 32) >>> 0)), pos: 0, wp: [], cfg, e, onTick });
   playSim();
 }
 export function playSim() {
@@ -90,14 +103,14 @@ export function playSim() {
   sim.playing = true; clearInterval(sim.timer);
   sim.timer = setInterval(() => {
     sim.pos = Math.min(sim.res.steps, sim.pos + (sim.res.steps / sim.dur) * (TICK / 1000));
-    if (sim.pos >= sim.res.steps) stopSim();
+    if (sim.pos >= sim.res.steps) { stopSim(); simEnded(); }
     sim.onTick?.();
   }, TICK);
 }
 export function simAction(act, val) {
   if (act === 'pause') stopSim();
   else if (act === 'play') playSim();
-  else if (act === 'end') { sim.pos = sim.res.steps; stopSim(); }
+  else if (act === 'end') { sim.pos = sim.res.steps; stopSim(); simEnded(); }
   else if (act === 'speed') { sim.dur = +val; if (sim.playing) playSim(); }
   else if (act === 'again') startSim(sim.m, sim.onTick);
   else if (act === 'close') closeSim();
@@ -142,7 +155,7 @@ export function simVM() {
   return {
     key: sim.key, m, mode: 'sim', colors: colors(m), e: sim.e, pre, probs: d, dist: d, next: done ? null : nextGoal(hz, sim.e.lh, sim.e.la, st),
     score: [st.hg, st.ag], reds: [st.rh, st.ra], scorers: scorersL, clock: done ? 'Fim de jogo' : half ? 'Intervalo' : tlSteps[Math.min(n - 1, step)].label,
-    info: 'Um resultado possível, sorteado pelo modelo', oracleRight: `antes do jogo: ${pct(pre.pH)} · ${pct(pre.pD)} · ${pct(pre.pA)}`,
+    info: 'Um resultado possível, sorteado pelo Vitrôncio', oracleRight: `antes do jogo: ${pct(pre.pH)} · ${pct(pre.pD)} · ${pct(pre.pA)}`,
     tl: { points: sim.wp.slice(0, step + 1), events: evs, total: n }, events: shown.map(toRow).reverse(),
     keyEvents: shown.filter((e) => KEY_TYPES.has(e.type)).map(toRow).reverse(), stats, lineups: { h: lu(m.h), a: lu(m.a) }, controls,
   };

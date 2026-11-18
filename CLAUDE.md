@@ -12,7 +12,10 @@ Site estático (GitHub Pages) da Série A com simulador próprio. Interface e co
 ## Interface
 
 - O HTML de cada página é gerado por inteiro, mas quem aplica no DOM é `site/js/app/morph.js` (atualização incremental). Listas que crescem usam `data-mk` como chave estável; não troque por `innerHTML`, senão volta a piscar.
-- Tom dos textos: direto e neutro ("modelo", "probabilidade"). Sem emoji, sem exclamações, sem personagem. O nome Vitrôncio aparece só na marca e na página do modelo.
+- Tom dos textos: direto e seco. Sem emoji, sem exclamações.
+- **O Vitrôncio é o Victor**, amigo do dono, e é o rosto do site (pedido do dono). O modelo se chama Vitrôncio em toda a interface ("Probabilidades do Vitrôncio", "Vitrôncio × mercado"). Imagens em `site/img/` (recortes sem fundo: `vitroncio-cara` rosto, `vitroncio-joia` sinal de positivo, `vitroncio-olho` olhando por cima dos óculos; favicon). Só os recortes são publicados, nunca as fotos originais.
+  - Presença fixa: marca no cabeçalho, rodapé, ao lado de toda barra de probabilidade, página "Odds" e topo da página do modelo.
+  - Aparições e easter eggs ficam em `site/js/app/vitroncio.js` (a lista está no cabeçalho do arquivo). São escondidos de propósito: não anuncie na interface nem no README. Falas curtas e secas, na voz dele; nada que zombe de um time específico.
 - Página inicial curta; o detalhe fica nas páginas de jogo.
 
 ## Reajuste semanal (o pedido mais comum)

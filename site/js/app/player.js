@@ -8,6 +8,7 @@
 import { team } from './store.js';
 import { esc, pct, num } from './util.js';
 import { logo, probBar, eventRow, statBars, scoreMatrix, wpChart } from './components.js';
+import { face } from './vitroncio.js';
 
 const tabState = new Map();
 const feedState = new Map();
@@ -26,7 +27,7 @@ export function renderPlayer(vm) {
   const tag = vm.mode === 'live' ? '<span class="livepill">Ao vivo</span>' : vm.mode === 'sim' ? '<span class="tag sim">Simulação</span>' : vm.mode === 'post' ? '<span class="tag">Encerrado</span>' : '<span class="tag">Pré-jogo</span>';
   const redsHtml = (n) => (n ? `<span class="rc">${'<i></i>'.repeat(n)}</span>` : '');
   const shown = vm.mode === 'post' ? vm.pre : vm.probs;
-  const label = vm.mode === 'post' ? 'Probabilidades antes do jogo' : vm.mode === 'pre' ? 'Probabilidades' : 'Probabilidades agora';
+  const label = vm.mode === 'post' ? 'Vitrôncio antes do jogo' : vm.mode === 'pre' ? 'Probabilidades do Vitrôncio' : 'Vitrôncio agora';
   const sc = (side) => (vm.scorers?.[side] || []).map((s) => `<b>${esc(s.n)}</b> ${esc(s.t)}`).join(' · ');
 
   const stage = `<div class="stage">
@@ -39,7 +40,7 @@ export function renderPlayer(vm) {
     <div class="clock"><span class="${vm.mode === 'live' || vm.mode === 'sim' ? 'on' : ''}">${esc(vm.clock || '')}</span></div>
     ${vm.scorers && (vm.scorers.h.length || vm.scorers.a.length) ? `<div class="scorers" data-mk="scorers"><div>${sc('h')}</div><div>${sc('a')}</div></div>` : ''}
     ${vm.controls ? `<div data-mk="controls">${vm.controls}</div>` : ''}
-    <div class="oracle" data-mk="oracle"><div class="oracle-h"><span>${label}</span><span>${esc(vm.oracleRight || '')}</span></div>
+    <div class="oracle" data-mk="oracle"><div class="oracle-h"><span>${face(18)}${label}</span><span>${esc(vm.oracleRight || '')}</span></div>
       ${probBar(shown)}
       <div class="plabels"><span><b>${pct(shown.pH)}</b> ${esc(H.name)}</span><span>empate <b>${pct(shown.pD)}</b></span><span>${esc(A.name)} <b>${pct(shown.pA)}</b></span></div>
     </div>

@@ -1,5 +1,5 @@
 // Ponto de entrada: roteador por hash, laço de renderização e ações da interface.
-import { S, boot, subscribe, runSeasonSim, liveMatches } from './store.js';
+import { S, boot, subscribe, runSeasonSim, liveMatches, team } from './store.js';
 import { store, esc, fmtFull } from './util.js';
 import { failedLogos } from './components.js';
 import { setTab, setFeed } from './player.js';
@@ -12,6 +12,7 @@ import { teamsView, teamView } from './views/teams.js';
 import { modelView } from './views/model.js';
 import { calendarView, playersView, calState } from './views/extra.js';
 import { compareView, cmpState } from './views/compare.js';
+import { initVitroncio, reactFav, reactSelf } from './vitroncio.js';
 
 const view = document.getElementById('view');
 const nav = document.getElementById('nav');
@@ -54,10 +55,10 @@ document.addEventListener('click', (ev) => {
   else if (act === 'feed') setFeed(el.dataset.key, el.dataset.mode);
   else if (act === 'selectlive') { homeState.selected = id; window.scrollTo({ top: 0, behavior: 'smooth' }); }
   else if (act === 'simstart') { const m = S.matches.get(id); if (m) { homeState.simHere = !!el.dataset.home; startSim(m, render); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
-  else if (act === 'simpair') { if (simState.h !== simState.a) startSim(pairMatch(simState.h, simState.a), render); }
+  else if (act === 'simpair') { if (simState.h !== simState.a) startSim(pairMatch(simState.h, simState.a), render); else reactSelf(team(simState.h).name); }
   else if (act === 'sim') { simAction(el.dataset.do, el.dataset.val); if (el.dataset.do === 'close') homeState.simHere = false; }
   else if (act === 'swap') { [simState.h, simState.a] = [simState.a, simState.h]; closeSim(); }
-  else if (act === 'fav') { store.set('fav', store.get('fav') === id ? null : id); }
+  else if (act === 'fav') { const on = store.get('fav') !== id; store.set('fav', on ? id : null); if (on) reactFav(team(id).name, S.seasonSim?.teams[id]); }
   else if (act === 'whatif') { if (simState.fixed[id] === el.dataset.r) delete simState.fixed[id]; else simState.fixed[id] = el.dataset.r; }
   else if (act === 'clearwhatif') { simState.fixed = {}; simState.result = null; }
   else if (act === 'whatifall') simState.all = !simState.all;
@@ -87,4 +88,5 @@ async function checkVersion() {
 checkVersion();
 setInterval(() => { if (!document.hidden && !sim.playing) checkVersion(); }, 5 * 60000);
 
+initVitroncio({ busy: () => sim.playing });
 boot().then(render).catch((e) => { console.error(e); view.innerHTML = `<div class="wrap"><div class="banner">Não consegui carregar o modelo (${esc(e.message)}). Recarregue a página.</div></div>`; });

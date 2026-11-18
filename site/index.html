@@ -6,7 +6,8 @@
 <title>Brasileirão do Vitrôncio</title>
 <meta name="description" content="Série A do Brasileirão ao vivo, com as chances de cada jogo e do campeonato calculadas pelo simulador Vitrôncio.">
 <meta name="theme-color" content="#0b0f14">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23ffd21f'/%3E%3Ctext x='32' y='44' font-size='36' font-family='Arial' font-weight='700' text-anchor='middle' fill='%2308110a'%3EV%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
@@ -14,11 +15,11 @@
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="brand" href="#/">Brasileirão do <em>Vitrôncio</em></a>
+  <a class="brand" href="#/"><img class="vit-face" src="img/vitroncio-cara.webp" width="30" height="30" alt=""><span>Brasileirão do <em>Vitrôncio</em></span></a>
   <nav class="nav" id="nav" aria-label="Seções"></nav>
 </div></header>
-<main id="view"><div class="wrap"><p class="muted">Carregando…</p></div></main>
-<footer class="foot-note">Probabilidades estimadas por modelo estatístico, para entretenimento. Não é recomendação de aposta. Dados de jogo: ESPN.<br><span id="stamp"></span></footer>
+<main id="view"><div class="wrap"><p class="muted vit-load"><img class="vit-face" src="img/vitroncio-cara.webp" width="28" height="28" alt="">O Vitrôncio está fazendo as contas…</p></div></main>
+<footer class="foot-note"><img class="foot-vit" src="img/vitroncio-joia.webp" width="683" height="720" loading="lazy" alt="Victor, o Vitrôncio, fazendo sinal de positivo"><div class="foot-txt">Probabilidades estimadas pelo Vitrôncio, um modelo estatístico, para entretenimento. Não é recomendação de aposta. Dados de jogo: ESPN.<br><span id="stamp"></span></div></footer>
 <script type="module" src="js/app/main.js"></script>
 </body>
 </html>
