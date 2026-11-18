@@ -53,6 +53,7 @@ export function modelView() {
         <tr><td class="l">Mando a mais de 100 km da sede (vantagem de casa)</td><td class="pts">${e(M.ctx.disp)}</td></tr>
         <tr><td class="l">Portões fechados, 2020–21 (vantagem de casa)</td><td class="pts">${e(M.ctx.closed)}</td></tr></table>
       ${M.ctx.lineup ? `<p>Quando a escalação sai (cerca de uma hora antes do jogo), o modelo mede quanto do time habitual de cada lado começa jogando, quanto dos gols e assistências recentes do time está em campo e quantos titulares habituais estão no banco. Cada 10 pontos percentuais a menos do time habitual em campo valem ${e(-0.1 * M.ctx.lineup.usage)} nos gols esperados do time.</p>` : ''}
+      ${M.ctx.absent ? `<p>Antes de a escalação sair, entram os desfalques que já se sabem: suspensos por cartões (expulsão ou terceiro amarelo, pela regra da CBF) e titulares habituais que ficaram fora do último jogo, quase sempre por lesão. Cada titular suspenso tira cerca de ${e(-0.09 * M.ctx.absent.susp_w).replace('+', '')} dos gols esperados do time.</p>` : ''}
       <p class="small muted">Efeito nos gols esperados do próprio time; o adversário ganha o equivalente.</p>` : ''}
       <h3>${M.ctx ? 4 : 3}. O campeonato</h3>
       <p>Título, Libertadores e rebaixamento saem de milhares de simulações dos jogos restantes, com um desvio de força sorteado por time em cada simulação e os critérios de desempate da CBF. Com jogos em andamento, a simulação parte do placar e do minuto atuais.</p>

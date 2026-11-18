@@ -56,3 +56,5 @@ Leitura: em `zoo`, ganhos de ≈ 0,001 no DEV caíram para ≈ 0,0003 em 2022–
 - **Árvores com atributos de elenco** (`players/gbm_final.py`): sobre o contexto, somam ≈ o mesmo que o deslocamento linear; ficou o linear, que roda no navegador.
 - **Redes neurais** (`neural/`): DeepSets e GRU, sobre contexto + escalação: −0,00005 e −0,00012 no HOLDOUT, IC cruzando zero. Não entraram.
 - **Trilha core**: novo canal de gols (EKF com covariância ataque–defesa e surpresa de finalizações) e rating ordinal. Sobre o contexto: +0,00011 no HOLDOUT. Não entraram; detalhes de porte na conversa de 18/11/2026 e em `core/`.
+
+- **Desfalques na véspera** (`absent/`, v3.3): suspensos por cartões (validação 2013+: 2,9% dos suspensos apareceram no jogo) e titulares fora do último jogo. Sobre o contexto, sem escalação: DEV −0,00019 [−0,00062; +0,00023], HOLDOUT −0,00047 [−0,00104; +0,00011], 4 de 5 temporadas melhores; coeficientes negativos em todas as temporadas (−0,12 a −0,22 por suspensos). Abaixo do limiar de ruído no DEV; entrou por ser consistente e plausível. Com a escalação anunciada: nada (+0,00009 / −0,00018). Árbitro: sem efeito, mas a ESPN não tem o árbitro de 2014 a 2021.

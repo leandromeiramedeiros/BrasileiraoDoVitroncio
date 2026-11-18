@@ -14,7 +14,7 @@ import { probableLineup, scorerProbabilities, genericLineup } from '../engine/pl
 export const S = {
   model: null, state: null, teams: {}, season: null,
   matches: new Map(), applied: new Set(), lam: new Map(), details: new Map(),
-  odds: new Map(), cx: new Map(),
+  odds: new Map(), cx: new Map(), ab: new Map(),
   seasonSim: null, simKey: '', simRunning: false,
   online: null, lastUpdate: null, version: 0, error: null,
 };
@@ -32,6 +32,7 @@ export async function boot() {
     S.matches.set(f.id, { ...f, lg: 'A', season: model.temporada, ev: (f.ev || []).map((e) => ({ m: e[0], x: e[1], t: e[2], s: e[3], n: e[4] })), stats: null, clock: '', period: 0, statusName: '', snapshot: true });
     if (f.lam) S.lam.set(f.id, { lh: f.lam[0], la: f.lam[1] });
     if (f.cx) S.cx.set(f.id, f.cx);
+    if (f.ab) S.ab.set(f.id, f.ab);
     if (f.mkt) S.odds.set(f.id, { dec: f.mkt, src: 'média de fechamento do mercado', kind: 'fechamento' });
   }
   // odds vistas neste navegador antes de o jogo começar (ficam guardadas para a comparação depois)
@@ -144,7 +145,7 @@ function decidedBefore(date) {
 export function contextOf(m, cached = true) {
   const d = cached ? memo(`dec${m.date}`, () => decidedBefore(m.date)) : decidedBefore(m.date);
   const c = S.cx.get(m.id) || [0, 0, 0];
-  return { dec: [d.has(m.h) ? 1 : 0, d.has(m.a) ? 1 : 0], nc: [c[0], c[1]], disp: c[2], why: [d.get(m.h), d.get(m.a)], lu: lineupOf(m) };
+  return { dec: [d.has(m.h) ? 1 : 0, d.has(m.a) ? 1 : 0], nc: [c[0], c[1]], disp: c[2], why: [d.get(m.h), d.get(m.a)], lu: lineupOf(m), ab: S.ab.get(m.id) || null };
 }
 /** Atributos da escalação anunciada (ESPN) dos dois times, ou null se ainda não saiu. */
 function lineupOf(m) {
@@ -160,6 +161,7 @@ export function contextNotes(m) {
   f.why.forEach((w, i) => { if (w) out.push(`${nm[i]}: ${w === 'campeao' ? 'título' : 'rebaixamento'} já confirmado`); });
   f.nc.forEach((v, i) => { if (v) out.push(`${nm[i]}: jogo continental logo em seguida`); });
   if (f.disp) out.push(`${nm[0]}: mando fora da sede`);
+  if (!f.lu && f.ab && S.model.ctx?.absent) f.ab.forEach((t, i) => { if (!t) return; if (t.s?.length) out.push(`${nm[i]}: ${t.s.join(', ')} ${t.s.length > 1 ? 'suspensos' : 'suspenso'}`); if (t.absP_w >= 0.08) out.push(`${nm[i]}: titulares habituais fora do último jogo`); });
   if (f.lu && f.lu[0].usage != null && f.lu[1].usage != null) out.push(`escalações anunciadas (${nm[0]} com ${pct(Math.min(1, Math.round(f.lu[0].usage * 100) / 100))} do time habitual, ${nm[1]} com ${pct(Math.min(1, Math.round(f.lu[1].usage * 100) / 100))})`);
   return out;
 }

@@ -184,3 +184,16 @@ test('Best Against: probabilidade corrigida pelo histórico', async () => {
   assert.ok(Math.abs(good.c.reduce((a, b) => a + b, 0) - 1) < 1e-12, 'soma 1');
   if (model.against) assert.ok(model.against.total.bets > 50 && Object.keys(model.against.cells).length > 4);
 });
+
+test('desfalques: suspensão por cartões', async () => {
+  const { createCardState, applyCardMatch, suspendedFor, serveBans } = await import('../site/js/engine/absent.js');
+  const c = createCardState(), base = { lg: 'A', season: 2026, h: 'T', a: 'U' };
+  for (let k = 0; k < 2; k++) applyCardMatch(c, { ...base, ev: [{ t: 'Y', s: 'h', p: 'p1', m: 30 }] });
+  assert.equal(suspendedFor(c, 'T', 'A', 2026).length, 0, 'dois amarelos: ainda joga');
+  applyCardMatch(c, { ...base, ev: [{ t: 'Y', s: 'h', p: 'p1', m: 30 }, { t: 'R', s: 'a', p: 'p2', m: 80 }] });
+  assert.deepEqual(suspendedFor(c, 'T', 'A', 2026), ['p1'], 'terceiro amarelo suspende');
+  assert.deepEqual(suspendedFor(c, 'U', 'A', 2026), ['p2'], 'vermelho direto suspende');
+  serveBans(c, 'T', 'A', 2026);
+  assert.equal(suspendedFor(c, 'T', 'A', 2026).length, 0, 'cumpriu no jogo seguinte');
+  if (model.ctx?.absent) assert.ok(model.ctx.absent.susp_w < 0 && model.ctx.absent.absP_w < 0, 'desfalque reduz os gols esperados');
+});

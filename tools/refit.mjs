@@ -17,6 +17,7 @@ import { applyContext } from '../site/js/engine/context.js';
 import { bestAgainst, GAPS } from '../site/js/engine/against.js';
 import { buildContext, loadCities } from './lib/context.mjs';
 import { createLineupState, lineupFeatures, applyLineupMatch, teamSnapshot } from '../site/js/engine/lineup.js';
+import { createCardState, applyCardMatch, serveBans, suspendedFor, absentFeatures } from '../site/js/engine/absent.js';
 import { gunzipSync } from 'node:zlib';
 
 const QUICK = process.argv.includes('--quick');
@@ -199,6 +200,46 @@ const luSnaps = {};
 const nowIso = new Date().toISOString();
 for (const id of new Set(matches.filter((m) => m.lg === 'A' && m.season === seasonNow).flatMap((m) => [m.h, m.a]))) { const sn = teamSnapshot(luState, id, nowIso); if (sn.n) luSnaps[id] = sn; }
 log('escalação', lineupCoef, `${luFeat.size} jogos com escalação`);
+
+// ── (4d) desfalques conhecidos na véspera (ver site/js/engine/absent.js) ─────
+// Suspensos (cartões) e titulares habituais fora do último jogo. Entram só na previsão
+// sem escalação (r.lhNoLu); coeficiente da temporada Y com Série A 2009..Y−1.
+const AB_KEYS = ['susp_w', 'absP_w'];
+const rosterById = new Map(lineupRows.map((x) => [x.id, x]));
+const abState = createLineupState(), cards = createCardState(), abFeat = new Map(), abNext = new Map(), ahead = {}, pname = {};
+for (const m of matches) {
+  if (m.status !== 'post' && m.status !== 'pre') continue;
+  for (const e of m.ev) if (e.p && e.n) pname[e.p] = e.n;
+  const rr = rosterById.get(m.id);
+  const f = [m.h, m.a].map((t) => absentFeatures(teamSnapshot(abState, t, m.date), abState.teams[t], cards, t, m.lg, m.season, m.date));
+  if (m.status === 'post') {
+    abFeat.set(m.id, f);
+    if (rr) applyLineupMatch(abState, rr);
+    applyCardMatch(cards, { lg: m.lg, season: m.season, h: m.h, a: m.a, ev: m.ev, min: rr ? { ...rr.home.min, ...rr.away.min } : null });
+  } else {
+    for (const t of [m.h, m.a]) ahead[t] = (ahead[t] || 0) + 1;
+    // só o próximo jogo de cada time: depois dele a foto já não vale
+    if (m.lg === 'A' && m.season === seasonNow) abNext.set(m.id, [m.h, m.a].map((t, j) => (ahead[t] === 1 ? { susp_w: f[j].susp_w, absP_w: f[j].absP_w, s: suspendedFor(cards, t, m.lg, m.season).map((p) => pname[p] || '').filter(Boolean) } : null)));
+    serveBans(cards, m.h, m.lg, m.season); serveBans(cards, m.a, m.lg, m.season);
+  }
+}
+const abDiff = (id) => { const f = abFeat.get(id); return AB_KEYS.map((k) => (f && f[0][k] != null && f[1][k] != null ? f[0][k] - f[1][k] : 0)); };
+function fitAbsent(sub) {
+  if (sub.length < 300) return null;
+  const X = [], y = [], off = [];
+  for (const r of sub) { const d = abDiff(r.m.id); X.push(d); y.push(r.m.hg); off.push(Math.log(r.lhNoLu)); X.push(d.map((v) => -v)); y.push(r.m.ag); off.push(Math.log(r.laNoLu)); }
+  const b = poissonGLM(X, y, off, { ridge: 1e-6 });
+  return Object.fromEntries(AB_KEYS.map((k, j) => [k, b[j]]));
+}
+const abTrain = (to) => rows.filter((r) => r.m.lg === 'A' && r.m.season >= 2009 && r.m.season < to && abFeat.has(r.m.id));
+const abBySeason = {}; for (const s of seasons) abBySeason[s] = fitAbsent(abTrain(s));
+const absentCoef = fitAbsent(abTrain(Infinity));
+for (const r of rows) {
+  const b = abBySeason[r.m.season]; if (r.m.lg !== 'A' || !b || !abFeat.has(r.m.id)) continue;
+  const e = abDiff(r.m.id).reduce((a, x, j) => a + b[AB_KEYS[j]] * x, 0);
+  r.lhNoLu *= Math.exp(e); r.laNoLu *= Math.exp(-e);
+}
+log('desfalques', absentCoef, `próximos jogos com dados: ${abNext.size}`);
 
 // ── (5) intensidades minuto a minuto ─────────────────────────────────────────
 const S1 = 3, S2 = 7;
@@ -427,12 +468,12 @@ const preLam = new Map(rows.filter((r) => r.m.lg === 'A' && r.m.season === seaso
 // calendário da temporada; jogos já aplicados levam o λ pré-jogo (para gráficos de jogos passados);
 // jogos por vir levam o contexto conhecido de antemão: [continental em seguida (m, v), mando fora da sede]
 const cxOut = (id) => { const f = cx.get(id); return f && (f.nc[0] || f.nc[1] || f.disp) ? [f.nc[0], f.nc[1], f.disp] : null; };
-const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).map((m) => ({ id: m.id, date: m.date, status: m.status, h: m.h, a: m.a, hg: m.hg, ag: m.ag, venue: m.venue, city: m.city, ...(oddsDec.has(`${m.season}|${m.h}|${m.a}`) && m.status === 'post' ? { mkt: oddsDec.get(`${m.season}|${m.h}|${m.a}`) } : {}), ...(m.status !== 'post' && cxOut(m.id) ? { cx: cxOut(m.id) } : {}), ...(preLam.has(m.id) ? { lam: preLam.get(m.id), ev: m.ev.filter((e) => e.t !== 'Y').map((e) => [e.m, e.x, e.t, e.s, e.n]) } : {}) }));
+const fixtures = matches.filter((m) => m.lg === 'A' && m.season === seasonNow).map((m) => ({ id: m.id, date: m.date, status: m.status, h: m.h, a: m.a, hg: m.hg, ag: m.ag, venue: m.venue, city: m.city, ...(oddsDec.has(`${m.season}|${m.h}|${m.a}`) && m.status === 'post' ? { mkt: oddsDec.get(`${m.season}|${m.h}|${m.a}`) } : {}), ...(m.status !== 'post' && cxOut(m.id) ? { cx: cxOut(m.id) } : {}), ...(m.status !== 'post' && abNext.has(m.id) ? { ab: abNext.get(m.id) } : {}), ...(preLam.has(m.id) ? { lam: preLam.get(m.id), ev: m.ev.filter((e) => e.t !== 'Y').map((e) => [e.m, e.x, e.t, e.s, e.n]) } : {}) }));
 const lastA = done.filter((m) => m.lg === 'A').at(-1);
 const round5 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'number' ? +v.toPrecision(5) : v]));
 const model = {
   version: 3,
-  nome: 'Vitrôncio v3.2',
+  nome: 'Vitrôncio v3.3',
   geradoEm: new Date().toISOString(),
   dadosAte: lastA?.date,
   temporada: seasonNow,
@@ -440,7 +481,7 @@ const model = {
   params: Object.fromEntries(Object.entries(params).map(([c, p]) => [c, round5(p)])),
   xg: round5(xg),
   stack: stack && round5(stack),
-  ctx: ctx && { ...round5(ctx), ...(lineupCoef ? { lineup: round5(lineupCoef) } : {}) },
+  ctx: ctx && { ...round5(ctx), ...(lineupCoef ? { lineup: round5(lineupCoef) } : {}), ...(absentCoef ? { absent: round5(absentCoef) } : {}) },
   lineupSnaps: luSnaps,
   calib: CALIB,
   hazard,
