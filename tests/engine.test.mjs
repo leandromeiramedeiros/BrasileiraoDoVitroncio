@@ -171,3 +171,16 @@ test('escalação: foto do time e efeito nos gols esperados', async () => {
     assert.ok(Math.abs(c.lh - z.lh) < 1e-12, 'atributo nulo de um lado não entra');
   }
 });
+
+test('Best Against: probabilidade corrigida pelo histórico', async () => {
+  const { bestAgainst, cellKey } = await import('../site/js/engine/against.js');
+  const p = [0.49, 0.25, 0.26], q = [0.80, 0.12, 0.08];
+  assert.equal(bestAgainst({}, [0.5, 0.3, 0.2], [0.48, 0.3, 0.22]), null, 'diferença menor que 5 pontos');
+  const none = bestAgainst({}, p, q);
+  assert.equal(none.i, 2); assert.ok(Math.abs(none.c[2] - q[2]) < 1e-12, 'sem histórico, fica com o mercado');
+  const key = cellKey(none.gap, q[2], false);
+  const good = bestAgainst({ [key]: { n: 100, ex: 10 } }, p, q);
+  assert.ok(Math.abs(good.c[2] - (q[2] + 10 / 200)) < 1e-12, 'histórico favorável sobe, com desconto');
+  assert.ok(Math.abs(good.c.reduce((a, b) => a + b, 0) - 1) < 1e-12, 'soma 1');
+  if (model.against) assert.ok(model.against.total.bets > 50 && Object.keys(model.against.cells).length > 4);
+});

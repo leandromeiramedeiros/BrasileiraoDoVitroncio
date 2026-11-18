@@ -241,3 +241,17 @@ body.vitmode img.logo { content: url("../img/vitroncio-cara.webp"); border-radiu
 @media (prefers-reduced-motion: reduce) { .vit-pop, .vit-peek { transition: none; } }
 
 .refs { padding-left: 18px; } .refs li { font-size: 13.5px; line-height: 1.5; margin: 6px 0; } .refs a { color: inherit; } .refs a:hover i { text-decoration: underline; } .refs i { color: var(--text); font-style: normal; font-weight: 500; }
+
+/* abas internas das páginas agrupadas */
+.subnav { display: flex; gap: 4px; padding-top: 14px; padding-bottom: 0; }
+.subnav a { padding: 6px 12px; border-radius: 99px; font-size: 13.5px; font-weight: 500; color: var(--muted); border: 1px solid var(--line); }
+.subnav a:hover { color: var(--text); } .subnav a.on { color: #14110a; background: var(--gold); border-color: var(--gold); }
+.subnav + .wrap > section:first-child, .subnav + .wrap > :first-child { margin-top: 14px; }
+/* Best Against */
+.ba-warn { border-color: #54421a; background: #1d1910; } .ba-warn p { margin: 0 0 6px; } .ba-warn p:last-child { margin: 0; }
+td.ev { font-weight: 700; font-variant-numeric: tabular-nums; } td.ev.pos { color: var(--green); } td.ev.neg { color: var(--muted); }
+table.ba tr.up td { background: rgba(47, 191, 127, .07); }
+
+table.ba td.hist { white-space: normal; min-width: 150px; }
+.ba-pick { margin-top: 2px; font-size: 12px; color: var(--muted); font-weight: 600; }
+@media (max-width: 640px) { .nav { margin-left: -5px; } .nav a { padding: 9px 5px; font-size: 13px; } .subnav a { padding: 5px 10px; font-size: 13px; } table.ba th, table.ba td { padding: 7px 4px; } }

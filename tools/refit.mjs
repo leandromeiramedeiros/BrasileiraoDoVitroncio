@@ -14,6 +14,7 @@ import { nelderMead, ols, poissonGLM } from './lib/optim.mjs';
 import * as R from '../site/js/engine/ratings.js';
 import { scoreDistribution, calibrateLambdas, timeline, stepOf, diffIdx, menIdx } from '../site/js/engine/match-model.js';
 import { applyContext } from '../site/js/engine/context.js';
+import { bestAgainst, GAPS } from '../site/js/engine/against.js';
 import { buildContext, loadCities } from './lib/context.mjs';
 import { createLineupState, lineupFeatures, applyLineupMatch, teamSnapshot } from '../site/js/engine/lineup.js';
 import { gunzipSync } from 'node:zlib';
@@ -268,6 +269,7 @@ log('intensidades', JSON.stringify(hazard));
 // ── (6) backtest (Série A) ───────────────────────────────────────────────────
 let odds = new Map();
 const oddsDec = new Map();
+const oddsAvg = new Map(); // odds médias de fechamento (para a aba Best Against)
 try {
   const map = { 'Flamengo RJ': 'Flamengo', 'Sport Recife': 'Sport', 'Sao Paulo': 'São Paulo', Gremio: 'Grêmio', 'Botafogo RJ': 'Botafogo', Ceara: 'Ceará', Goias: 'Goiás', 'Atletico GO': 'Atlético-GO', 'America MG': 'América-MG', Avai: 'Avaí', Cuiaba: 'Cuiabá', Vitoria: 'Vitória', 'Chapecoense-SC': 'Chapecoense', Nautico: 'Náutico', Parana: 'Paraná', Criciuma: 'Criciúma', 'Atletico-MG': 'Atlético-MG' };
   const nameToId = {}; for (const [id, t] of Object.entries(teams)) { nameToId[t.name] = id; nameToId[t.full] = id; }
@@ -278,10 +280,12 @@ try {
     const inv = o.map((v) => 1 / v), s = inv[0] + inv[1] + inv[2];
     odds.set(`${r[2]}|${hi}|${ai}`, inv.map((v) => v / s));
     oddsDec.set(`${r[2]}|${hi}|${ai}`, o);
+    const av = [16, 17, 18].map((j) => parseFloat(r[j])); if (av.every((v) => v > 1)) oddsAvg.set(`${r[2]}|${hi}|${ai}`, av);
   }
 } catch { log('sem arquivo de referência de mercado (model/cache/BRA.csv) — benchmark ignorado'); }
 
 const CALIB = 2; // iterações da calibração da cadeia (ver calibrateLambdas)
+const cmpRows = [], gpA = {}; // (Best Against) jogos com odds médias de fechamento
 const bt = { from: 2013, seasons: {}, calib: Array.from({ length: 10 }, () => ({ n: 0, p: 0, y: 0 })), totals: { pred: new Array(9).fill(0), obs: new Array(9).fill(0) }, scoreHit: { n: 0, top1: 0, top3: 0 } };
 const agg = () => ({ n: 0, ll: 0, rps: 0, brier: 0, hit: 0, nM: 0, llMk: 0, rpsMk: 0, llM2: 0, rpsM2: 0, llBase: 0, rpsBase: 0, rpsNoLu: 0 });
 const all = agg();
@@ -298,6 +302,8 @@ for (const r of rows) {
     const rps = (q) => ((q[0] - y[0]) ** 2 + (q[0] + q[1] - y[0] - y[1]) ** 2) / 2;
     const c0 = r.lhNoLu !== r.lh ? calibrateLambdas(hazard, r.lhNoLu, r.laNoLu, CALIB) : null, d0 = c0 ? scoreDistribution(hazard, c0.lh, c0.la) : d;
     const rpsNoLu = rps([d0.pH, d0.pD, d0.pA]);
+    const av = oddsAvg.get(`${m.season}|${m.h}|${m.a}`);
+    if (av) { const inv = av.map((v) => 1 / v), s = inv[0] + inv[1] + inv[2]; cmpRows.push({ id: m.id, season: m.season, early: (gpA[`${m.season}|${m.h}`] || 0) < 5 && (gpA[`${m.season}|${m.a}`] || 0) < 5 ? 1 : 0, p: [d0.pH, d0.pD, d0.pA], q: inv.map((v) => v / s), o: av, k }); }
     const bs = baseCnt.map((v) => v / (baseCnt[0] + baseCnt[1] + baseCnt[2]));
     const mk = odds.get(`${m.season}|${m.h}|${m.a}`);
     for (const a of [all, (bt.seasons[m.season] ||= agg())]) {
@@ -312,6 +318,7 @@ for (const r of rows) {
     bt.scoreHit.n++; if (flat[0][1] === m.hg && flat[0][2] === m.ag) bt.scoreHit.top1++; if (flat.slice(0, 3).some((f) => f[1] === m.hg && f[2] === m.ag)) bt.scoreHit.top3++;
   }
   baseCnt[k]++;
+  for (const id of [m.h, m.a]) gpA[`${m.season}|${id}`] = (gpA[`${m.season}|${id}`] || 0) + 1;
 }
 const fin = (a) => ({ n: a.n, logloss: +(a.ll / a.n).toFixed(4), rps: +(a.rps / a.n).toFixed(4), rpsSemEscalacao: +(a.rpsNoLu / a.n).toFixed(4), brier: +(a.brier / a.n).toFixed(4), acerto: +(a.hit / a.n).toFixed(4), rpsBase: +(a.rpsBase / a.n).toFixed(4), loglossBase: +(a.llBase / a.n).toFixed(4), ...(a.nM ? { nRef: a.nM, rpsRef: +(a.rpsMk / a.nM).toFixed(4), loglossRef: +(a.llMk / a.nM).toFixed(4), rpsModelNoRef: +(a.rpsM2 / a.nM).toFixed(4) } : {}) });
 const backtest = {
@@ -322,6 +329,43 @@ const backtest = {
   placarExato: { top1: +(bt.scoreHit.top1 / bt.scoreHit.n).toFixed(4), top3: +(bt.scoreHit.top3 / bt.scoreHit.n).toFixed(4) },
 };
 log('backtest geral', backtest.geral);
+
+// ── (6b) Best Against: o que o histórico diz quando o Vitrôncio discorda do mercado ──
+// Células de discordâncias parecidas (site/js/engine/against.js). Para a temporada Y, as
+// células usam só temporadas anteriores. Palpite do histórico: o resultado mais acima do
+// mercado, quando o ganho esperado com a probabilidade corrigida e a odd média é positivo.
+// O Vitrôncio usado é o de dias antes do jogo (sem a escalação).
+const agAdd = (cells, r) => { const b = bestAgainst(null, r.p, r.q, r.early); if (!b) return; const h = (cells[b.key] ||= { n: 0, ex: 0, y: 0, p: 0, q: 0, ret: 0 }); const won = r.k === b.i ? 1 : 0; h.n++; h.ex += won - r.q[b.i]; h.y += won; h.p += r.p[b.i]; h.q += r.q[b.i]; h.ret += won * r.o[b.i] - 1; };
+const agSeasons = [...new Set(cmpRows.map((r) => r.season))].sort();
+const agCellsBy = {}; { const acc = {}; for (const s of agSeasons) { agCellsBy[s] = structuredClone(acc); for (const r of cmpRows) if (r.season === s) agAdd(acc, r); } }
+const agCells = {}; for (const r of cmpRows) agAdd(agCells, r);
+const agCell = () => ({ n: 0, y: 0, p: 0, q: 0, ret: 0 });
+const agGap = GAPS.map(agCell), agSeason = {}, agRecord = [];
+for (const r of cmpRows) {
+  const S = (agSeason[r.season] ||= { n: 0, bets: 0, wins: 0, ret: 0, rawBets: 0, rawWins: 0, rawRet: 0 }); S.n++;
+  const raw = bestAgainst(null, r.p, r.q, r.early);
+  if (raw) {
+    const won = r.k === raw.i ? 1 : 0, b = agGap[+raw.key[0]];
+    b.n++; b.y += won; b.p += r.p[raw.i]; b.q += r.q[raw.i]; b.ret += won * r.o[raw.i] - 1;
+    if (r.p[raw.i] * r.o[raw.i] > 1) { S.rawBets++; S.rawWins += won; S.rawRet += won * r.o[raw.i] - 1; }
+  }
+  const res = bestAgainst(agCellsBy[r.season], r.p, r.q, r.early);
+  if (!res || res.c[res.i] * r.o[res.i] <= 1) continue;
+  const won = r.k === res.i ? 1 : 0;
+  S.bets++; S.wins += won; S.ret += won * r.o[res.i] - 1;
+  if (r.season === seasonNow) agRecord.push({ id: r.id, k: res.i, p: +r.p[res.i].toFixed(4), q: +r.q[res.i].toFixed(4), c: +res.c[res.i].toFixed(4), o: r.o[res.i], won });
+}
+const agFmt = (b) => ({ n: b.n, aconteceu: b.n ? +(b.y / b.n).toFixed(4) : null, modelo: b.n ? +(b.p / b.n).toFixed(4) : null, mercado: b.n ? +(b.q / b.n).toFixed(4) : null, retorno: b.n ? +(b.ret / b.n).toFixed(4) : null });
+const agTot = Object.values(agSeason).reduce((t, x) => { for (const k in x) t[k] = (t[k] || 0) + x[k]; return t; }, {});
+const r2 = (v) => +v.toFixed(2);
+const against = cmpRows.length ? {
+  cells: Object.fromEntries(Object.entries(agCells).map(([k, h]) => [k, { n: h.n, ex: +h.ex.toFixed(3), y: h.y, p: +h.p.toFixed(3), q: +h.q.toFixed(3), ret: +h.ret.toFixed(3) }])),
+  porDiferenca: agGap.map(agFmt),
+  temporadas: Object.fromEntries(Object.entries(agSeason).map(([s, v]) => [s, { ...v, ret: r2(v.ret), rawRet: r2(v.rawRet) }])),
+  total: { ...agTot, ret: r2(agTot.ret), rawRet: r2(agTot.rawRet) },
+  record: agRecord, jogos: cmpRows.length, fonte: 'odds médias de fechamento (football-data.co.uk)',
+} : null;
+log('best against', against && { total: against.total, porDiferenca: against.porDiferenca });
 
 // dispersão por canal (para distribuições de escanteios, cartões, finalizações)
 const dispersion = {};
@@ -408,6 +452,7 @@ const model = {
   ratingHistory,
   players,
   backtest,
+  against,
 };
 await writeFile(OUT, JSON.stringify(model));
 log(`model.json gravado (${((await readFile(OUT)).length / 1024).toFixed(0)} KB)`);

@@ -30,7 +30,7 @@ export function versusBlock(m) {
     const who = Math.abs(rm - rk) < 0.002 ? 'Empate.' : rm < rk ? 'Vitrôncio mais preciso.' : 'Mercado mais preciso.';
     verdict = `<div class="kv" style="margin-top:12px"><div><div class="k">Aconteceu</div><div class="v s">${m.hg}–${m.ag}, ${esc(resultTxt(m))}</div></div><div><div class="k">Vitrôncio dava</div><div class="v">${pct(pm)}</div></div><div><div class="k">Mercado dava</div><div class="v">${pct(pk)}</div></div><div><div class="k">Neste jogo</div><div class="v s">${who}</div></div></div>`;
   }
-  return `<section class="panel" data-mk="versus" style="${colors(m)}"><div class="sec-h"><h3>Vitrôncio × mercado</h3><span class="sub">${played ? 'antes do jogo' : 'o Vitrôncio não usa as odds'}</span><a class="more" href="#/comparar">todos os jogos</a></div>
+  return `<section class="panel" data-mk="versus" style="${colors(m)}"><div class="sec-h"><h3>Vitrôncio × mercado</h3><span class="sub">${played ? 'antes do jogo' : 'o Vitrôncio não usa as odds'}</span><a class="more" href="#/contra/comparar">todos os jogos</a></div>
     ${row(`${face(18)}Vitrôncio`, p)}
     ${row('Mercado', k, `<div class="small dim" style="margin-top:4px">odds: ${dec(k.dec[0])} · ${dec(k.dec[1])} · ${dec(k.dec[2])} (${esc(k.src)}${k.kind === 'pre' ? ', agora' : k.src.includes('fechamento') ? '' : ', fechamento'}) · margem da casa retirada</div>`)}
     ${played ? verdict : `<p class="small muted" style="margin:12px 0 0">Maior diferença: o Vitrôncio dá <b style="color:var(--text)">${g.v > 0 ? '+' : ''}${(g.v * 100).toFixed(0)} pontos percentuais</b> para ${esc(g.lab)} em relação ao mercado.</p>`}

@@ -4,7 +4,8 @@ Site estático (GitHub Pages) da Série A com simulador próprio. Interface e co
 
 ## Regras do projeto
 
-- Não é ferramenta de aposta. As odds aparecem no site **apenas como comparação** (página "Odds" e bloco na página do jogo: modelo × odds × resultado) e como régua no backtest. **Nunca** viram entrada, alvo ou critério de seleção do modelo — a comparação só faz sentido se o modelo for independente do mercado. Nada de linguagem de "aposta de valor".
+- As odds **nunca** viram entrada, alvo ou critério de seleção da previsão do Vitrôncio — a comparação só faz sentido se o modelo for independente do mercado.
+- Aba **Best Against** (`#/contra`, pedido explícito do dono em 18/11/2026): lista de oportunidades onde o Vitrôncio mais discorda do mercado, ordenada pelo ganho esperado com a probabilidade corrigida pelo histórico de discordâncias parecidas (`site/js/engine/against.js`; células e retrospecto calculados em `tools/refit.mjs`). É o único lugar que combina modelo e mercado. Sempre com o aviso no topo e o retrospecto real (negativo na maior parte das temporadas); não esconda nem suavize esses números. A comparação completa fica na sub-aba `#/contra/comparar`.
 - `site/js/engine/` é JS puro compartilhado entre navegador e `tools/`. Qualquer mudança no motor precisa manter os dois lados funcionando; rode `npm test`.
 - O dono autorizou push direto em `main` (cada push publica o site).
 - Teste de interface: sirva `site/` e use Playwright com respostas gravadas da ESPN (a CDN deles recusa navegador headless). Não tente contornar esse bloqueio.
@@ -17,6 +18,7 @@ Site estático (GitHub Pages) da Série A com simulador próprio. Interface e co
   - Presença fixa: marca no cabeçalho, rodapé, ao lado de toda barra de probabilidade, página "Odds" e topo da página do modelo.
   - Aparições e easter eggs ficam em `site/js/app/vitroncio.js` (a lista está no cabeçalho do arquivo). São escondidos de propósito: não anuncie na interface nem no README. Falas curtas e secas, na voz dele; nada que zombe de um time específico.
 - Página inicial curta; o detalhe fica nas páginas de jogo.
+- Menu com 6 itens: Início, Jogos, Campeonato (Tabela | Simulador), Times (Times | Jogadores), Best Against (Oportunidades | Comparação completa), Modelo. Abas internas em `SUBS` e endereços antigos em `ALIAS` (`site/js/app/main.js`). Não acrescente item ao menu sem tirar outro.
 - Página do modelo: a tabela "Pesquisa" e as referências vêm de `site/js/app/views/refs.js`. Ao testar algo novo, acrescente a linha com o efeito em 2022–2026; só cite livro ou artigo que foi de fato usado, sem inventar páginas ou DOI.
 
 ## Reajuste semanal (o pedido mais comum)

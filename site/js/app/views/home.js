@@ -46,7 +46,7 @@ export function homeView() {
     ${hero}
     ${favHtml}
     ${upcomingHtml ? `<section data-mk="next"><div class="sec-h"><h2>Próximos jogos</h2><span class="sub">probabilidade de vitória de cada lado</span><a class="more" href="#/jogos">calendário completo</a></div>${upcomingHtml}</section>` : ''}
-    <section data-mk="proj"><div class="sec-h"><h2>Projeção do campeonato</h2><span class="sub">${S.seasonSim ? `${S.seasonSim.n.toLocaleString('pt-BR')} simulações do restante da temporada${live.length ? ', com os placares em andamento' : ''}` : ''}</span><a class="more" href="#/tabela">tabela completa</a></div>
+    <section data-mk="proj"><div class="sec-h"><h2>Projeção do campeonato</h2><span class="sub">${S.seasonSim ? `${S.seasonSim.n.toLocaleString('pt-BR')} simulações do restante da temporada${live.length ? ', com os placares em andamento' : ''}` : ''}</span><a class="more" href="#/campeonato">tabela completa</a></div>
       <div class="grid g3">
         <div class="panel"><div class="sec-h"><h3>Título</h3></div>${raceBlock('titulo', 4, '242,194,48')}</div>
         <div class="panel"><div class="sec-h"><h3>Libertadores (G4)</h3></div>${raceBlock('libertadores', 6, '79,157,232')}</div>

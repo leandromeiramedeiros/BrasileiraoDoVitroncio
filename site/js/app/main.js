@@ -12,12 +12,23 @@ import { teamsView, teamView } from './views/teams.js';
 import { modelView } from './views/model.js';
 import { calendarView, playersView, calState } from './views/extra.js';
 import { compareView, cmpState } from './views/compare.js';
+import { againstView } from './views/against.js';
 import { initVitroncio, reactFav, reactSelf } from './vitroncio.js';
 
 const view = document.getElementById('view');
 const nav = document.getElementById('nav');
-const NAV = [['', 'Início'], ['jogos', 'Jogos'], ['tabela', 'Tabela'], ['simulador', 'Simulador'], ['comparar', 'Odds'], ['times', 'Times'], ['artilharia', 'Jogadores'], ['modelo', 'Modelo']];
-const route = () => location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+const NAV = [['', 'Início'], ['jogos', 'Jogos'], ['campeonato', 'Campeonato'], ['times', 'Times'], ['contra', 'Best Against'], ['modelo', 'Modelo']];
+// páginas com abas internas; os endereços antigos continuam valendo
+const SUBS = { campeonato: [['', 'Tabela'], ['simulador', 'Simulador']], times: [['', 'Times'], ['jogadores', 'Jogadores']], contra: [['', 'Oportunidades'], ['comparar', 'Comparação completa']] };
+const ALIAS = { tabela: ['campeonato'], simulador: ['campeonato', 'simulador'], comparar: ['contra', 'comparar'], artilharia: ['times', 'jogadores'] };
+const route = () => { const r = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean); return ALIAS[r[0]] ? [...ALIAS[r[0]], ...r.slice(1)] : r; };
+const VIEWS = {
+  jogo: (a) => matchView(a), jogos: () => calendarView(), modelo: () => modelView(), time: (a) => teamView(a),
+  campeonato: (a) => (a === 'simulador' ? simulatorView() : tableView()),
+  times: (a) => (a === 'jogadores' ? playersView() : teamsView()),
+  contra: (a) => (a === 'comparar' ? compareView() : againstView()),
+};
+const subnav = (p, a) => (SUBS[p] ? `<div class="wrap subnav" data-mk="subnav">${SUBS[p].map(([k, l]) => `<a href="#/${p}${k ? '/' + k : ''}" class="${(a || '') === k ? 'on' : ''}">${l}</a>`).join('')}</div>` : '');
 
 let last = '', lastNav = '', lastRoute = null, queued = false;
 function render() {
@@ -29,7 +40,7 @@ function render() {
     const routeKey = `${p || ''}/${a || ''}`;
     let html;
     try {
-      html = p === 'jogo' ? matchView(a) : p === 'tabela' ? tableView() : p === 'simulador' ? simulatorView() : p === 'times' ? teamsView() : p === 'time' ? teamView(a) : p === 'modelo' ? modelView() : p === 'jogos' ? calendarView() : p === 'comparar' ? compareView() : p === 'artilharia' ? playersView() : homeView();
+      html = subnav(p, a) + (VIEWS[p] ? VIEWS[p](a) : homeView());
     } catch (e) { console.error(e); html = `<div class="wrap"><div class="banner">Algo deu errado ao montar esta página: ${esc(e.message)}</div></div>`; }
     if (html !== last) { morph(view, html, routeKey === lastRoute); last = html; lastRoute = routeKey; }
     const cur = p === 'jogo' ? '' : p === 'time' ? 'times' : p || '';
